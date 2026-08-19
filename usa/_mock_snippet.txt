@@ -1,0 +1,620 @@
+              <div class="overview-grid" style="grid-template-columns: 1.2fr 1fr;">
+                
+                <!-- Left Column: Form -->
+                <div class="overview-card" style="padding: 24px;">
+                  <p class="field-hint" style="margin: 0 0 20px 0;">ACH credits push funds to an external recipient; ACH debits pull funds into your account. Standard settlement is 1ΓÇô3 business days.</p>
+                  <form id="achTransferForm" onsubmit="handleACHTransferSubmit(event)">
+                    
+                    <div style="margin-bottom: 24px;">
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px;">Transfer Direction</label>
+                      <div style="display: flex; gap: 16px;">
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500;">
+                          <input type="radio" name="achDirection" value="credit" checked onchange="updateACHTransferPreview()">
+                          ACH Credit (Push)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500;">
+                          <input type="radio" name="achDirection" value="debit" onchange="updateACHTransferPreview()">
+                          ACH Debit (Pull)
+                        </label>
+                      </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Source Account</label>
+                      <select id="achSourceAccount" class="modal-input" style="background: #f8fafc;" required onchange="updateACHTransferPreview()">
+                        <option value="" disabled selected>Select funding source...</option>
+                        <option value="checking">Checking Account (Avail: $8,245.30)</option>
+                        <option value="credit">NT Premium Credit Line (Avail: $12,500.00)</option>
+                      </select>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">External Beneficiary</label>
+                      <select id="achBeneficiary" class="modal-input" style="background: #f8fafc;" required onchange="updateACHTransferPreview()">
+                        <option value="" disabled selected>Loading beneficiaries...</option>
+                      </select>
+                    </div>
+
+                    <div class="transfer-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                      <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Amount (USD)</label>
+                        <div style="position: relative;">
+                          <span style="position: absolute; left: 14px; top: 12px; color: #94a3b8; font-weight: 600;">$</span>
+                          <input type="number" id="achAmount" class="modal-input" style="padding-left: 28px;" placeholder="0.00" min="0.01" step="0.01" required oninput="updateACHTransferPreview()">
+                        </div>
+                        <p class="field-hint">ACH same-day cutoff: 2:45 PM CT ┬╖ Standard settlement: 1ΓÇô3 business days.</p>
+                      </div>
+                      <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Effective Date</label>
+                        <input type="date" id="achEffectiveDate" class="modal-input" style="background: #f8fafc;" required onchange="updateACHTransferPreview()">
+                      </div>
+                    </div>
+
+                    <div class="transfer-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                      <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">SEC Code</label>
+                        <select id="achSecCode" class="modal-input" style="background: #f8fafc;" required>
+                          <option value="PPD">PPD (Personal)</option>
+                          <option value="CCD" selected>CCD (Corporate)</option>
+                          <option value="WEB">WEB (Internet)</option>
+                          <option value="TEL">TEL (Telephone)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Scheduling</label>
+                        <select id="achScheduling" class="modal-input" style="background: #f8fafc;" required>
+                          <option value="once" selected>One-time Transfer</option>
+                          <option value="weekly">Recurring Weekly</option>
+                          <option value="biweekly">Recurring Biweekly</option>
+                          <option value="monthly">Recurring Monthly</option>
+                          <option value="quarterly">Recurring Quarterly</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Memo / Description</label>
+                      <input type="text" id="achMemo" class="modal-input" placeholder="e.g. Vendor Payment INV-203">
+                    </div>
+
+                    <!-- Review Transfer Section -->
+                    <div style="background-color: #f1f5f9; border-radius: 8px; padding: 16px; margin-bottom: 24px; font-size: 13px; color: #334155;">
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Expected Settlement:</span>
+                        <strong id="achReviewSettlementDate">-</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>ACH Fee:</span>
+                        <strong>$0.00</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between;">
+                        <span>Daily ACH Limit Utilization:</span>
+                        <strong id="achReviewLimit">0.00%</strong>
+                      </div>
+                    </div>
+
+                    <div id="achWarningBanner" style="display: none; padding: 12px 16px; border-radius: 8px; border: 1px solid #fef08a; background-color: #fefce8; color: #a16207; font-size: 13px; margin-bottom: 20px; line-height: 1.4;">
+                      <!-- Dynamic warning text -->
+                    </div>
+
+                    <button type="submit" class="dropdown-btn" style="width: 100%; justify-content: center; background-color: var(--primary); color: white; border-color: var(--primary); padding: 12px; font-size: 14px;">
+                      Submit ACH Transfer
+                    </button>
+                  </form>
+                </div>
+
+                <!-- Right Column: Previews and History -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                  
+                  <div class="overview-card" style="padding: 24px; background: #f8fafc; border: 1px dashed #cbd5e1;">
+                    <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Liquidity Projection</div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">
+                      <div style="font-size: 13px; color: #475569; font-weight: 600;" id="achPreviewSourceLabel">Source Account</div>
+                      <div style="text-align: right;">
+                        <div style="font-size: 11px; color: #94a3b8; text-decoration: line-through;" id="achPreviewSourceOld">-</div>
+                        <div style="font-size: 15px; font-weight: 700; color: #0f172a;" id="achPreviewSourceNew">-</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="overview-card" style="padding: 24px;">
+                    <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;">ACH Settlement Timeline</div>
+                    <div class="settlement-timeline" style="display: flex; justify-content: space-between; position: relative;">
+                      <div style="position: absolute; top: 10px; left: 10px; right: 10px; height: 2px; background: #e2e8f0; z-index: 1;"></div>
+                      
+                      <div class="settlement-step" style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 60px;">
+                        <div style="width: 20px; height: 20px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-bottom: 6px;">1</div>
+                        <div style="font-size: 10px; font-weight: 600; text-align: center; color: #475569;">Draft / Submit</div>
+                      </div>
+
+                      <div class="settlement-step" style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 60px;">
+                        <div style="width: 20px; height: 20px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-bottom: 6px;" id="achStep2">2</div>
+                        <div style="font-size: 10px; font-weight: 600; text-align: center; color: #94a3b8;" id="achStep2Text">Pending Batch</div>
+                      </div>
+
+                      <div class="settlement-step" style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 60px;">
+                        <div style="width: 20px; height: 20px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-bottom: 6px;" id="achStep3">3</div>
+                        <div style="font-size: 10px; font-weight: 600; text-align: center; color: #94a3b8;" id="achStep3Text">Processing</div>
+                      </div>
+
+                      <div class="settlement-step" style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 60px;">
+                        <div style="width: 20px; height: 20px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-bottom: 6px;" id="achStep4">4</div>
+                        <div style="font-size: 10px; font-weight: 600; text-align: center; color: #94a3b8;" id="achStep4Text">Settled</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="overview-card" style="padding-bottom: 12px;">
+                    <div class="card-header-flex">
+                      <span class="card-title-lg">Recent ACH Transfers</span>
+                    </div>
+                    <table class="activity-table">
+                      <tbody id="achHistoryTableBody">
+                        <!-- Populated by JS -->
+                      </tbody>
+                    </table>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          `;
+          window.initACHTransferView();
+
+        } else if (viewName === 'WireTransfer') {
+          dynamicContainer.innerHTML = `
+            <div style="background-color: white;">
+              <!-- TWO-COLUMN LAYOUT -->
+              <div class="overview-grid" style="grid-template-columns: 1.2fr 1fr;">
+                
+                <!-- Left Column: Form -->
+                <div class="overview-card" style="padding: 24px;">
+                  <p class="field-hint" style="margin: 0 0 20px 0;">High-value domestic Fedwire or international SWIFT transfers. Same-day options may incur additional network fees.</p>
+                  <form id="wireTransferForm" onsubmit="handleWireTransferSubmit(event)">
+
+                    <div style="margin-bottom: 24px;">
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px;">Wire Network</label>
+                      <div style="display: flex; gap: 16px;">
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500;">
+                          <input type="radio" name="wireType" value="domestic" checked onchange="toggleWireFields()">
+                          Domestic Fedwire
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500;">
+                          <input type="radio" name="wireType" value="swift" onchange="toggleWireFields()">
+                          International SWIFT
+                        </label>
+                      </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Funding Source</label>
+                      <select id="wireSourceAccount" class="modal-input" style="background: #f8fafc;" required onchange="updateWireTransferPreview()">
+                        <option value="checking" selected>Checking Account (Avail: $8,245.30)</option>
+                        <option value="credit">Apex Credit Line (Avail: $12,500.00)</option>
+                      </select>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">External Beneficiary</label>
+                      <select id="wireBeneficiary" class="modal-input" style="background: #f8fafc;" required onchange="fillWireBeneficiaryFromSelection()">
+                        <option value="" disabled selected>Loading beneficiaries...</option>
+                      </select>
+                    </div>
+
+                    <!-- Dynamic Domestic Fields -->
+                    <div id="wireDomesticFields" style="display: block; border-left: 2px solid #e2e8f0; padding-left: 12px; margin-bottom: 20px;">
+                      <div class="transfer-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px;">
+                        <div>
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Routing Number (ABA)</label>
+                          <input type="text" id="wireDomesticRouting" class="modal-input" placeholder="9-digit ABA" style="font-size: 13px; padding: 8px;">
+                        </div>
+                        <div>
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Account Number</label>
+                          <input type="text" id="wireDomesticAccount" class="modal-input" placeholder="Account No." style="font-size: 13px; padding: 8px;">
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Dynamic SWIFT Fields -->
+                    <div id="wireSwiftFields" style="display: none; border-left: 2px solid #3b82f6; padding-left: 12px; margin-bottom: 20px;">
+                      <div class="transfer-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px;">
+                        <div>
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Target Currency</label>
+                          <select id="wireSwiftCurrency" class="modal-input" style="font-size: 13px; padding: 8px;" onchange="updateWireTransferPreview()">
+                            <option value="EUR">Euro (EUR)</option>
+                            <option value="GBP">British Pound (GBP)</option>
+                            <option value="JPY">Japanese Yen (JPY)</option>
+                            <option value="CHF">Swiss Franc (CHF)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">SWIFT / BIC Code</label>
+                          <input type="text" id="wireSwiftBic" class="modal-input" placeholder="8 or 11 chars" style="font-size: 13px; padding: 8px; text-transform: uppercase;">
+                        </div>
+                      </div>
+                      <div>
+                        <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">IBAN</label>
+                        <input type="text" id="wireSwiftIban" class="modal-input" placeholder="International Bank Account Number" style="font-size: 13px; padding: 8px; text-transform: uppercase;">
+                      </div>
+                    </div>
+
+                    <div class="transfer-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                      <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Transfer Amount</label>
+                        <div style="position: relative;">
+                          <span style="position: absolute; left: 14px; top: 12px; color: #94a3b8; font-weight: 600;" id="wireAmountCurrencySymbol">$</span>
+                          <input type="number" id="wireAmount" class="modal-input" style="padding-left: 28px;" placeholder="0.00" min="0.01" step="0.01" required oninput="updateWireTransferPreview()">
+                        </div>
+                        <p class="field-hint">Transfers of $25,000 or more require secondary approver release.</p>
+                      </div>
+                      <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Priority Level</label>
+                        <select id="wirePriority" class="modal-input" style="background: #f8fafc;" required>
+                          <option value="Standard">Standard Wire</option>
+                          <option value="SameDay">Same-Day Priority</option>
+                          <option value="Urgent">Urgent Treasury Wire</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Transfer Purpose</label>
+                      <input type="text" id="wireMemo" class="modal-input" placeholder="e.g. Asset Acquisition">
+                    </div>
+
+                    <!-- Review Transfer Section -->
+                    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 24px; font-size: 13px; color: #334155;">
+                      
+                      <div id="wireFxRow" style="display: none; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Estimated FX Rate:</span>
+                        <strong id="wireReviewFxRate" style="color: #3b82f6;">-</strong>
+                      </div>
+
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Principal Amount (USD Equivalent):</span>
+                        <strong id="wireReviewPrincipal">$0.00</strong>
+                      </div>
+
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Network Fee:</span>
+                        <strong id="wireReviewFee">$25.00</strong>
+                      </div>
+
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Compliance Status:</span>
+                        <strong style="color: #16a34a;">Pre-Screening Cleared</strong>
+                      </div>
+
+                      <div style="display: flex; justify-content: space-between; border-top: 1px solid #cbd5e1; padding-top: 8px; margin-top: 8px;">
+                        <span>Total USD Liquidity Deduction:</span>
+                        <strong id="wireReviewTotal" style="color: #0f172a; font-size: 14px;">$0.00</strong>
+                      </div>
+                    </div>
+
+                    <div id="wireDualControlNote" style="display: none; padding: 12px 16px; border-radius: 8px; border: 1px solid #bfdbfe; background-color: #eff6ff; color: #1e40af; font-size: 12px; margin-bottom: 16px; line-height: 1.45;">
+                      <strong>Dual authorization required:</strong> Transfers of $25,000 or more are submitted for secondary approver release before the wire is dispatched.
+                    </div>
+
+                    <div id="wireWarningBanner" style="display: none; padding: 12px 16px; border-radius: 8px; border: 1px solid #fef08a; background-color: #fefce8; color: #a16207; font-size: 13px; margin-bottom: 20px; line-height: 1.4;">
+                      <!-- Dynamic warning text -->
+                    </div>
+
+                    <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: #475569; margin-bottom: 20px;">
+                      <input type="checkbox" id="wireAmlAck" required style="margin-top: 2px;">
+                      I confirm this transfer complies with applicable AML and OFAC requirements and authorize Northern Trust to release the wire on my behalf. Wires are final once submitted.
+                    </label>
+
+                    <button type="submit" class="dropdown-btn" style="width: 100%; justify-content: center; background-color: var(--primary); color: white; border-color: var(--primary); padding: 12px; font-size: 14px;">
+                      Authorize Wire Dispatch
+                    </button>
+                    <p class="regulatory-footnote">Domestic Fedwire cut-off: 5:00 PM CT (banking days). International SWIFT cut-off varies by corridor. FX rates shown are indicative until the wire is released.</p>
+                  </form>
+                </div>
+
+                <!-- Right Column: Previews and History -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                  
+                  <div class="overview-card" style="padding: 24px; background: #f8fafc; border: 1px dashed #cbd5e1;">
+                    <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Liquidity Impact</div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">
+                      <div style="font-size: 13px; color: #475569; font-weight: 600;" id="wirePreviewSourceLabel">Checking Account</div>
+                      <div style="text-align: right;">
+                        <div style="font-size: 11px; color: #94a3b8; text-decoration: line-through;" id="wirePreviewSourceOld">$8,245.30</div>
+                        <div style="font-size: 15px; font-weight: 700; color: #0f172a;" id="wirePreviewSourceNew">-</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="overview-card" style="padding: 24px;">
+                    <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Processing Lifecycle</div>
+                    <div style="display: flex; justify-content: space-between; position: relative;">
+                      <div style="position: absolute; top: 10px; left: 10px; right: 10px; height: 2px; background: #e2e8f0; z-index: 1;"></div>
+                      
+                      <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 50px;">
+                        <div style="width: 20px; height: 20px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-bottom: 6px;">1</div>
+                        <div style="font-size: 9px; font-weight: 600; text-align: center; color: #475569;">Draft</div>
+                      </div>
+
+                      <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 50px;">
+                        <div style="width: 20px; height: 20px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-bottom: 6px;" id="wireStep2">2</div>
+                        <div style="font-size: 9px; font-weight: 600; text-align: center; color: #94a3b8;" id="wireStep2Text">OFAC Check</div>
+                      </div>
+
+                      <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 50px;">
+                        <div style="width: 20px; height: 20px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-bottom: 6px;" id="wireStep3">3</div>
+                        <div style="font-size: 9px; font-weight: 600; text-align: center; color: #94a3b8;" id="wireStep3Text">Network</div>
+                      </div>
+
+                      <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 50px;">
+                        <div style="width: 20px; height: 20px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-bottom: 6px;" id="wireStep4">4</div>
+                        <div style="font-size: 9px; font-weight: 600; text-align: center; color: #94a3b8;" id="wireStep4Text">Settled</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="overview-card" style="padding-bottom: 12px;">
+                    <div class="card-header-flex">
+                      <span class="card-title-lg">Recent Treasury Dispatches</span>
+                    </div>
+                    <table class="activity-table" style="font-size: 12px;">
+                      <thead>
+                        <tr>
+                          <th style="text-align: left; padding: 12px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Date</th>
+                          <th style="text-align: left; padding: 12px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Entity</th>
+                          <th style="text-align: left; padding: 12px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Type</th>
+                          <th style="text-align: right; padding: 12px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Amount</th>
+                          <th style="text-align: center; padding: 12px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody id="wireHistoryTableBody">
+                        <!-- Populated by JS -->
+                      </tbody>
+                    </table>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          `;
+          window.initWireTransferView();
+
+        } else if (viewName === 'InternationalTransfer') {
+          dynamicContainer.innerHTML = `
+            <div style="background-color: white;">
+              <!-- TWO-COLUMN LAYOUT -->
+              <div class="overview-grid" style="grid-template-columns: 1.2fr 1fr;">
+                
+                <!-- Left Column: Form -->
+                <div class="overview-card" style="padding: 24px;">
+                  <p class="field-hint" style="margin: 0 0 20px 0;">Cross-border payments with live FX conversion. Settlement timing depends on corridor, currency, and priority selected.</p>
+                  <form id="intlTransferForm" onsubmit="handleIntlTransferSubmit(event)">
+
+                    <div style="margin-bottom: 24px;">
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px;">Transfer Network Protocol</label>
+                      <select id="intlTransferType" class="modal-input" style="background: #f8fafc;" required>
+                        <option value="swift">SWIFT / BIC Cross-Border</option>
+                        <option value="sepa">SEPA (Eurozone only)</option>
+                        <option value="multi">Internal Multi-Currency Ledger</option>
+                        <option value="fx">FX Conversion Only</option>
+                      </select>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                      <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Funding Source</label>
+                        <select id="intlSourceAccount" class="modal-input" style="background: #f8fafc;" required onchange="updateIntlTransferPreview()">
+                          <option value="checking" selected>Checking Account (Avail: $8,245.30)</option>
+                          <option value="credit">Apex Credit Line (Avail: $12,500.00)</option>
+                          <option value="invest">Managed Portfolio (Settlement T+2)</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Priority & Settlement</label>
+                        <select id="intlPriority" class="modal-input" style="background: #f8fafc;" required>
+                          <option value="Standard">Standard (T+2)</option>
+                          <option value="Priority">Priority Global (T+1)</option>
+                          <option value="Treasury">Urgent Treasury (Same-Day)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Global Beneficiary</label>
+                      <select id="intlBeneficiary" class="modal-input" style="background: #f8fafc;" required onchange="updateIntlTransferPreview()">
+                        <option value="" disabled selected>Loading beneficiaries...</option>
+                      </select>
+                    </div>
+
+                    <div style="border-left: 2px solid #8b5cf6; padding-left: 12px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 12px;">
+                      <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px;">
+                        <div>
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Recipient Currency</label>
+                          <select id="intlTargetCurrency" class="modal-input" style="font-size: 13px; padding: 8px;" onchange="updateIntlTransferPreview()">
+                            <option value="EUR">Euro (EUR)</option>
+                            <option value="GBP">British Pound (GBP)</option>
+                            <option value="CHF">Swiss Franc (CHF)</option>
+                            <option value="JPY">Japanese Yen (JPY)</option>
+                            <option value="CAD">Canadian Dollar (CAD)</option>
+                            <option value="AUD">Australian Dollar (AUD)</option>
+                            <option value="SGD">Singapore Dollar (SGD)</option>
+                            <option value="HKD">Hong Kong Dollar (HKD)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">IBAN</label>
+                          <input type="text" id="intlIban" class="modal-input" placeholder="International Bank Account No." style="font-size: 13px; padding: 8px; text-transform: uppercase;">
+                        </div>
+                      </div>
+                      
+                      <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px;">
+                        <div>
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">SWIFT / BIC Code</label>
+                          <input type="text" id="intlSwiftBic" class="modal-input" placeholder="8-11 Characters" style="font-size: 13px; padding: 8px; text-transform: uppercase;">
+                        </div>
+                        <div>
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Intermediary Bank Routing (Optional)</label>
+                          <input type="text" class="modal-input" placeholder="Intermediary SWIFT/BIC" style="font-size: 13px; padding: 8px; text-transform: uppercase;">
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Transfer Amount (in Recipient Currency)</label>
+                      <div style="position: relative;">
+                        <span style="position: absolute; left: 14px; top: 12px; color: #94a3b8; font-weight: 600;" id="intlAmountCurrencySymbol">Γé¼</span>
+                        <input type="number" id="intlAmount" class="modal-input" style="padding-left: 28px; border: 1px solid #3b82f6;" placeholder="0.00" min="0.01" step="0.01" required oninput="updateIntlTransferPreview()">
+                      </div>
+                      <div style="font-size: 11px; color: #64748b; margin-top: 6px;">Input the exact foreign amount to be received. USD deduction will be calculated.</div>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Transfer Purpose (Regulatory Requirement)</label>
+                      <select id="intlPurpose" class="modal-input" style="background: #f8fafc;" required>
+                        <option value="Family Support">Family Support / Remittance</option>
+                        <option value="Property Purchase">International Property Purchase</option>
+                        <option value="Investment">Offshore Investment Funding</option>
+                        <option value="Invoice">Supplier / Vendor Invoice</option>
+                        <option value="Tax Payment">Cross-Border Tax Payment</option>
+                      </select>
+                    </div>
+
+                    <!-- Live FX Engine Mock Section -->
+                    <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 16px; margin-bottom: 24px; font-size: 13px; color: #334155;">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="font-weight: 600; color: #0f172a;">Live FX Conversion Hub</span>
+                        <span style="background-color: #dbeafe; color: #1e40af; font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px;" id="intlFxTimer">Lock: 30s</span>
+                      </div>
+                      
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Interbank Rate (USD / Target):</span>
+                        <strong id="intlBaseRate" style="color: #64748b;">-</strong>
+                      </div>
+
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Institutional Spread (0.25%):</span>
+                        <strong id="intlSpreadRate" style="color: #0f172a;">-</strong>
+                      </div>
+
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Effective Conversion Rate:</span>
+                        <strong id="intlEffectiveRate" style="color: #3b82f6;">-</strong>
+                      </div>
+
+                      <div style="display: flex; justify-content: space-between; border-top: 1px solid #cbd5e1; padding-top: 8px; margin-top: 8px;">
+                        <span>USD Principal Equivalent:</span>
+                        <strong id="intlReviewPrincipal" style="color: #0f172a;">$0.00</strong>
+                      </div>
+
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Cross-Border Network Fee:</span>
+                        <strong id="intlReviewFee">$45.00</strong>
+                      </div>
+
+                      <div style="display: flex; justify-content: space-between; border-top: 1px solid #cbd5e1; padding-top: 8px; margin-top: 8px;">
+                        <span>Total USD Liquidity Deduction:</span>
+                        <strong id="intlReviewTotal" style="color: #0f172a; font-size: 15px;">$0.00</strong>
+                      </div>
+                    </div>
+
+                    <div id="intlWarningBanner" style="display: none; padding: 12px 16px; border-radius: 8px; border: 1px solid #fef08a; background-color: #fefce8; color: #a16207; font-size: 13px; margin-bottom: 20px; line-height: 1.4;">
+                      <!-- Dynamic warning text -->
+                    </div>
+
+                    <div style="background-color: #f1f5f9; padding: 12px; border-radius: 8px; margin-bottom: 24px;">
+                      <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 11px; color: #475569; margin-bottom: 12px;">
+                        <input type="checkbox" required style="margin-top: 2px;">
+                        I declare the source of these funds is legitimate and compliant with OFAC/FATF regulations.
+                      </label>
+                      <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 11px; color: #475569;">
+                        <input type="checkbox" required style="margin-top: 2px;">
+                        I understand that international transfers may be subject to intermediary bank delays or holds beyond Northern Trust's control.
+                      </label>
+                    </div>
+
+                    <button type="submit" class="dropdown-btn" style="width: 100%; justify-content: center; background-color: #1e3a8a; color: white; border-color: #1e3a8a; padding: 12px; font-size: 14px;">
+                      Execute Global Dispatch
+                    </button>
+                    <p class="regulatory-footnote">Quoted FX rates lock for 30 seconds. Final settlement amount and correspondent fees may differ. Cross-border transfers are irrevocable once released to the beneficiary bank.</p>
+                  </form>
+                </div>
+
+                <!-- Right Column: Previews and History -->
+                <div style="display: flex; flex-direction: column; gap: 24px;">
+                  
+                  <div class="overview-card" style="padding: 24px; background: #f8fafc; border: 1px dashed #cbd5e1;">
+                    <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Global Liquidity Preview</div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center;">
+                      <div style="font-size: 13px; color: #475569; font-weight: 600;" id="intlPreviewSourceLabel">Checking Account</div>
+                      <div style="text-align: right;">
+                        <div style="font-size: 11px; color: #94a3b8; text-decoration: line-through;" id="intlPreviewSourceOld">$8,245.30</div>
+                        <div style="font-size: 15px; font-weight: 700; color: #0f172a;" id="intlPreviewSourceNew">-</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="overview-card" style="padding: 24px;">
+                    <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.5px;">International Settlement Timeline</div>
+                    <div style="display: flex; justify-content: space-between; position: relative;">
+                      <div style="position: absolute; top: 10px; left: 10px; right: 10px; height: 2px; background: #e2e8f0; z-index: 1;"></div>
+                      
+                      <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 45px;">
+                        <div style="width: 20px; height: 20px; border-radius: 50%; background: #3b82f6; color: white; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-bottom: 6px;">1</div>
+                        <div style="font-size: 9px; font-weight: 600; text-align: center; color: #475569;">Draft</div>
+                      </div>
+
+                      <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 45px;">
+                        <div style="width: 20px; height: 20px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-bottom: 6px;" id="intlStep2">2</div>
+                        <div style="font-size: 9px; font-weight: 600; text-align: center; color: #94a3b8;" id="intlStep2Text">FX Locked</div>
+                      </div>
+
+                      <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 45px;">
+                        <div style="width: 20px; height: 20px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-bottom: 6px;" id="intlStep3">3</div>
+                        <div style="font-size: 9px; font-weight: 600; text-align: center; color: #94a3b8;" id="intlStep3Text">Compliance</div>
+                      </div>
+
+                      <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 45px;">
+                        <div style="width: 20px; height: 20px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-bottom: 6px;" id="intlStep4">4</div>
+                        <div style="font-size: 9px; font-weight: 600; text-align: center; color: #94a3b8;" id="intlStep4Text">In Transit</div>
+                      </div>
+
+                      <div style="display: flex; flex-direction: column; align-items: center; z-index: 2; width: 45px;">
+                        <div style="width: 20px; height: 20px; border-radius: 50%; background: #e2e8f0; color: #64748b; display: flex; align-items: center; justify-content: center; font-size: 10px; margin-bottom: 6px;" id="intlStep5">5</div>
+                        <div style="font-size: 9px; font-weight: 600; text-align: center; color: #94a3b8;" id="intlStep5Text">Settled</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="overview-card" style="padding-bottom: 12px;">
+                    <div class="card-header-flex">
+                      <span class="card-title-lg">Global Transfer Ledger</span>
+                    </div>
+                    <table class="activity-table" style="font-size: 12px;">
+                      <thead>
+                        <tr>
+                          <th style="text-align: left; padding: 12px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Date</th>
+                          <th style="text-align: left; padding: 12px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Entity</th>
+                          <th style="text-align: left; padding: 12px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Pair/Rate</th>
+                          <th style="text-align: right; padding: 12px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Foreign Amt</th>
+                          <th style="text-align: center; padding: 12px; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0;">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody id="intlHistoryTableBody">
+                        <!-- Populated by JS -->
+                      </tbody>
+                    </table>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          `;
+          window.initIntlTransferView();
+
+        } else if (viewName === 'PendingApprovals') {
+          dynamicContainer.innerHTML = `
+            <div style="background-color: white; height: calc(100vh - 120px); display: flex; flex-direction: column;">
+              
+              <!-- 1. HEADER + FILTERS -->

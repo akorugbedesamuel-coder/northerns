@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Northern Trust Treasury Administration — review and approve transfers.">
+  <title>Treasury Administration | Northern Trust</title>
+  <link rel="icon" href="public/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#004225">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+  <!-- ===== LOGIN ===== -->
+  <div id="loginView" class="admin-login-shell">
+    <header class="admin-topbar">
+      <div class="admin-brand">
+        <img src="public/logo.svg" alt="" class="nt-brand-logo" width="90" height="44" style="object-fit:contain;object-position:center;height:52px;width:auto;">
+        <span>Northern Trust <small>· Treasury Administration</small></span>
+      </div>
+      <a href="login.html" class="admin-back">Return to client login</a>
+    </header>
+
+    <div class="admin-login-card">
+      <p class="admin-eyebrow">Restricted access</p>
+      <h1>Admin Console</h1>
+      <p class="admin-login-lead">Sign in to observe and approve transfers across all client accounts.</p>
+
+      <div id="adminLoginAlert" class="admin-alert" hidden></div>
+
+      <form id="adminLoginForm" novalidate>
+        <div class="admin-field">
+          <label for="adminUserId">Admin User ID</label>
+          <input type="text" id="adminUserId" autocomplete="username" placeholder="0000" inputmode="numeric" required>
+        </div>
+        <div class="admin-field">
+          <label for="adminPassword">Password</label>
+          <input type="password" id="adminPassword" autocomplete="current-password" placeholder="Password" required>
+        </div>
+        <button type="submit" id="adminLoginBtn" class="btn-admin">Sign in</button>
+      </form>
+      <p class="admin-login-foot">Authorized personnel only. All actions are audited.</p>
+    </div>
+
+    <footer class="admin-footer">© 2026 Northern Trust Corporation · Family Office Technology</footer>
+  </div>
+
+  <!-- ===== CONSOLE ===== -->
+  <div id="consoleView" class="admin-console" hidden>
+    <header class="admin-console-header">
+      <div class="admin-brand">
+        <img src="public/logo.svg" alt="" class="nt-brand-logo" width="90" height="44" style="object-fit:contain;object-position:center;height:44px;width:auto;">
+        <span>Northern Trust <small>· Treasury Administration</small></span>
+      </div>
+      <div class="admin-console-actions">
+        <span id="adminSessionName" class="admin-session-name"></span>
+        <button type="button" id="refreshConsoleBtn" class="btn-ghost">Refresh</button>
+        <button type="button" id="logoutBtn" class="btn-ghost">Sign out</button>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <div id="adminToast" class="admin-toast" hidden></div>
+
+      <section class="admin-stats" id="adminStats">
+        <div class="admin-stat-card">
+          <span class="admin-stat-label">Pending Approvals</span>
+          <span class="admin-stat-value" id="statPending">0</span>
+        </div>
+        <div class="admin-stat-card">
+          <span class="admin-stat-label">Total Transfers</span>
+          <span class="admin-stat-value" id="statTotal">0</span>
+        </div>
+        <div class="admin-stat-card">
+          <span class="admin-stat-label">Total Volume</span>
+          <span class="admin-stat-value" id="statVolume">$0.00</span>
+        </div>
+        <div class="admin-stat-card">
+          <span class="admin-stat-label">Settled</span>
+          <span class="admin-stat-value" id="statSettled">0</span>
+        </div>
+        <div class="admin-stat-card">
+          <span class="admin-stat-label">On Hold</span>
+          <span class="admin-stat-value" id="statHeld">0</span>
+        </div>
+        <div class="admin-stat-card">
+          <span class="admin-stat-label">Failed / Returned</span>
+          <span class="admin-stat-value" id="statFailed">0</span>
+        </div>
+      </section>
+
+      <div class="admin-tabs">
+        <button type="button" class="admin-tab is-active" data-tab="approvals">Approvals</button>
+        <button type="button" class="admin-tab" data-tab="transfers">All Transfers</button>
+        <button type="button" class="admin-tab" data-tab="accounts">Accounts</button>
+      </div>
+
+      <section id="tab-approvals" class="admin-tab-panel is-active">
+        <div class="admin-panel-head">
+          <h2>Pending Approvals</h2>
+          <span class="admin-badge" id="pendingBadge">0 pending</span>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>Date</th>
+                <th>User</th>
+                <th>Type</th>
+                <th>Counterparty</th>
+                <th>Amount</th>
+                <th>Risk</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="approvalsBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="tab-transfers" class="admin-tab-panel">
+        <div class="admin-panel-head">
+          <h2>All Transfers</h2>
+          <input type="text" id="transfersSearch" class="admin-search" placeholder="Search reference, user, counterparty…">
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>Date</th>
+                <th>User</th>
+                <th>Type</th>
+                <th>Counterparty</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Approval</th>
+              </tr>
+            </thead>
+            <tbody id="transfersBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="tab-accounts" class="admin-tab-panel">
+        <div class="admin-panel-head">
+          <h2>Accounts</h2>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Account</th>
+                <th>Owner</th>
+                <th>Product</th>
+                <th>Currency</th>
+                <th>Balance</th>
+                <th>Available</th>
+              </tr>
+            </thead>
+            <tbody id="accountsBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

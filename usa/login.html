@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Sign in to Northern Trust Family Office Technology — secure client access for accounts, transfers, and reporting.">
+  <title>Client Login | Northern Trust Family Office</title>
+  <link rel="icon" href="public/favicon.svg" type="image/svg+xml">
+  <meta name="theme-color" content="#004225">
+  <link rel="stylesheet" href="login.css">
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <script>
+    if (NTAuth.isLoggedIn()) {
+      window.location.replace('index.html');
+    }
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#loginForm">Skip to sign in</a>
+
+  <div class="login-shell">
+    <header class="login-topbar">
+      <a href="login.html" class="login-topbar__brand" aria-label="Northern Trust Family Office home">
+        <img src="public/logo.svg" alt="" class="nt-brand-logo" width="90" height="44" style="object-fit:contain;object-position:center;height:52px;width:auto;">
+        <span>Northern Trust</span>
+      </a>
+      <a href="/" class="login-topbar__back">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M19 12H5M12 19l-7-7 7-7"/>
+        </svg>
+        Return to home
+      </a>
+    </header>
+
+    <div class="login-main">
+      <section class="login-panel--info" aria-labelledby="info-heading">
+        <p class="info-eyebrow">Your enhanced login experience</p>
+        <h2 id="info-heading" class="info-title">Security built for family office clients</h2>
+        <p class="info-lead">
+          At Northern Trust Family Office Technology, protecting your accounts is our priority.
+          We use multi-factor verification and continuous monitoring to help keep your information safe.
+        </p>
+
+        <div class="info-carousel" aria-live="polite">
+          <div class="info-slide is-active">
+            <article class="info-feature">
+              <div class="info-feature__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>
+              </div>
+              <div>
+                <h3>Mobile registration</h3>
+                <p>Enroll a trusted device to add an extra layer of protection when you move money or update beneficiaries.</p>
+              </div>
+            </article>
+            <article class="info-feature">
+              <div class="info-feature__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+              <div>
+                <h3>Two-step login</h3>
+                <p>Provide your password and the 6-digit code from your authenticator app at sign-in so we can confirm it is you accessing the workspace.</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="info-slide">
+            <article class="info-feature">
+              <div class="info-feature__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              </div>
+              <div>
+                <h3>Institutional controls</h3>
+                <p>Role-based approvals, audit trails, and compliance screening are integrated into every transfer workflow.</p>
+              </div>
+            </article>
+            <article class="info-feature">
+              <div class="info-feature__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <div>
+                <h3>Session protection</h3>
+                <p>Inactive sessions time out automatically. Sign in again anytime from this secure client portal.</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="info-slide">
+            <article class="info-feature">
+              <div class="info-feature__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+              </div>
+              <div>
+                <h3>Maximum cybersecurity</h3>
+                <p>Encryption in transit, fraud monitoring, and OFAC screening help protect against unauthorized access.</p>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <div class="info-dots" role="tablist" aria-label="Security highlights">
+          <button type="button" class="is-active" aria-label="Slide 1" aria-selected="true"></button>
+          <button type="button" aria-label="Slide 2" aria-selected="false"></button>
+          <button type="button" aria-label="Slide 3" aria-selected="false"></button>
+        </div>
+
+        <p class="info-security-link">
+          <a href="#">Visit our Security Center</a> to learn more about protecting your family office accounts.
+        </p>
+      </section>
+
+      <section class="login-panel--form">
+        <div class="form-header">
+          <h1>Client Login</h1>
+          <p id="formHeaderText">Enter your credentials below to sign in. Contact your relationship manager if you need to register.</p>
+        </div>
+
+        <div id="loginAlert" class="login-alert">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+          </svg>
+          <span id="loginAlertText"></span>
+        </div>
+
+        <form id="loginForm" novalidate>
+          <div class="form-group">
+            <label for="userId">User ID</label>
+            <input type="text" id="userId" name="userId" autocomplete="username"
+                   placeholder="Account number" inputmode="numeric" required>
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" autocomplete="current-password"
+                   placeholder="Password" required>
+            <p id="capsWarning" class="caps-warning" role="status">CAPS Lock is on</p>
+          </div>
+
+          <div class="form-row">
+            <label class="form-check">
+              <input type="checkbox" id="rememberMe" name="rememberMe">
+              Remember Me
+            </label>
+            <div class="form-links">
+              <a href="#">Forgot Password</a>
+              <a href="#">Unlock account?</a>
+            </div>
+          </div>
+
+          <button type="submit" id="submitLogin" class="btn-login">Continue</button>
+        </form>
+
+        <p class="form-footer">
+          Need help? <a href="#">Passport Help</a> · For authorized users only.
+        </p>
+      </section>
+    </div>
+
+    <footer class="login-page-footer">
+      <span>&copy; 2026 Northern Trust Corporation · Family Office Technology</span>
+      <span>Member FDIC · All rights reserved</span>
+    </footer>
+  </div>
+
+  <!-- OTP verification modal (shown after valid password) -->
+  <div id="loginOtpModal" class="login-otp-modal" role="dialog" aria-modal="true" aria-labelledby="loginOtpTitle" hidden>
+    <div class="login-otp-modal__backdrop"></div>
+    <div class="login-otp-modal__sheet">
+      <button type="button" class="login-otp-modal__close" id="closeOtpModal" aria-label="Close verification dialog">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+
+      <h2 id="loginOtpTitle" class="login-otp-modal__title">Two-step verification</h2>
+      <p class="login-otp-modal__subtitle">
+        Open your <strong>authenticator app</strong> and enter the 6-digit code for account
+        <strong id="otpAccountLabel"></strong>. The code refreshes every 30 seconds.
+      </p>
+
+      <div class="login-otp-banner" role="status">
+        <span aria-hidden="true">&#128274;</span>
+        <span>Check Northern Trust Authenticator (or your registered MFA app). Never share this code — we will not ask for it by phone or email.</span>
+      </div>
+
+      <div id="otpModalAlert" class="login-otp-modal__error" hidden></div>
+
+      <div class="login-otp-digits" id="loginOtpDigits">
+        <input type="text" class="login-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="0" aria-label="Digit 1">
+        <input type="text" class="login-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="1" aria-label="Digit 2">
+        <input type="text" class="login-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="2" aria-label="Digit 3">
+        <input type="text" class="login-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="3" aria-label="Digit 4">
+        <input type="text" class="login-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="4" aria-label="Digit 5">
+        <input type="text" class="login-otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]" data-index="5" aria-label="Digit 6">
+      </div>
+
+      <button type="button" id="submitOtp" class="btn-login">Verify &amp; Sign In</button>
+
+      <div class="login-otp-modal__actions">
+        <button type="button" id="resendOtp" class="btn-text">Resend code</button>
+        <button type="button" id="backToCredentials" class="btn-text">Back to sign in</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="login.js"></script>
+</body>
+</html>

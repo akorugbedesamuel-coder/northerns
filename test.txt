@@ -1,0 +1,3 @@
+<div class="analytics-grid" style="grid-template-columns: 1fr;">
+          <div class="analytics-chart-card"><div class="chart-container" id="approvalPerformanceChart" style="min-height: 280px;"></div></div>
+        </div> why empty
