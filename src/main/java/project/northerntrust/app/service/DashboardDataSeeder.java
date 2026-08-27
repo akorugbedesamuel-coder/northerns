@@ -154,35 +154,33 @@ public class DashboardDataSeeder implements CommandLineRunner {
     }
 
     private void seedBeneficiaries(User user) {
-        saveBen(user, "BEN-001", BeneficiaryType.BANK, "Skarsgard Family Trust", "Family Trust",
-                "JPMorgan Chase Bank", "•••• •••• •••• 9012", "021000021", "United States",
-                new BigDecimal("2500"), new BigDecimal("5000"), TrustLevel.Trusted, true,
-                LocalDateTime.now().minusDays(3), "270 Park Avenue, New York, NY 10017, United States");
-        saveBen(user, "BEN-002", BeneficiaryType.INTERNAL, "Alexander S Vault", "Personal Reserve Sweep",
-                null, null, null, null, new BigDecimal("10000"), new BigDecimal("20000"),
-                TrustLevel.Trusted, true, LocalDateTime.now().minusDays(2), null);
+        saveBen(user, "BEN-001", BeneficiaryType.BANK, "Lindqvist & Strand Law LLP", "Entertainment Legal Counsel",
+                "Citibank N.A.", "•••• •••• •••• 7834", "021000089", "United States",
+                new BigDecimal("50000"), new BigDecimal("150000"), TrustLevel.Trusted, true,
+                LocalDateTime.now().minusDays(5), "388 Greenwich Street, New York, NY 10013, United States");
+        saveBen(user, "BEN-002", BeneficiaryType.INTERNAL, "Skarsgard Reserve Sweep", "Internal Savings Transfer",
+                null, null, null, null, new BigDecimal("10000"), new BigDecimal("25000"),
+                TrustLevel.Trusted, true, LocalDateTime.now().minusDays(1), null);
         patchBen("BEN-002", b -> {
             b.setDestinationUserId("USR-221457");
             b.setEmailOrPhone("alexander.skarsgard@northerntrust.com");
         });
-        saveBen(user, "BEN-003", BeneficiaryType.CREDIT, "NT Credit Repayment Facility", "Primary Debt Servicer",
-                null, null, null, null, new BigDecimal("2500"), new BigDecimal("2500"),
-                TrustLevel.Verified, true, LocalDateTime.now().minusDays(7), null);
-        patchBen("BEN-003", b -> b.setCreditAccountId("NT-CRD-8902"));
-        saveBen(user, "BEN-004", BeneficiaryType.INVESTMENT, "Vanguard Managed Index Fund", "Corporate Treasury Invest",
-                null, null, null, null, new BigDecimal("5000"), new BigDecimal("10000"),
-                TrustLevel.Verified, true, LocalDateTime.now().minusDays(16), null);
-        patchBen("BEN-004", b -> b.setPortfolioId("PORT-TREAS-01"));
-        saveBen(user, "BEN-005", BeneficiaryType.BANK, "Zürich Private Asset Clearing", "Offshore Portfolio Target",
-                "UBS Switzerland AG", "•••• •••• •••• 4410", "UBSWCH22XXX", "Switzerland",
-                new BigDecimal("500"), new BigDecimal("1000"), TrustLevel.New, false, null,
-                "Bahnhofstrasse 45, 8001 Zurich, Switzerland");
-        Beneficiary b6 = saveBen(user, "BEN-006", BeneficiaryType.INTERNAL, "Compliance Transit Escrow", "Audit Lock Clearing",
-                null, null, null, null, BigDecimal.ZERO, BigDecimal.ZERO, TrustLevel.Blocked, false, null, null);
-        b6.setStatus(BeneficiaryStatus.BLOCKED);
-        b6.setDestinationUserId("USR-COMP-01");
-        b6.setEmailOrPhone("audit@northerntrust.com");
-        beneficiaryRepository.save(b6);
+        saveBen(user, "BEN-003", BeneficiaryType.BANK, "Gustafsson Properties AB", "Real Estate Holding Company",
+                "Handelsbanken", "•••• •••• •••• 2156", "SWedishSESS", "Sweden",
+                new BigDecimal("75000"), new BigDecimal("200000"), TrustLevel.Verified, true,
+                LocalDateTime.now().minusDays(12), "Kungsgatan 1, 111 43 Stockholm, Sweden");
+        saveBen(user, "BEN-004", BeneficiaryType.BANK, "Meridian Capital Partners", "Investment Advisory Fees",
+                "Goldman Sachs Bank USA", "•••• •••• •••• 5501", "021000218", "United States",
+                new BigDecimal("25000"), new BigDecimal("100000"), TrustLevel.Verified, true,
+                LocalDateTime.now().minusDays(8), "200 West Street, New York, NY 10282, United States");
+        saveBen(user, "BEN-005", BeneficiaryType.BANK, "Swedish Red Cross Foundation", "Annual Charitable Contribution",
+                "Nordea Bank Abp", "•••• •••• •••• 8843", "NDEAFIHH", "Finland",
+                new BigDecimal("5000"), new BigDecimal("50000"), TrustLevel.Verified, true,
+                LocalDateTime.now().minusDays(30), "Satamakatu 3, 00020 Helsinki, Finland");
+        saveBen(user, "BEN-006", BeneficiaryType.BANK, "Lloyd's of London Syndicate", "Keyman Insurance Premium",
+                "Barclays Bank PLC", "•••• •••• •••• 6697", "BARCGB22XXX", "United Kingdom",
+                new BigDecimal("15000"), new BigDecimal("15000"), TrustLevel.New, false, null,
+                "1 Churchill Place, London E14 5HP, United Kingdom");
     }
 
     private void patchBen(String code, java.util.function.Consumer<Beneficiary> fn) {
@@ -480,9 +478,9 @@ public class DashboardDataSeeder implements CommandLineRunner {
 
         beneficiaryRepository.findByUser(user).forEach(b -> {
             if ("BEN-001".equals(b.getBeneficiaryCode())) {
-                b.setDisplayName("Skarsgard Family Trust");
+                b.setDisplayName("Lindqvist & Strand Law LLP");
             } else if ("BEN-002".equals(b.getBeneficiaryCode())) {
-                b.setDisplayName("Alexander S Vault");
+                b.setDisplayName("Skarsgard Reserve Sweep");
                 b.setEmailOrPhone("alexander.skarsgard@northerntrust.com");
             }
             beneficiaryRepository.save(b);
