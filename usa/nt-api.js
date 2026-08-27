@@ -585,6 +585,8 @@
       applyGlobalMocks();
       syncBalances();
       hideConnectionBanner();
+      const mockBlock = document.getElementById('mockOtpDemoBlock');
+      if (mockBlock) mockBlock.classList.add('nt-api-hidden');
       if (global.NTNotifications) {
         global.NTNotifications.refreshBadge().catch(() => {});
       }
