@@ -165,17 +165,14 @@
   }
 
   async function runWithOtp(callback, amount, ben, force) {
-    if (!global.NTApi?.state?.connected) return callback();
+    if (!global.NTApi?.state?.connected) {
+      NTUI.error('Unable to reach banking services. Please try again later.');
+      return;
+    }
     if (!force && !needsOtp(amount, ben)) return callback();
     global.ensureSharedModals?.();
     try {
       const req = await global.NTApi.requestOtp();
-      const demo = document.getElementById('mockOtpDemoBlock');
-      const hint = document.getElementById('mockOtpValue');
-      if (demo && hint && req.demoCode) {
-        hint.textContent = req.demoCode;
-        demo.classList.remove('nt-api-hidden');
-      }
       global.otpSuccessCallback = async () => {
         try { await callback(); } catch (e) { NTUI.error(e.message); }
       };

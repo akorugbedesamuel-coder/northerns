@@ -252,7 +252,7 @@
     const b = document.getElementById('ntConnectionBanner');
     const m = document.getElementById('ntConnectionBannerMsg');
     if (b && m) {
-      m.textContent = msg || 'Unable to reach banking services. Showing cached demo data.';
+      m.textContent = msg || 'Unable to reach banking services. Please try again later.';
       b.classList.add('visible');
     }
   }
@@ -604,7 +604,7 @@
       console.warn('[NT API] Backend unreachable — embedded mocks only.', e.message);
       state.connected = false;
       state.ready = true;
-      showConnectionBanner('Unable to reach banking services. Displaying cached demo data.');
+      showConnectionBanner('Unable to reach banking services. Please try again later.');
     } finally {
       if (loading) loading.style.display = 'none';
     }

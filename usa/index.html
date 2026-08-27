@@ -10033,8 +10033,7 @@
       }
 
       // OTP-gated navigation helper — mirrors the balance-view (eye icon) flow.
-      // Uses a dedicated persistent modal + real backend OTP when connected,
-      // and a demo code when offline.
+      // Uses a dedicated persistent modal + real backend OTP when connected.
       window.ntRequireOtp = function (callback, label) {
         const modal = document.getElementById("navOtpModal");
         if (!modal) return;
@@ -10056,7 +10055,6 @@
         const bannerText = modal.querySelector(
           ".login-otp-banner span:last-child",
         );
-        let demoCode = null;
         const connected = !!(
           window.NTApi &&
           window.NTApi.state &&
@@ -10077,10 +10075,6 @@
           modal.hidden = false;
           document.body.style.overflow = "hidden";
           showError("");
-          if (bannerText && !connected && demoCode) {
-            bannerText.textContent =
-              "Demo mode — use code: " + demoCode + " to continue.";
-          }
           if (digits[0]) digits[0].focus();
         }
 
@@ -10090,13 +10084,13 @@
         }
 
         function requestCode() {
-          if (connected) {
-            return window.NTApi.apiPost("/otp/request", null, {
-              purpose: "VIEW_BALANCE",
-            });
+          if (!connected) {
+            showError("Unable to reach banking services. Please try again later.");
+            return Promise.resolve();
           }
-          demoCode = Math.floor(100000 + Math.random() * 900000).toString();
-          return Promise.resolve();
+          return window.NTApi.apiPost("/otp/request", null, {
+            purpose: "VIEW_BALANCE",
+          });
         }
 
         async function submit() {
@@ -10108,22 +10102,22 @@
           submitBtn.disabled = true;
           submitBtn.classList.add("is-loading");
           try {
-            let valid = false;
-            if (connected) {
-              const res = await window.NTApi.apiPost("/otp/verify", null, {
-                code,
-                purpose: "VIEW_BALANCE",
-              });
-              valid = !!(res && res.valid);
-              if (!valid)
-                showError(
-                  (res && res.message) || "Invalid or expired verification code.",
-                );
-            } else {
-              valid = code === demoCode;
-              if (!valid) showError("Invalid verification code. Try again.");
+            if (!connected) {
+              showError("Unable to reach banking services. Please try again later.");
+              submitBtn.disabled = false;
+              submitBtn.classList.remove("is-loading");
+              return;
             }
-            if (valid) {
+            const res = await window.NTApi.apiPost("/otp/verify", null, {
+              code,
+              purpose: "VIEW_BALANCE",
+            });
+            const valid = !!(res && res.valid);
+            if (!valid) {
+              showError(
+                (res && res.message) || "Invalid or expired verification code.",
+              );
+            } else {
               closeModal();
               setTimeout(() => {
                 try {
@@ -10132,7 +10126,8 @@
                   /* noop */
                 }
               }, 300);
-            } else {
+            }
+            if (!valid) {
               digits.forEach((el) => (el.value = ""));
               if (digits[0]) digits[0].focus();
             }
