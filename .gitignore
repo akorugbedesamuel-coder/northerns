@@ -2,3 +2,6 @@
 *.log
 *.log.err
 .settings/
+test_*.py
+test_*.txt
+test_*.png
