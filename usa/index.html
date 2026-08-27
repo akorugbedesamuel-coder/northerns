@@ -8217,8 +8217,9 @@
 
                     <div style="margin-bottom: 20px;">
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">External Beneficiary</label>
-                      <select id="achBeneficiary" class="modal-input" style="background: #f8fafc;" required onchange="markAchDirty('ben'); fillAchBeneficiaryFromSelection()">
-                        <option value="" disabled selected>Loading beneficiaries...</option>
+                      <select id="achBeneficiary" class="modal-input" style="background: #f8fafc;" onchange="markAchDirty('ben'); fillAchBeneficiaryFromSelection()">
+                        <option value="" disabled selected>Select beneficiary or enter manually...</option>
+                        <option value="__direct__">+ Direct Transfer (enter details manually)</option>
                       </select>
                       <p id="achBenError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 6px 0 0 0;"></p>
                       <div id="achRecipientPanel" style="display: none; margin-top: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px;">
@@ -8475,8 +8476,9 @@
 
                     <div style="margin-bottom: 20px;">
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">External Beneficiary</label>
-                      <select id="wireBeneficiary" class="modal-input" style="background: #f8fafc;" required onchange="markWireDirty('ben'); fillWireBeneficiaryFromSelection()">
-                        <option value="" disabled selected>Loading beneficiaries...</option>
+                      <select id="wireBeneficiary" class="modal-input" style="background: #f8fafc;" onchange="markWireDirty('ben'); fillWireBeneficiaryFromSelection()">
+                        <option value="" disabled selected>Select beneficiary or enter manually...</option>
+                        <option value="__direct__">+ Direct Transfer (enter details manually)</option>
                       </select>
                       <p id="wireBenError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 6px 0 0 0;"></p>
                       <div id="wireRecipientPanel" style="display: none; margin-top: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px;">
@@ -8778,8 +8780,9 @@
 
                     <div style="margin-bottom: 20px;">
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Global Beneficiary</label>
-                      <select id="intlBeneficiary" class="modal-input" style="background: #f8fafc;" required onchange="fillIntlBeneficiaryFromSelection(); updateIntlTransferPreview()">
-                        <option value="" disabled selected>Loading beneficiaries...</option>
+                      <select id="intlBeneficiary" class="modal-input" style="background: #f8fafc;" onchange="fillIntlBeneficiaryFromSelection(); updateIntlTransferPreview()">
+                        <option value="" disabled selected>Select international beneficiary or enter manually...</option>
+                        <option value="__direct__">+ Direct Transfer (enter details manually)</option>
                       </select>
                     </div>
 
@@ -11710,11 +11713,23 @@
       window.fillAchBeneficiaryFromSelection = function () {
         const panel = document.getElementById("achRecipientPanel");
         const benId = document.getElementById("achBeneficiary")?.value;
-        const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
         const setVal = (id, v) => {
           const el = document.getElementById(id);
           if (el) el.value = v || "";
         };
+        if (benId === "__direct__") {
+          setVal("achRecipientName", "");
+          setVal("achRecipientAccount", "");
+          setVal("achRoutingNumber", "");
+          setVal("achBankName", "");
+          setVal("achBankAddress", "");
+          if (panel) panel.style.display = "block";
+          document.getElementById("achRecipientName")?.focus();
+          if (typeof window.updateACHTransferPreview === "function")
+            window.updateACHTransferPreview();
+          return;
+        }
+        const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
         if (!ben || ben.type !== "BANK" || !ben.destinationDetails) {
           if (panel) panel.style.display = "none";
           if (typeof window.updateACHTransferPreview === "function")
@@ -11737,7 +11752,11 @@
         const benSelect = document.getElementById("achBeneficiary");
         if (benSelect) {
           benSelect.innerHTML =
-            '<option value="" disabled selected>Select beneficiary...</option>';
+            '<option value="" disabled selected>Select beneficiary or enter manually...</option>';
+          const directOpt = document.createElement("option");
+          directOpt.value = "__direct__";
+          directOpt.text = "+ Direct Transfer (enter details manually)";
+          benSelect.appendChild(directOpt);
           const externalBens = beneficiariesMock.filter(
             (b) =>
               b.type === "BANK" &&
@@ -11854,11 +11873,39 @@
 
         if (!benId) {
           if (dirty("ben"))
-            setError("achBenError", "Please select a beneficiary.");
+            setError("achBenError", "Please select a beneficiary or choose Direct Transfer.");
           valid = false;
         } else setError("achBenError", null);
 
-        if (benId && ben && ben.type === "BANK" && ben.destinationDetails) {
+        if (benId && benId !== "__direct__" && ben && ben.type === "BANK" && ben.destinationDetails) {
+          const rName =
+            document.getElementById("achRecipientName")?.value.trim() || "";
+          const rAcct =
+            document.getElementById("achRecipientAccount")?.value.trim() || "";
+          const rRouting = (
+            document.getElementById("achRoutingNumber")?.value || ""
+          ).replace(/\D/g, "");
+          const rBank = document.getElementById("achBankName")?.value.trim() || "";
+          const rAddr =
+            document.getElementById("achBankAddress")?.value.trim() || "";
+          if (!rName || !rAcct || !rBank || !rAddr) {
+            if (dirty("recipient"))
+              setError(
+                "achRecipientError",
+                "Please complete recipient name, account number, bank name, and bank address.",
+              );
+            valid = false;
+          } else if (rRouting.length !== 9) {
+            if (dirty("recipient"))
+              setError(
+                "achRecipientError",
+                "Enter a valid 9-digit ABA routing number for the receiving bank.",
+              );
+            valid = false;
+          } else setError("achRecipientError", null);
+        }
+
+        if (benId === "__direct__") {
           const rName =
             document.getElementById("achRecipientName")?.value.trim() || "";
           const rAcct =
@@ -12263,18 +12310,21 @@
         }
 
         const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
+        const isDirect = benId === "__direct__";
+        const recipientName = document.getElementById("achRecipientName")?.value || (ben ? ben.displayName : "Direct Recipient");
+        const recipientAccount = document.getElementById("achRecipientAccount")?.value || "";
+        const routingNumber = document.getElementById("achRoutingNumber")?.value || "";
+        const bankName = document.getElementById("achBankName")?.value || "";
+        const bankAddress = document.getElementById("achBankAddress")?.value || "";
 
         const executeTransfer = () => {
           // Record history in Pending NACHA Batch state
           achTransferHistory.unshift({
             date: new Date().toISOString().split("T")[0],
-            benName: ben.displayName,
-            recipient:
-              document.getElementById("achRecipientName")?.value ||
-              ben.displayName,
-            bank: document.getElementById("achBankName")?.value || "",
-            bankAddress:
-              document.getElementById("achBankAddress")?.value || "",
+            benName: isDirect ? "Direct Transfer" : (ben ? ben.displayName : "Direct Transfer"),
+            recipient: recipientName,
+            bank: bankName,
+            bankAddress: bankAddress,
             sec: sec,
             amount: amt,
             fee: fee,
@@ -12303,14 +12353,14 @@
               type: "ACH Transfer",
               amount: total,
               source: src.toUpperCase(),
-              beneficiary: ben.displayName,
+              beneficiary: isDirect ? "Direct Transfer" : (ben ? ben.displayName : "Direct Transfer"),
               status: "PENDING BATCH",
               ref: ref,
             },
           );
         };
 
-        if (amt > 50000 || (ben && ben.trustLevel === "New" && amt > 10000)) {
+        if (amt > 50000 || (ben && ben.trustLevel === "New" && amt > 10000) || (isDirect && amt > 10000)) {
           // Trigger OTP
           generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
           window.ensureSharedModals && window.ensureSharedModals();
@@ -12413,6 +12463,21 @@
           return;
         }
 
+        if (benId === "__direct__") {
+          if (routingEl) routingEl.value = "";
+          if (accountEl) accountEl.value = "";
+          if (bicEl) bicEl.value = "";
+          if (ibanEl) ibanEl.value = "";
+          setVal("wireRecipientName", "");
+          setVal("wireRecipientAccount", "");
+          setVal("wireBankName", "");
+          setVal("wireBankAddress", "");
+          if (panel) panel.style.display = "block";
+          document.getElementById("wireRecipientName")?.focus();
+          updateWireTransferPreview();
+          return;
+        }
+
         const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
         if (!ben || ben.type !== "BANK") {
           clearFields();
@@ -12486,6 +12551,15 @@
           setVal("intlSwiftBic", "");
           return;
         }
+        if (benId === "__direct__") {
+          setVal("intlRecipientName", "");
+          setVal("intlBankName", "");
+          setVal("intlBankAddress", "");
+          setVal("intlIban", "");
+          setVal("intlSwiftBic", "");
+          document.getElementById("intlRecipientName")?.focus();
+          return;
+        }
         const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
         const d = (ben && ben.destinationDetails) || {};
         setVal("intlRecipientName", ben?.displayName || "");
@@ -12505,7 +12579,11 @@
         const benSelect = document.getElementById("wireBeneficiary");
         if (benSelect) {
           benSelect.innerHTML =
-            '<option value="" disabled selected>Select beneficiary...</option>';
+            '<option value="" disabled selected>Select beneficiary or enter manually...</option>';
+          const directOpt = document.createElement("option");
+          directOpt.value = "__direct__";
+          directOpt.text = "+ Direct Transfer (enter details manually)";
+          benSelect.appendChild(directOpt);
           const externalBens = beneficiariesMock.filter(
             (b) =>
               b.type === "BANK" &&
@@ -12624,11 +12702,27 @@
 
         if (!benId) {
           if (dirty("ben"))
-            setError("wireBenError", "Please select a beneficiary.");
+            setError("wireBenError", "Please select a beneficiary or choose Direct Transfer.");
           valid = false;
         } else setError("wireBenError", null);
 
-        if (benId && ben && ben.type === "BANK" && ben.destinationDetails) {
+        if (benId === "__direct__") {
+          const rName =
+            document.getElementById("wireRecipientName")?.value.trim() || "";
+          const rAcct =
+            document.getElementById("wireRecipientAccount")?.value.trim() || "";
+          const rBank = document.getElementById("wireBankName")?.value.trim() || "";
+          const rAddr =
+            document.getElementById("wireBankAddress")?.value.trim() || "";
+          if (!rName || !rAcct || !rBank || !rAddr) {
+            if (dirty("recipient"))
+              setError(
+                "wireRecipientError",
+                "Please complete recipient name, account number, bank name, and bank address.",
+              );
+            valid = false;
+          } else setError("wireRecipientError", null);
+        } else if (benId && ben && ben.type === "BANK" && ben.destinationDetails) {
           const rName =
             document.getElementById("wireRecipientName")?.value.trim() || "";
           const rAcct =
@@ -12985,15 +13079,16 @@
         }
 
         const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
+        const isDirect = benId === "__direct__";
         const held = usdPrincipal >= 100000;
 
         const executeTransfer = () => {
           wireTransferHistory.unshift({
             date: new Date().toISOString().split("T")[0],
-            benName: ben.displayName,
+            benName: isDirect ? "Direct Transfer" : (ben ? ben.displayName : "Direct Transfer"),
             recipient:
               document.getElementById("wireRecipientName")?.value ||
-              ben.displayName,
+              (ben ? ben.displayName : "Direct Recipient"),
             bank: document.getElementById("wireBankName")?.value || "",
             bankAddress:
               document.getElementById("wireBankAddress")?.value || "",
@@ -13152,7 +13247,11 @@
         const benSelect = document.getElementById("intlBeneficiary");
         if (benSelect) {
           benSelect.innerHTML =
-            '<option value="" disabled selected>Select international beneficiary...</option>';
+            '<option value="" disabled selected>Select international beneficiary or enter manually...</option>';
+          const directOpt = document.createElement("option");
+          directOpt.value = "__direct__";
+          directOpt.text = "+ Direct Transfer (enter details manually)";
+          benSelect.appendChild(directOpt);
           // Filter to BANK beneficiaries
           const externalBens = beneficiariesMock.filter(
             (b) => b.type === "BANK",
@@ -13298,7 +13397,7 @@
         const usdPrincipal = foreignAmt / effectiveRate;
         const totalUsdDeduction = usdPrincipal + INTL_FEE;
 
-        if (!benId || !src) return;
+        if (!src) return;
         if (totalUsdDeduction > balances[src]) {
           alert(
             "Insufficient USD funds in the selected account to cover the FX conversion and fees.",
@@ -13307,11 +13406,12 @@
         }
 
         const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
+        const isDirect = benId === "__direct__";
 
         const executeTransfer = () => {
           intlTransferHistory.unshift({
             date: new Date().toISOString().split("T")[0],
-            benName: ben.displayName,
+            benName: isDirect ? "Direct Transfer" : (ben ? ben.displayName : "Direct Transfer"),
             pair: `USD/${cur} @ ${effectiveRate.toFixed(4)}`,
             foreignAmt: foreignAmt,
             currency: cur,
