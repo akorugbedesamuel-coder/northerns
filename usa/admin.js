@@ -1,4 +1,4 @@
-(function () {
+(function (global) {
   const TOKEN_KEY = 'nt_admin_token';
   const NAME_KEY = 'nt_admin_name';
 
@@ -9,6 +9,7 @@
   const $ = (id) => document.getElementById(id);
   let currentTab = 'approvals';
   let transfersCache = [];
+  let accountsCache = [];
 
   function token() { return sessionStorage.getItem(TOKEN_KEY); }
   function headers() {
@@ -135,7 +136,8 @@
       renderApprovals(approvals);
       transfersCache = transfers || [];
       renderTransfers(transfersCache);
-      renderAccounts(accounts || []);
+      accountsCache = accounts || [];
+      renderAccounts(accountsCache);
     } catch (err) {
       toast(err.message, true);
     }
@@ -166,7 +168,7 @@
         <td>${shortDate(t.createdAt)}</td>
         <td>${esc(t.user || '—')}<br><span style="color:var(--nt-muted);font-size:11px;">${esc(t.userAccountNumber || '')}</span></td>
         <td>${esc(t.type || '—')}</td>
-        <td>${esc(t.counterparty || '—')}</td>
+        <td>${esc(t.counterparty || '—')}<br><span style="color:var(--nt-muted);font-size:11px;">from ${esc(t.source || '—')}</span></td>
         <td style="font-weight:700;">${esc(t.currency || 'USD')} ${fmt(t.amount)}</td>
         <td><span class="admin-risk ${riskClass(t.riskLevel)}">${t.riskScore != null ? t.riskScore + ' · ' : ''}${esc(t.riskLevel || '—')}</span></td>
         <td><span class="admin-status ${statusClass(t.displayStatus)}">${esc(t.displayStatus || '—')}</span></td>
@@ -206,7 +208,7 @@
     body.innerHTML = items.map(a => `
       <tr>
         <td class="mono">${esc(a.accountNumber || '—')}</td>
-        <td>${esc(a.owner || '—')}</td>
+        <td>${esc(a.owner || '—')}<br><span style="color:var(--nt-muted);font-size:11px;">${esc(a.ownerAccountNumber || '')}</span></td>
         <td>${esc(a.productKey || '—')}</td>
         <td>${esc(a.currency || '—')}</td>
         <td style="font-weight:700;">${fmt(a.balance)}</td>
@@ -219,7 +221,13 @@
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
+  const ACTION_VERBS = { approve: 'APPROVE', reject: 'DECLINE', escalate: 'ESCALATE' };
+
   async function doAction(reference, action) {
+    const verb = ACTION_VERBS[action] || String(action).toUpperCase();
+    if (!window.confirm(verb + ' transfer ' + reference + '?\nThis action is final and cannot be undone.')) {
+      return;
+    }
     try {
       const res = await api('/approvals/' + encodeURIComponent(reference) + '/' + action, { method: 'POST' });
       toast(res && res.message ? res.message : 'Action applied');
@@ -254,10 +262,24 @@
     }));
   });
 
+  $('accountsSearch').addEventListener('input', (e) => {
+    const q = (e.target.value || '').toLowerCase();
+    renderAccounts(accountsCache.filter(a => {
+      return [a.accountNumber, a.owner, a.ownerAccountNumber, a.productKey, a.currency]
+        .some(v => v && String(v).toLowerCase().includes(q));
+    }));
+  });
+
   /* ——— Boot ——— */
   if (token()) {
     enterConsole();
   } else {
     $('loginView').hidden = false;
   }
-})();
+
+  setInterval(() => {
+    if (token() && document.hidden === false && $('consoleView').hidden === false) {
+      loadConsole().catch(() => {});
+    }
+  }, 20000);
+})(window);

@@ -56,47 +56,96 @@ public class DashboardTransferController {
     public ResponseEntity<MessageResponse> ach(
             @RequestParam(defaultValue = "8902410001") String accountNumber,
             @RequestBody Map<String, Object> body) {
-        return ResponseEntity.ok(performExternal(accountNumber, body, "ACH"));
+        User user = dashboardService.requireUser(accountNumber);
+        Account from = resolveSource(user, body);
+        ExternalTransferRequest req = buildRequest(user, from, body, "ACH");
+
+        Beneficiary ben = null;
+        String beneficiaryId = body.containsKey("beneficiaryId") ? body.get("beneficiaryId").toString() : null;
+        if (beneficiaryId != null) {
+            ben = beneficiaryRepository.findByBeneficiaryCodeAndUser(beneficiaryId, user)
+                    .orElseThrow(() -> new IllegalArgumentException("Beneficiary not found"));
+        }
+
+        MessageResponse response = transferService.performAchTransfer(req, ben);
+        return enrichAndReturn(req, response, from.getDisplayName());
     }
 
     @PostMapping("/wire")
     public ResponseEntity<MessageResponse> wire(
             @RequestParam(defaultValue = "8902410001") String accountNumber,
             @RequestBody Map<String, Object> body) {
+        User user = dashboardService.requireUser(accountNumber);
+        Account from = resolveSource(user, body);
         String network = body.getOrDefault("network", "domestic").toString();
         String type = "swift".equalsIgnoreCase(network) ? "SWIFT" : "WIRE";
-        return ResponseEntity.ok(performExternal(accountNumber, body, type));
+        ExternalTransferRequest req = buildRequest(user, from, body, type);
+        MessageResponse response = transferService.performExternalTransfer(req);
+        return enrichAndReturn(req, response, from.getDisplayName());
     }
 
     @PostMapping("/international")
     public ResponseEntity<MessageResponse> international(
             @RequestParam(defaultValue = "8902410001") String accountNumber,
             @RequestBody Map<String, Object> body) {
-        return ResponseEntity.ok(performExternal(accountNumber, body, "SWIFT"));
+        User user = dashboardService.requireUser(accountNumber);
+        Account from = resolveSource(user, body);
+        ExternalTransferRequest req = buildRequest(user, from, body, "SWIFT");
+        MessageResponse response = transferService.performExternalTransfer(req);
+        return enrichAndReturn(req, response, from.getDisplayName());
     }
 
-    private MessageResponse performExternal(String accountNumber, Map<String, Object> body, String transferType) {
-        User user = dashboardService.requireUser(accountNumber);
+    private Account resolveSource(User user, Map<String, Object> body) {
         String sourceKey = body.getOrDefault("sourceAccountKey", "checking").toString();
-        Account from = dashboardService.resolveSourceAccount(user, sourceKey)
+        return dashboardService.resolveSourceAccount(user, sourceKey)
                 .orElseThrow(() -> new IllegalArgumentException("Source account not found"));
+    }
 
-        BigDecimal amount = new BigDecimal(body.get("amount").toString());
-        String beneficiaryId = body.containsKey("beneficiaryId") ? body.get("beneficiaryId").toString() : null;
-
+    private ExternalTransferRequest buildRequest(User user, Account from, Map<String, Object> body, String transferType) {
         ExternalTransferRequest req = new ExternalTransferRequest();
         req.setFromAccountNumber(from.getAccountNumber());
         req.setTransferType(transferType);
-        req.setAmount(amount);
+        req.setAmount(new BigDecimal(body.get("amount").toString()));
         req.setDescription(body.getOrDefault("memo", body.getOrDefault("purpose", "Transfer")).toString());
 
+        req.setDirection(body.getOrDefault("direction", "CREDIT").toString());
+        req.setEffectiveDate(body.getOrDefault("effectiveDate", "").toString());
+        req.setSecCode(body.getOrDefault("secCode", "").toString());
+        req.setScheduling(body.getOrDefault("scheduling", "once").toString());
+        req.setSameDay(Boolean.parseBoolean(String.valueOf(body.getOrDefault("sameDay", "false"))));
+        req.setAchAuthAck(Boolean.parseBoolean(String.valueOf(body.getOrDefault("achAuthAck", "false"))));
+        req.setPriority(body.getOrDefault("priority", "Standard").toString());
+        req.setCurrency(body.getOrDefault("currency", "USD").toString());
+        try {
+            if (body.get("fxRate") != null && !body.get("fxRate").toString().isBlank()) {
+                req.setFxRate(new BigDecimal(body.get("fxRate").toString()));
+            }
+            if (body.get("usdEquivalent") != null && !body.get("usdEquivalent").toString().isBlank()) {
+                req.setUsdEquivalent(new BigDecimal(body.get("usdEquivalent").toString()));
+            }
+        } catch (NumberFormatException ignored) {
+        }
+        if (body.get("fee") != null) {
+            try {
+                req.setFee(new BigDecimal(body.get("fee").toString()));
+            } catch (NumberFormatException ignored) {
+                req.setFee(null);
+            }
+        }
+
+        String beneficiaryId = body.containsKey("beneficiaryId") ? body.get("beneficiaryId").toString() : null;
         if (beneficiaryId != null) {
             Beneficiary ben = beneficiaryRepository.findByBeneficiaryCodeAndUser(beneficiaryId, user)
                     .orElseThrow(() -> new IllegalArgumentException("Beneficiary not found"));
-            req.setBankName(ben.getBankName());
-            req.setRecipientAccount(ben.getAccountNumber());
-            req.setRecipientName(ben.getDisplayName());
-            req.setSwiftCode(ben.getRoutingOrSwift());
+            req.setBankName(firstNonBlank(body.containsKey("bankName") ? body.get("bankName").toString() : "", ben.getBankName()));
+            req.setRecipientAccount(firstNonBlank(body.containsKey("accountNumber") ? body.get("accountNumber").toString() : "", ben.getAccountNumber()));
+            req.setRecipientName(firstNonBlank(body.containsKey("recipientName") ? body.get("recipientName").toString() : "", ben.getDisplayName()));
+            String bodySwift = body.containsKey("swiftBic") ? body.get("swiftBic").toString() : "";
+            String bodyRouting = body.containsKey("routingNumber") ? body.get("routingNumber").toString() : "";
+            req.setSwiftCode(firstNonBlank(bodySwift, ben.getRoutingOrSwift()));
+            req.setRoutingNumber(firstNonBlank(bodyRouting, ben.getRoutingOrSwift()));
+            req.setRecipientAddress(firstNonBlank(body.containsKey("bankAddress") ? body.get("bankAddress").toString() : "", ben.getBankAddress()));
+            req.setCountry(ben.getCountry());
             ben.setLastUsedAt(java.time.LocalDateTime.now());
             beneficiaryRepository.save(ben);
         } else {
@@ -106,10 +155,13 @@ public class DashboardTransferController {
             req.setSwiftCode(body.getOrDefault("swiftBic", "").toString());
             req.setIban(body.getOrDefault("iban", "").toString());
             req.setRoutingNumber(body.getOrDefault("routingNumber", "").toString());
+            req.setRecipientAddress(body.getOrDefault("bankAddress", "").toString());
+            req.setCountry(body.getOrDefault("country", "").toString());
         }
+        return req;
+    }
 
-        MessageResponse response = transferService.performExternalTransfer(req);
-
+    private ResponseEntity<MessageResponse> enrichAndReturn(ExternalTransferRequest req, MessageResponse response, String sourceLabel) {
         if (response.isSuccess() || response.isHeld()) {
             String ref = response.getReference();
             if (ref == null) {
@@ -119,12 +171,19 @@ public class DashboardTransferController {
             if (finalRef != null && !finalRef.isEmpty()) {
                 transferRepository.findByReference(finalRef).ifPresent(t -> {
                     t.setCounterpartyName(req.getRecipientName());
-                    t.setSourceAccountLabel(from.getDisplayName());
+                    t.setSourceAccountLabel(sourceLabel);
                     transferRepository.save(t);
                 });
             }
         }
-        return response;
+        return ResponseEntity.ok(response);
+    }
+
+    private String firstNonBlank(String primary, String fallback) {
+        if (primary != null && !primary.trim().isEmpty()) {
+            return primary.trim();
+        }
+        return fallback;
     }
 
     private String extractReference(String message) {

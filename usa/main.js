@@ -164,7 +164,7 @@ function initCharts() {
       datasets: [{
         label: 'Assets',
         data: [68000, 70000, 71500, 72200, 73425, 75000],
-        borderColor: '#004225',
+        borderColor: '#115740',
         backgroundColor: 'rgba(0, 66, 37, 0.1)',
         fill: true,
         tension: 0.4
@@ -195,7 +195,7 @@ function initCharts() {
       labels: ['Cash', 'Equities', 'Fixed Income', 'Real Estate'],
       datasets: [{
         data: [25, 45, 20, 10],
-        backgroundColor: ['#004225', '#b3995d', '#075985', '#2c2c2c'],
+        backgroundColor: ['#115740', '#b3995d', '#075985', '#2c2c2c'],
         borderWidth: 0
       }]
     },
@@ -217,7 +217,7 @@ function initCharts() {
       datasets: [{
         label: 'Inbound',
         data: [1200, 1900, 300, 500, 200],
-        backgroundColor: '#004225'
+        backgroundColor: '#115740'
       }, {
         label: 'Outbound',
         data: [800, 1200, 1500, 700, 900],

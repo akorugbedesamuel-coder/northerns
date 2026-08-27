@@ -4,6 +4,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -50,6 +51,41 @@ public class TransferDetail {
 
     @Column(length = 100)
     private String country;
+
+    // ACH-specific metadata (standard NACHA fields)
+    @Column(name = "ach_direction", length = 10)
+    private String achDirection;
+
+    @Column(name = "effective_date")
+    private LocalDate effectiveDate;
+
+    @Column(name = "sec_code", length = 10)
+    private String secCode;
+
+    @Column(name = "scheduling", length = 20)
+    private String scheduling;
+
+    @Column(name = "same_day")
+    private Boolean sameDay;
+
+    @Column(name = "expected_settlement_date")
+    private LocalDate expectedSettlementDate;
+
+    // Wire-specific metadata
+    @Column(name = "priority", length = 20)
+    private String priority;
+
+    @Column(name = "currency", length = 10)
+    private String currency;
+
+    @Column(name = "fx_rate", precision = 18, scale = 6)
+    private java.math.BigDecimal fxRate;
+
+    @Column(name = "usd_equivalent", precision = 18, scale = 2)
+    private java.math.BigDecimal usdEquivalent;
+
+    @Column(name = "fee", precision = 15, scale = 2)
+    private java.math.BigDecimal fee;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
@@ -153,6 +189,94 @@ public class TransferDetail {
 
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    public String getAchDirection() {
+        return achDirection;
+    }
+
+    public void setAchDirection(String achDirection) {
+        this.achDirection = achDirection;
+    }
+
+    public LocalDate getEffectiveDate() {
+        return effectiveDate;
+    }
+
+    public void setEffectiveDate(LocalDate effectiveDate) {
+        this.effectiveDate = effectiveDate;
+    }
+
+    public String getSecCode() {
+        return secCode;
+    }
+
+    public void setSecCode(String secCode) {
+        this.secCode = secCode;
+    }
+
+    public String getScheduling() {
+        return scheduling;
+    }
+
+    public void setScheduling(String scheduling) {
+        this.scheduling = scheduling;
+    }
+
+    public Boolean getSameDay() {
+        return sameDay;
+    }
+
+    public void setSameDay(Boolean sameDay) {
+        this.sameDay = sameDay;
+    }
+
+    public LocalDate getExpectedSettlementDate() {
+        return expectedSettlementDate;
+    }
+
+    public void setExpectedSettlementDate(LocalDate expectedSettlementDate) {
+        this.expectedSettlementDate = expectedSettlementDate;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public java.math.BigDecimal getFxRate() {
+        return fxRate;
+    }
+
+    public void setFxRate(java.math.BigDecimal fxRate) {
+        this.fxRate = fxRate;
+    }
+
+    public java.math.BigDecimal getUsdEquivalent() {
+        return usdEquivalent;
+    }
+
+    public void setUsdEquivalent(java.math.BigDecimal usdEquivalent) {
+        this.usdEquivalent = usdEquivalent;
+    }
+
+    public java.math.BigDecimal getFee() {
+        return fee;
+    }
+
+    public void setFee(java.math.BigDecimal fee) {
+        this.fee = fee;
     }
 
     public LocalDateTime getCreatedAt() {

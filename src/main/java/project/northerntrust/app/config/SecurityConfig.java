@@ -23,7 +23,21 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
             // Permit all requests to /api/** for testing purposes
             .authorizeRequests()
-            .antMatchers("/api/**", "/usa/**", "/", "/dashboard", "/login").permitAll()
+            .antMatchers(
+                    "/api/**",
+                    "/usa/**",
+                    "/",
+                    "/dashboard",
+                    "/login",
+                    "/login.html",
+                    "/*.js",
+                    "/*.css",
+                    "/*.svg",
+                    "/*.png",
+                    "/*.jpg",
+                    "/*.ico",
+                    "/public/**"
+            ).permitAll()
             // Require authentication for other requests
             .anyRequest().authenticated();
     }

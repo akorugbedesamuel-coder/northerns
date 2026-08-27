@@ -31,7 +31,7 @@ public class TransferController {
     @PostMapping("/transfers/external")
     public ResponseEntity<MessageResponse> performExternalTransfer(@Valid @RequestBody project.northerntrust.app.dto.ExternalTransferRequest request) {
         MessageResponse response = transferService.performExternalTransfer(request);
-        if (response.isSuccess()) {
+        if (response.isSuccess() || response.isHeld()) {
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.badRequest().body(response);

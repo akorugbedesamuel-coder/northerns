@@ -69,6 +69,9 @@ public class DashboardDataSeeder implements CommandLineRunner {
         user.setTransactionPinHash(passwordEncoder.encode("1234"));
         user.setKycStatus(KycStatus.VERIFIED);
         user.setAccountStatus(UserStatus.ACTIVE);
+        user.setLastLoginAt(LocalDateTime.now().minusHours(2));
+        user.setLastLoginIp("12.34.56.78");
+        user.setLastLoginUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
         user = userRepository.save(user);
 
         KycProfile kyc = new KycProfile();
@@ -152,29 +155,30 @@ public class DashboardDataSeeder implements CommandLineRunner {
 
     private void seedBeneficiaries(User user) {
         saveBen(user, "BEN-001", BeneficiaryType.BANK, "Skarsgard Family Trust", "Family Trust",
-                "JPMorgan Chase Bank", "•••• •••• •••• 9012", "CHASUS33XXX", "United States",
+                "JPMorgan Chase Bank", "•••• •••• •••• 9012", "021000021", "United States",
                 new BigDecimal("2500"), new BigDecimal("5000"), TrustLevel.Trusted, true,
-                LocalDateTime.now().minusDays(3));
+                LocalDateTime.now().minusDays(3), "270 Park Avenue, New York, NY 10017, United States");
         saveBen(user, "BEN-002", BeneficiaryType.INTERNAL, "Alexander S Vault", "Personal Reserve Sweep",
                 null, null, null, null, new BigDecimal("10000"), new BigDecimal("20000"),
-                TrustLevel.Trusted, true, LocalDateTime.now().minusDays(2));
+                TrustLevel.Trusted, true, LocalDateTime.now().minusDays(2), null);
         patchBen("BEN-002", b -> {
             b.setDestinationUserId("USR-89024");
             b.setEmailOrPhone("alexander.skarsgard@northerntrust.com");
         });
         saveBen(user, "BEN-003", BeneficiaryType.CREDIT, "NT Credit Repayment Facility", "Primary Debt Servicer",
                 null, null, null, null, new BigDecimal("2500"), new BigDecimal("2500"),
-                TrustLevel.Verified, true, LocalDateTime.now().minusDays(7));
+                TrustLevel.Verified, true, LocalDateTime.now().minusDays(7), null);
         patchBen("BEN-003", b -> b.setCreditAccountId("NT-CRD-8902"));
         saveBen(user, "BEN-004", BeneficiaryType.INVESTMENT, "Vanguard Managed Index Fund", "Corporate Treasury Invest",
                 null, null, null, null, new BigDecimal("5000"), new BigDecimal("10000"),
-                TrustLevel.Verified, true, LocalDateTime.now().minusDays(16));
+                TrustLevel.Verified, true, LocalDateTime.now().minusDays(16), null);
         patchBen("BEN-004", b -> b.setPortfolioId("PORT-TREAS-01"));
         saveBen(user, "BEN-005", BeneficiaryType.BANK, "Zürich Private Asset Clearing", "Offshore Portfolio Target",
                 "UBS Switzerland AG", "•••• •••• •••• 4410", "UBSWCH22XXX", "Switzerland",
-                new BigDecimal("500"), new BigDecimal("1000"), TrustLevel.New, false, null);
+                new BigDecimal("500"), new BigDecimal("1000"), TrustLevel.New, false, null,
+                "Bahnhofstrasse 45, 8001 Zurich, Switzerland");
         Beneficiary b6 = saveBen(user, "BEN-006", BeneficiaryType.INTERNAL, "Compliance Transit Escrow", "Audit Lock Clearing",
-                null, null, null, null, BigDecimal.ZERO, BigDecimal.ZERO, TrustLevel.Blocked, false, null);
+                null, null, null, null, BigDecimal.ZERO, BigDecimal.ZERO, TrustLevel.Blocked, false, null, null);
         b6.setStatus(BeneficiaryStatus.BLOCKED);
         b6.setDestinationUserId("USR-COMP-01");
         b6.setEmailOrPhone("audit@northerntrust.com");
@@ -191,7 +195,7 @@ public class DashboardDataSeeder implements CommandLineRunner {
     private Beneficiary saveBen(User user, String code, BeneficiaryType type, String name, String rel,
                                 String bank, String acct, String routing, String country,
                                 BigDecimal single, BigDecimal daily, TrustLevel trust, boolean isTrusted,
-                                LocalDateTime lastUsed) {
+                                LocalDateTime lastUsed, String bankAddress) {
         Beneficiary b = new Beneficiary();
         b.setUser(user);
         b.setBeneficiaryCode(code);
@@ -203,6 +207,7 @@ public class DashboardDataSeeder implements CommandLineRunner {
         b.setAccountName(name);
         b.setRoutingOrSwift(routing);
         b.setCountry(country);
+        b.setBankAddress(bankAddress);
         b.setSingleLimit(single);
         b.setDailyLimit(daily);
         b.setTrustLevel(trust);
@@ -429,6 +434,15 @@ public class DashboardDataSeeder implements CommandLineRunner {
         user.setFirstName("Alexander J");
         user.setLastName("Skarsgard");
         user.setEmail("alexander.skarsgard@northerntrust.com");
+        if (user.getLastLoginAt() == null) {
+            user.setLastLoginAt(LocalDateTime.now().minusHours(2));
+        }
+        if (user.getLastLoginIp() == null) {
+            user.setLastLoginIp("12.34.56.78");
+        }
+        if (user.getLastLoginUserAgent() == null) {
+            user.setLastLoginUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36");
+        }
         userRepository.save(user);
 
         for (Account account : accountRepository.findByUser(user)) {

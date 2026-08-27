@@ -34,6 +34,44 @@ public class ExternalTransferRequest {
 
     private String recipientAddress;
 
+    /** Recipient's country (used for wire TransferDetail). */
+    private String country;
+
+    // ACH-specific fields
+    /** CREDIT (push) or DEBIT (pull). */
+    private String direction;
+
+    /** ISO-8601 date (yyyy-MM-dd) the transfer should be initiated. */
+    private String effectiveDate;
+
+    /** NACHA SEC code, e.g. PPD, CCD, WEB, TEL. */
+    private String secCode;
+
+    /** Scheduling type: once, weekly, biweekly, monthly, quarterly. */
+    private String scheduling;
+
+    /** True when the user selected same-day ACH (fee applies). */
+    private Boolean sameDay;
+
+    /** Mandatory for ACH DEBIT (pull) — user authorization on file. */
+    private Boolean achAuthAck;
+
+    /** Fee quoted to the user at submission (used for audit consistency). */
+    private BigDecimal fee;
+
+    // Wire-specific fields
+    /** Wire priority: Standard, SameDay, Urgent (Urgent adds a surcharge on the WIRE rail). */
+    private String priority;
+
+    /** Target currency code for SWIFT wires (e.g. EUR, GBP, JPY, CHF). */
+    private String currency;
+
+    /** FX rate quoted to the user (USD per foreign unit) for SWIFT wires. */
+    private BigDecimal fxRate;
+
+    /** USD-equivalent principal for the ledger (equals amount for USD wires). */
+    private BigDecimal usdEquivalent;
+
     // Getters and Setters
     public String getFromAccountNumber() {
         return fromAccountNumber;
@@ -121,5 +159,101 @@ public class ExternalTransferRequest {
 
     public void setRecipientAddress(String recipientAddress) {
         this.recipientAddress = recipientAddress;
+    }
+
+    public String getCountry() {
+        return country;
+    }
+
+    public void setCountry(String country) {
+        this.country = country;
+    }
+
+    public String getDirection() {
+        return direction;
+    }
+
+    public void setDirection(String direction) {
+        this.direction = direction;
+    }
+
+    public String getEffectiveDate() {
+        return effectiveDate;
+    }
+
+    public void setEffectiveDate(String effectiveDate) {
+        this.effectiveDate = effectiveDate;
+    }
+
+    public String getSecCode() {
+        return secCode;
+    }
+
+    public void setSecCode(String secCode) {
+        this.secCode = secCode;
+    }
+
+    public String getScheduling() {
+        return scheduling;
+    }
+
+    public void setScheduling(String scheduling) {
+        this.scheduling = scheduling;
+    }
+
+    public Boolean getSameDay() {
+        return sameDay;
+    }
+
+    public void setSameDay(Boolean sameDay) {
+        this.sameDay = sameDay;
+    }
+
+    public Boolean getAchAuthAck() {
+        return achAuthAck;
+    }
+
+    public void setAchAuthAck(Boolean achAuthAck) {
+        this.achAuthAck = achAuthAck;
+    }
+
+    public BigDecimal getFee() {
+        return fee;
+    }
+
+    public void setFee(BigDecimal fee) {
+        this.fee = fee;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
+
+    public BigDecimal getFxRate() {
+        return fxRate;
+    }
+
+    public void setFxRate(BigDecimal fxRate) {
+        this.fxRate = fxRate;
+    }
+
+    public BigDecimal getUsdEquivalent() {
+        return usdEquivalent;
+    }
+
+    public void setUsdEquivalent(BigDecimal usdEquivalent) {
+        this.usdEquivalent = usdEquivalent;
     }
 }

@@ -10,5 +10,6 @@ public enum DisplayTransferStatus {
     Pending_NACHA_Batch,
     Awaiting_Treasury_Approval,
     Awaiting_Verification,
-    Blocked_OFAC_Review
+    Blocked_OFAC_Review,
+    In_Transit
 }

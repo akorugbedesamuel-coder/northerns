@@ -9,7 +9,7 @@
     />
     <title>Northern Trust | Family Office Technology</title>
     <link rel="icon" href="public/favicon.svg" type="image/svg+xml" />
-    <meta name="theme-color" content="#004225" />
+    <meta name="theme-color" content="#115740" />
     <script>
       window.NT_LOGO_SRC = "public/logo.svg";
     </script>
@@ -19,6 +19,8 @@
       NTAuth.requireAuth();
     </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -35,7 +37,7 @@
         --bg-sidebar: rgba(255, 255, 255, 0.6);
         --text-main: #0b1a13;
         --text-muted: #4e6357;
-        --primary: #004225;
+        --primary: #115740;
         --primary-hover: #002d1a;
         --primary-glow: rgba(0, 66, 37, 0.15);
         --accent-gold: #b3995d;
@@ -384,7 +386,7 @@
         font-family: 'Source Serif 4', Georgia, 'Times New Roman', serif;
         font-size: 1.5rem;
         font-weight: 600;
-        color: #004225;
+        color: #115740;
         margin-bottom: 10px;
         padding-right: 28px;
       }
@@ -401,7 +403,7 @@
         gap: 10px;
         align-items: flex-start;
         background: #ecfdf5;
-        border-left: 4px solid #004225;
+        border-left: 4px solid #115740;
         padding: 12px 14px;
         border-radius: 6px;
         font-size: 0.8125rem;
@@ -433,7 +435,7 @@
       }
 
       .login-otp-digit:focus {
-        border-color: #004225;
+        border-color: #115740;
         box-shadow: 0 0 0 3px rgba(0, 66, 37, 0.15);
       }
 
@@ -462,7 +464,7 @@
         font-family: inherit;
         font-size: 0.875rem;
         font-weight: 600;
-        color: #004225;
+        color: #115740;
         cursor: pointer;
       }
 
@@ -482,7 +484,7 @@
         font-weight: 600;
         font-family: inherit;
         color: #ffffff;
-        background: #004225;
+        background: #115740;
         border: none;
         border-radius: 4px;
         cursor: pointer;
@@ -846,7 +848,7 @@
       .sidebar-container {
         background: linear-gradient(
           180deg,
-          #004225 0%,
+          #115740 0%,
           #002d1a 100%
         ) !important;
         border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -1909,6 +1911,37 @@
         font-size: 15px;
         font-weight: 700;
         color: var(--text-main);
+      }
+      .sub-account-num {
+        display: inline-block;
+        margin-left: 6px;
+        font-family: 'SF Mono', 'Consolas', monospace;
+        font-size: 11px;
+        font-weight: 600;
+        color: #94a3b8;
+        letter-spacing: 0.5px;
+      }
+      .overview-greeting h2 {
+        font-size: 22px;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.3px;
+        margin: 0 0 4px 0;
+      }
+      .overview-greeting p {
+        margin: 0;
+        font-size: 12px;
+        color: #64748b;
+      }
+      .nt-fdic-strip {
+        margin-top: 28px;
+        padding-top: 14px;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 22px;
+        font-size: 11px;
+        color: #94a3b8;
       }
       .sub-account-value {
         font-size: 26px;
@@ -3707,18 +3740,7 @@
                 text-overflow: ellipsis;
               "
             >
-              <span
-                id="headerClientName"
-                style="
-                  max-width: 180px;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  color: #0f172a;
-                  font-weight: 600;
-                "
-                >Alexander J Skarsgard</span
-              >
-              <span id="ntLiveBadge" class="offline" style="margin-left: 8px"
+              <span id="ntLiveBadge" class="offline" style="margin-left: 0"
                 >Connecting…</span
               >
             </div>
@@ -3734,7 +3756,7 @@
                 text-overflow: ellipsis;
               "
             >
-              Last sign-in: May 24, 2026, 9:14 AM CT · Chicago, IL
+              Last sign-in: May 24, 2026, 9:14 AM CT · Chicago, IL · CHR/WIN/DSK
             </div>
             <div id="userMenuWrap" style="position: relative; flex-shrink: 0">
               <button
@@ -4998,7 +5020,7 @@
         left: 0;
         right: 0;
         z-index: 9999;
-        background: #004225;
+        background: #115740;
         color: #fff;
         text-align: center;
         padding: 8px;
@@ -5990,7 +6012,8 @@
           destinationDetails: {
             bankName: "JPMorgan Chase Bank",
             accountNumber: "•••• •••• •••• 9012",
-            routingOrSwift: "CHASUS33XXX",
+            routingOrSwift: "021000021",
+            bankAddress: "270 Park Avenue, New York, NY 10017, United States",
             country: "United States",
           },
           transferLimits: {
@@ -6073,6 +6096,7 @@
             bankName: "UBS Switzerland AG",
             accountNumber: "•••• •••• •••• 4410",
             routingOrSwift: "UBSWCH22XXX",
+            bankAddress: "Bahnhofstrasse 45, 8001 Zurich, Switzerland",
             country: "Switzerland",
           },
           transferLimits: {
@@ -6127,6 +6151,107 @@
         }
         const v = window.ntAccountBal(key);
         return v != null ? { name: key, val: v, limit: null } : null;
+      };
+
+      window.refreshSourceAccountDropdowns = function () {
+        const fmtAmt = (v) =>
+          "$" +
+          Number(v).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+        const defs = [
+          {
+            id: "transferFromAccount",
+            placeholder: "Select funding source...",
+            keys: ["checking", "savings", "credit", "invest"],
+            labels: {
+              checking: "Checking Account",
+              savings: "Savings Vault",
+              credit: "NT Premium Credit Line",
+              invest: "Managed Portfolio",
+            },
+            valueText: (name, val) => name + " (Avail: " + fmtAmt(val) + ")",
+          },
+          {
+            id: "achSourceAccount",
+            placeholder: "Select funding source...",
+            keys: ["checking", "credit"],
+            labels: {
+              checking: "Checking Account",
+              credit: "NT Premium Credit Line",
+            },
+            valueText: (name, val) => name + " (Avail: " + fmtAmt(val) + ")",
+          },
+          {
+            id: "wireSourceAccount",
+            placeholder: null,
+            keys: ["checking", "credit"],
+            labels: { checking: "Checking Account", credit: "Apex Credit Line" },
+            valueText: (name, val) => name + " (Avail: " + fmtAmt(val) + ")",
+          },
+          {
+            id: "intlSourceAccount",
+            placeholder: null,
+            keys: ["checking", "credit", "invest"],
+            labels: {
+              checking: "Checking Account",
+              credit: "Apex Credit Line",
+              invest: "Managed Portfolio",
+            },
+            valueText: (name, val, key) =>
+              key === "invest"
+                ? name + " (Settlement T+2)"
+                : name + " (Avail: " + fmtAmt(val) + ")",
+          },
+          {
+            id: "sendMoneySource",
+            placeholder: null,
+            keys: ["checking", "savings", "credit", "invest"],
+            labels: {
+              checking: "Checking Account",
+              savings: "Savings Vault",
+              credit: "Apex Credit Line",
+              invest: "Managed Portfolio",
+            },
+            valueText: (name, val, key) =>
+              key === "invest"
+                ? name + " (Available Cash: " + fmtAmt(val) + ")"
+                : key === "credit"
+                  ? name + " (Available Credit: " + fmtAmt(val) + ")"
+                  : name + " (Balance: " + fmtAmt(val) + ")",
+          },
+        ];
+        defs.forEach((def) => {
+          const sel = document.getElementById(def.id);
+          if (!sel) return;
+          const prev = sel.value;
+          let html = "";
+          if (def.placeholder) {
+            html +=
+              '<option value="" disabled' +
+              (prev ? "" : " selected") +
+              ">" +
+              def.placeholder +
+              "</option>";
+          }
+          def.keys.forEach((key) => {
+            const entry = window.ntBalanceEntry(key);
+            const name = (entry && entry.name) || def.labels[key] || key;
+            const val =
+              entry && entry.val != null ? entry.val : window.ntAccountBal(key);
+            const label =
+              val != null
+                ? def.valueText(name, val, key)
+                : name;
+            html += '<option value="' + key + '">' + label + "</option>";
+          });
+          sel.innerHTML = html;
+          if (prev) {
+            const opts = Array.prototype.slice.call(sel.options);
+            if (opts.some((o) => o.value === prev)) sel.value = prev;
+          }
+        });
       };
 
       function initOverviewChart(type) {
@@ -7095,6 +7220,59 @@
         });
       };
 
+      // Shared modals (e.g. OTP) live inside the Beneficiaries view template only.
+      // Ensure they exist regardless of the active view so transfer flows always
+      // have a modal to render into.
+      window.ensureSharedModals = function ensureSharedModals() {
+        if (document.getElementById("modalOTP")) return true;
+        document.body.insertAdjacentHTML(
+          "beforeend",
+          `
+            <div id="modalOTP" class="modal-overlay">
+              <div class="modal-sheet" style="max-width: 400px;">
+                <div class="modal-header">
+                  <h4 class="modal-title">MFA Multi-Factor Verification</h4>
+                  <button class="modal-close-btn" onclick="closeBenModal('modalOTP')">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                </div>
+
+                <div class="otp-banner-info">
+                  🔒 <strong>High-Security Transaction:</strong> A one-time verification code has been sent to your registered device to authorize this transfer.
+                </div>
+
+                <p style="font-size: 13.5px; color: #475569; margin: 0 0 16px 0; text-align: center;">
+                  Enter the 6-digit code to confirm and release the transaction:
+                </p>
+
+                <div style="font-weight: 700; font-size: 15px; color: #4f46e5; text-align: center; margin-bottom: 12px; letter-spacing: 0.5px;">
+                  <span id="mockOtpDemoBlock">Verification code sent to your registered device. <span id="mockOtpValue" style="font-weight:700;color:#115740;"></span></span>
+                </div>
+
+                <div class="otp-digits-container">
+                  <input type="text" class="otp-digit-input" maxlength="1" oninput="focusNextDigit(this, 1)" id="otpDigit1">
+                  <input type="text" class="otp-digit-input" maxlength="1" oninput="focusNextDigit(this, 2)" id="otpDigit2">
+                  <input type="text" class="otp-digit-input" maxlength="1" oninput="focusNextDigit(this, 3)" id="otpDigit3">
+                  <input type="text" class="otp-digit-input" maxlength="1" oninput="focusNextDigit(this, 4)" id="otpDigit4">
+                  <input type="text" class="otp-digit-input" maxlength="1" oninput="focusNextDigit(this, 5)" id="otpDigit5">
+                  <input type="text" class="otp-digit-input" maxlength="1" oninput="focusNextDigit(this, null)" id="otpDigit6">
+                </div>
+
+                <div id="otpErrorMsg" style="color: #ef4444; font-size: 12px; font-weight: 600; text-align: center; display: none; margin-bottom: 12px;">
+                  ❌ Invalid verification code. Check the message on your device and try again.
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: center;">
+                  <button type="button" class="dropdown-btn" onclick="closeBenModal('modalOTP')" style="padding: 8px 16px;">Cancel</button>
+                  <button type="button" class="dropdown-btn" onclick="validateOTPCode()" style="padding: 8px 24px; background-color: #6366f1; color: white; border-color: #6366f1; font-weight: 700;">Confirm Code</button>
+                </div>
+              </div>
+            </div>
+          `,
+        );
+        return true;
+      };
+
       // Dynamic view content rendering functions
       window.renderTabContent = function renderTabContent(viewName) {
         // 1. Show professional loading overlay
@@ -7450,6 +7628,14 @@
 
             if (viewName === "Overview") {
               dynamicContainer.innerHTML = `
+            <!-- 0. Greeting & Last Login (banking-standard security disclosure) -->
+            <div class="overview-greeting" style="display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap; margin-bottom:18px;">
+              <div>
+                <h2 id="ntGreeting">Welcome back</h2>
+                <p>Last login: <span id="ntLastLogin">—</span> from a recognized device · Not you? <a href="login.html" style="color:#1d4ed8; font-weight:600; text-decoration:none;">Sign out</a></p>
+              </div>
+              <button type="button" class="dropdown-btn" style="padding:10px 18px; font-size:13px;" onclick="renderTabContent('InternalTransfer')">Transfer Money</button>
+            </div>
             <!-- 1. Account Summary (Core Snapshot) -->
             <p id="balancesAsOf" class="balances-as-of">Balances as of —</p>
             <div class="stats-container">
@@ -7461,7 +7647,7 @@
                     <svg class="icon-eye-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
                   </button>
                 </div>
-                <div class="stat-value nt-sensitive-balance stat-value--masked" id="statTotalPortfolio" data-balance-id="total-portfolio" data-real-value="$169,754,130.38">****</div>
+                <div class="stat-value nt-sensitive-balance stat-value--masked" id="statTotalPortfolio" data-balance-id="total-portfolio" data-real-value="$169,539,111.83">****</div>
                 <div class="stat-subtext">
                   <span class="badge-positive">+2.4%</span>
                   <span>vs last month</span>
@@ -7475,7 +7661,7 @@
                     <svg class="icon-eye-off" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
                   </button>
                 </div>
-                <div class="stat-value nt-sensitive-balance stat-value--masked" id="statAvailableBalance" data-balance-id="available-balance" data-real-value="$169,754,107.88">****</div>
+                <div class="stat-value nt-sensitive-balance stat-value--masked" id="statAvailableBalance" data-balance-id="available-balance" data-real-value="$169,539,089.33">****</div>
                 <div class="stat-subtext">
                   <span style="color: #64748b; font-weight: 500;">99.9% immediately liquid</span>
                 </div>
@@ -7498,18 +7684,22 @@
               <div class="sub-account-card selected" id="subCardChecking" data-account-type="checking" onclick="switchActiveSubAccount('checking', true)" style="cursor: pointer;">
                 <div>
                   <div class="sub-account-header">
-                    <span class="sub-account-title">Checking Account</span>
+                    <span class="sub-account-title">Total Checking<span class="sub-account-num">••••4001</span></span>
                     <span class="sub-account-badge badge-checking">Spending</span>
                   </div>
-                  <div class="sub-account-value">$318,750.00</div>
+                  <div class="sub-account-value">$103,931.45</div>
                 </div>
                 <div>
                   <div class="sub-account-info-row">
-                    <span>Balance: $318,772.50</span>
-                    <span style="color: #dc2626; font-weight: 500;">Pending: -$22.50</span>
+                    <span>Available balance</span>
+                    <span style="font-weight: 700; color: #0f172a;">$103,931.45</span>
+                  </div>
+                  <div class="sub-account-info-row">
+                    <span>Current balance</span>
+                    <span>$103,953.95</span>
                   </div>
                   <div class="sub-account-info-row" style="font-size: 11px; margin-top: 6px; color: #94a3b8;">
-                    <span>Daily operations & outbound payments</span>
+                    <span>Pending: -$22.50 · Daily operations & outbound payments</span>
                   </div>
                 </div>
               </div>
@@ -7518,12 +7708,16 @@
               <div class="sub-account-card" id="subCardSavings" data-account-type="savings" onclick="switchActiveSubAccount('savings', true)" style="cursor: pointer;">
                 <div>
                   <div class="sub-account-header">
-                    <span class="sub-account-title">Savings Vault</span>
+                    <span class="sub-account-title">Savings Vault<span class="sub-account-num">••••4002</span></span>
                     <span class="sub-account-badge badge-savings">Vault</span>
                   </div>
                   <div class="sub-account-value">$35,180.38</div>
                 </div>
                 <div>
+                  <div class="sub-account-info-row">
+                    <span>Current balance</span>
+                    <span style="font-weight: 700; color: #0f172a;">$35,180.38</span>
+                  </div>
                   <div class="sub-account-info-row">
                     <span>Rate: 4.5% APY</span>
                     <span style="color: #16a34a; font-weight: 500;">Earned: +$158.31</span>
@@ -7538,18 +7732,22 @@
               <div class="sub-account-card" id="subCardCredit" data-account-type="credit" onclick="switchActiveSubAccount('credit', true)" style="cursor: pointer;">
                 <div>
                   <div class="sub-account-header">
-                    <span class="sub-account-title">NT Premium Credit Line</span>
+                    <span class="sub-account-title">NT Premium Credit Line<span class="sub-account-num">••••4003</span></span>
                     <span class="sub-account-badge badge-credit">Borrowed</span>
                   </div>
-                  <div class="sub-account-value" style="color: #b91c1c;">$14,800.00</div>
+                  <div class="sub-account-value" style="color: #b91c1c;">$200.00</div>
                 </div>
                 <div>
                   <div class="sub-account-info-row">
-                    <span>Owed: $14,800.00</span>
-                    <span>Limit: $15,000.00</span>
+                    <span>Current balance owed</span>
+                    <span style="font-weight: 700; color: #b91c1c;">$200.00</span>
+                  </div>
+                  <div class="sub-account-info-row">
+                    <span>Credit limit</span>
+                    <span>$15,000.00</span>
                   </div>
                   <div class="sub-account-info-row" style="font-size: 11px; margin-top: 6px; color: var(--primary); font-weight: 600;">
-                    <span>Available Credit: $200.00</span>
+                    <span>Available Credit: $14,800.00</span>
                   </div>
                 </div>
               </div>
@@ -7558,7 +7756,7 @@
               <div class="sub-account-card" id="subCardInvest" data-account-type="invest" onclick="switchActiveSubAccount('invest', true)" style="cursor: pointer;">
                 <div>
                   <div class="sub-account-header" style="display: flex; align-items: center; gap: 8px;">
-                    <span class="sub-account-title">Managed Portfolio</span>
+                    <span class="sub-account-title">Managed Portfolio<span class="sub-account-num">••••4004</span></span>
                     <span class="sub-account-badge badge-invest">Investments</span>
                     <button type="button" class="balance-visibility-toggle" data-balance-toggle data-balance-id="managed-portfolio" aria-label="Show balance" title="Show balance" onclick="event.stopPropagation();">
                       <svg class="icon-eye" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -7677,21 +7875,21 @@
                 <div class="overview-card overview-card-quick-actions">
                   <div class="card-title-lg" style="margin-bottom: 16px;">Quick Actions</div>
                   <div class="action-btn-grid">
+                    <button class="quick-action-btn" onclick="renderTabContent('InternalTransfer')">
+                      <svg viewBox="0 0 24 24"><path d="M17 2.1l4 4-4 4M3 21.9l-4-4 4-4M21 6.1H7.1a4 4 0 0 0-4 4v11.8M3 17.9h13.9a4 4 0 0 0 4-4V2.1"/></svg>
+                      Transfer Money
+                    </button>
                     <button class="quick-action-btn" onclick="renderTabContent('ACHTransfer')">
                       <svg viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
                       Send Money
                     </button>
                     <button class="quick-action-btn" onclick="renderTabContent('ACHTransfer')">
-                      <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M16 8h-8v8h8V8z"/></svg>
-                      Request Funds
-                    </button>
-                    <button class="quick-action-btn" onclick="renderTabContent('ACHTransfer')">
                       <svg viewBox="0 0 24 24"><path d="M21 4H3a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
                       Pay Bills
                     </button>
-                    <button class="quick-action-btn" onclick="renderTabContent('InternalTransfer')">
-                      <svg viewBox="0 0 24 24"><path d="M17 2.1l4 4-4 4M3 21.9l-4-4 4-4M21 6.1H7.1a4 4 0 0 0-4 4v11.8M3 17.9h13.9a4 4 0 0 0 4-4V2.1"/></svg>
-                      Transfer
+                    <button class="quick-action-btn" onclick="renderTabContent('Statements')">
+                      <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                      Statements
                     </button>
                   </div>
                 </div>
@@ -7828,6 +8026,34 @@
                 }
               });
 
+              // Chase-standard greeting + last-login disclosure
+              (function () {
+                const g = document.getElementById("ntGreeting");
+                if (g) {
+                  const h = new Date().getHours();
+                  const part = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+                  let name = "";
+                  try {
+                    name = sessionStorage.getItem("nt_user_name")
+                      || localStorage.getItem("nt_user_name")
+                      || (window.NTApi && window.NTApi.state && window.NTApi.state.user && window.NTApi.state.user.firstName)
+                      || "Alexander";
+                  } catch (e) { name = "Alexander"; }
+                  g.textContent = part + ", " + name;
+                }
+                const ll = document.getElementById("ntLastLogin");
+                if (ll) {
+                  const now = new Date();
+                  const stamp = now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+                    + " at " + now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+                  try {
+                    const prev = sessionStorage.getItem("nt_prev_login");
+                    ll.textContent = prev || stamp;
+                    if (!prev) sessionStorage.setItem("nt_prev_login", stamp);
+                  } catch (e) { ll.textContent = stamp; }
+                }
+              })();
+
               // Default: Checking account chart + activity (pie on mobile, bar on desktop)
               switchActiveSubAccount("checking", false, { force: true });
               if (typeof initSubAccountCarousel === "function")
@@ -7847,33 +8073,38 @@
                     
                     <div style="margin-bottom: 20px;">
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">From Account</label>
-                      <select id="transferFromAccount" class="modal-input" style="background: #f8fafc;" required onchange="updateInternalTransferPreview()">
+                      <select id="transferFromAccount" class="modal-input" style="background: #f8fafc;" required onchange="markInternalDirty('from'); updateInternalTransferPreview()">
                         <option value="" disabled selected>Select funding source...</option>
-                        <option value="checking">Checking Account (Avail: $318,750.00)</option>
+                        <option value="checking">Checking Account (Avail: $103,931.45)</option>
                         <option value="savings">Savings Vault (Avail: $35,180.38)</option>
-                        <option value="credit">NT Premium Credit Line (Avail: $200.00)</option>
+                        <option value="credit">NT Premium Credit Line (Avail: $14,800.00)</option>
                         <option value="invest">Managed Portfolio (Avail: $169,400,000.00)</option>
                       </select>
+                      <p id="internalFromError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 6px 0 0 0;"></p>
                     </div>
 
                     <div style="margin-bottom: 20px;">
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">To Account</label>
-                      <select id="transferToAccount" class="modal-input" style="background: #f8fafc;" required onchange="updateInternalTransferPreview()">
+                      <select id="transferToAccount" class="modal-input" style="background: #f8fafc;" required onchange="markInternalDirty('to'); updateInternalTransferPreview()">
                         <option value="" disabled selected>Select destination...</option>
                         <option value="checking">Checking Account</option>
                         <option value="savings">Savings Vault</option>
                         <option value="credit">NT Premium Credit Line</option>
                         <option value="invest">Managed Portfolio</option>
                       </select>
+                      <p id="internalToError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 6px 0 0 0;"></p>
                     </div>
 
                     <div class="transfer-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
                       <div>
-                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Amount (USD)</label>
+                                                <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Amount (USD)
+                          <span class="info-icon" data-tippy-content="The amount of money to transfer. This must be a positive number."></span>
+                        </label>
                         <div style="position: relative;">
                           <span style="position: absolute; left: 14px; top: 12px; color: #94a3b8; font-weight: 600;">$</span>
-                          <input type="number" id="transferAmount" class="modal-input" style="padding-left: 28px;" placeholder="0.00" min="0.01" step="0.01" required oninput="updateInternalTransferPreview()">
+                          <input type="number" id="transferAmount" class="modal-input" style="padding-left: 28px;" placeholder="0.00" min="0.01" step="0.01" required oninput="markInternalDirty('amount'); updateInternalTransferPreview()">
                         </div>
+                        <p id="internalAmountError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 6px 0 0 0;"></p>
                         <p id="internalLimitHint" class="field-hint">Daily internal transfer limit: $250,000.00 remaining today.</p>
                       </div>
                       <div>
@@ -7888,7 +8119,12 @@
                     </div>
 
                     <div style="margin-bottom: 24px;">
-                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Memo / Reference (Optional)</label>
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Memo / Reference (Optional)
+                        <span class="tooltip">
+                          <i class="info-icon">?</i>
+                          <span class="tooltiptext">A short description for the transfer.</span>
+                        </span>
+                      </label>
                       <input type="text" id="transferMemo" class="modal-input" placeholder="e.g. Monthly reserve sweep">
                     </div>
 
@@ -7896,7 +8132,7 @@
                       <!-- Dynamic warning text -->
                     </div>
 
-                    <button type="submit" class="dropdown-btn" style="width: 100%; justify-content: center; background-color: var(--primary); color: white; border-color: var(--primary); padding: 12px; font-size: 14px;">
+                    <button type="submit" id="internalTransferSubmitBtn" class="dropdown-btn" style="width: 100%; justify-content: center; background-color: var(--primary); color: white; border-color: var(--primary); padding: 12px; font-size: 14px;">
                       Initiate Transfer
                     </button>
                   </form>
@@ -7971,33 +8207,96 @@
 
                     <div style="margin-bottom: 20px;">
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Source Account</label>
-                      <select id="achSourceAccount" class="modal-input" style="background: #f8fafc;" required onchange="updateACHTransferPreview()">
+                      <select id="achSourceAccount" class="modal-input" style="background: #f8fafc;" required onchange="markAchDirty('src'); updateACHTransferPreview()">
                         <option value="" disabled selected>Select funding source...</option>
                         <option value="checking">Checking Account (Avail: $318,750.00)</option>
                         <option value="credit">NT Premium Credit Line (Avail: $200.00)</option>
                       </select>
+                      <p id="achSourceError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 6px 0 0 0;"></p>
                     </div>
 
                     <div style="margin-bottom: 20px;">
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">External Beneficiary</label>
-                      <select id="achBeneficiary" class="modal-input" style="background: #f8fafc;" required onchange="updateACHTransferPreview()">
+                      <select id="achBeneficiary" class="modal-input" style="background: #f8fafc;" required onchange="markAchDirty('ben'); fillAchBeneficiaryFromSelection()">
                         <option value="" disabled selected>Loading beneficiaries...</option>
                       </select>
+                      <p id="achBenError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 6px 0 0 0;"></p>
+                      <div id="achRecipientPanel" style="display: none; margin-top: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px;">
+                        <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Recipient Bank Details</div>
+                        <div class="transfer-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                          <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Recipient Name</label>
+                            <input type="text" id="achRecipientName" class="modal-input" placeholder="Full legal name" style="font-size: 13px; padding: 8px;" oninput="markAchDirty('recipient'); updateACHTransferPreview()">
+                          </div>
+                          <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Account Number</label>
+                            <input type="text" id="achRecipientAccount" class="modal-input" placeholder="Recipient account no." style="font-size: 13px; padding: 8px;" oninput="markAchDirty('recipient'); updateACHTransferPreview()">
+                          </div>
+                          <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Routing Number (ABA)</label>
+                            <input type="text" id="achRoutingNumber" class="modal-input" placeholder="9-digit ABA" style="font-size: 13px; padding: 8px;" oninput="markAchDirty('recipient'); updateACHTransferPreview()">
+                          </div>
+                          <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Bank Name</label>
+                            <input type="text" id="achBankName" class="modal-input" placeholder="Receiving bank" style="font-size: 13px; padding: 8px;" oninput="markAchDirty('recipient'); updateACHTransferPreview()">
+                          </div>
+                        </div>
+                        <div>
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Bank Address</label>
+                          <input type="text" id="achBankAddress" class="modal-input" placeholder="Street, City, State, ZIP / Country" style="font-size: 13px; padding: 8px;" oninput="markAchDirty('recipient'); updateACHTransferPreview()">
+                        </div>
+                        <p id="achRecipientError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 8px 0 0 0;"></p>
+                      </div>
                     </div>
 
                     <div class="transfer-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
                       <div>
-                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Amount (USD)</label>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Amount (USD)
+                          <span class="info-icon" data-tippy-content="The amount for the ACH transfer. This must be a positive number."></span>
+                        </label>
                         <div style="position: relative;">
                           <span style="position: absolute; left: 14px; top: 12px; color: #94a3b8; font-weight: 600;">$</span>
-                          <input type="number" id="achAmount" class="modal-input" style="padding-left: 28px;" placeholder="0.00" min="0.01" step="0.01" required oninput="updateACHTransferPreview()">
+                          <input type="number" id="achAmount" class="modal-input" style="padding-left: 28px;" placeholder="0.00" min="0.01" step="0.01" required oninput="markAchDirty('amount'); updateACHTransferPreview()">
                         </div>
+                        <p id="achAmountError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 6px 0 0 0;"></p>
+                        <p id="achBenLimitHint" class="field-hint" style="display: none;"></p>
                         <p class="field-hint">ACH same-day cutoff: 2:45 PM CT · Standard settlement: 1–3 business days.</p>
                       </div>
                       <div>
-                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Effective Date</label>
-                        <input type="date" id="achEffectiveDate" class="modal-input" style="background: #f8fafc;" required onchange="updateACHTransferPreview()">
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Effective Date
+                          <span class="tooltip">
+                            <i class="info-icon">?</i>
+                            <span class="tooltiptext">The date the ACH transfer will be initiated. Cannot be in the past.</span>
+                          </span>
+                        </label>
+                        <input type="date" id="achEffectiveDate" class="modal-input" style="background: #f8fafc;" required onchange="markAchDirty('date'); updateACHTransferPreview()">
+                        <p id="achDateError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 6px 0 0 0;"></p>
                       </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px;">Delivery Speed</label>
+                      <div style="display: flex; gap: 16px;">
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
+                          <input type="radio" name="achDelivery" value="standard" checked onchange="updateACHTransferPreview()">
+                          Standard ACH (Free) <span style="color: #94a3b8;">· 1–3 business days</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; cursor: pointer;">
+                          <input type="radio" name="achDelivery" value="same_day" onchange="updateACHTransferPreview()">
+                          Same-Day ACH ($15.00 fee) <span style="color: #94a3b8;">· settle same day</span>
+                        </label>
+                      </div>
+                      <p class="field-hint" style="margin-top: 6px;">Same-day cut-off is 2:45 PM CT. Orders after cutoff settle next business day.</p>
+                    </div>
+
+                    <div id="achDebitAuthPanel" style="display: none; margin-bottom: 20px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px 16px;">
+                      <label style="display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #166534; cursor: pointer; line-height: 1.5;">
+                        <input type="checkbox" id="achAuthAck" onchange="markAchDirty('auth'); updateACHTransferPreview()" style="margin-top: 2px;">
+                        <span>
+                          <strong>ACH Debit Authorization</strong> — I authorize Northern Trust to initiate an ACH debit from the external account to the source account above, pursuant to the authorization on file. I understand debits are governed by NACHA Rules.
+                        </span>
+                      </label>
+                      <p id="achAuthError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 8px 0 0 0;">Authorization is required to initiate an ACH debit.</p>
                     </div>
 
                     <div class="transfer-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
@@ -8023,7 +8322,12 @@
                     </div>
 
                     <div style="margin-bottom: 24px;">
-                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Memo / Description</label>
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Memo / Description
+                        <span class="tooltip">
+                          <i class="info-icon">?</i>
+                          <span class="tooltiptext">A short description for the ACH transfer.</span>
+                        </span>
+                      </label>
                       <input type="text" id="achMemo" class="modal-input" placeholder="e.g. Vendor Payment INV-203">
                     </div>
 
@@ -8035,7 +8339,11 @@
                       </div>
                       <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                         <span>ACH Fee:</span>
-                        <strong>$0.00</strong>
+                        <strong id="achReviewFee">$0.00</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Total Debit:</span>
+                        <strong id="achReviewTotal">$0.00</strong>
                       </div>
                       <div style="display: flex; justify-content: space-between;">
                         <span>Daily ACH Limit Utilization:</span>
@@ -8047,10 +8355,30 @@
                       <!-- Dynamic warning text -->
                     </div>
 
-                    <button type="submit" class="dropdown-btn" style="width: 100%; justify-content: center; background-color: var(--primary); color: white; border-color: var(--primary); padding: 12px; font-size: 14px;">
-                      Submit ACH Transfer
+                    <button type="button" id="achSubmitBtn" class="dropdown-btn" style="width: 100%; justify-content: center; background-color: var(--primary); color: white; border-color: var(--primary); padding: 12px; font-size: 14px;" onclick="achReviewAndContinue()">
+                      Review &amp; Continue
                     </button>
                   </form>
+
+                  <!-- ACH Review & Confirm modal -->
+                  <div id="achReviewModal" class="modal-overlay">
+                    <div class="modal-sheet" style="max-width: 460px;">
+                      <div class="modal-header">
+                        <h4 class="modal-title">Review ACH Transfer</h4>
+                        <button class="modal-close-btn" onclick="closeBenModal('achReviewModal')">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                      </div>
+                      <div style="padding: 8px 4px 0 4px; font-size: 13px; color: #475569; line-height: 1.7;" id="achReviewSummary">
+                        <!-- Populated by JS -->
+                      </div>
+                      <div id="achReviewWarning" style="display: none; margin-top: 14px; padding: 12px 14px; border-radius: 8px; border: 1px solid #fde68a; background-color: #fffbeb; color: #92400e; font-size: 12.5px; line-height: 1.5;"></div>
+                      <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end;">
+                        <button type="button" class="dropdown-btn" onclick="closeBenModal('achReviewModal')" style="padding: 8px 16px;">Edit</button>
+                        <button type="button" class="dropdown-btn" onclick="achConfirmAndSubmit()" style="padding: 8px 24px; background-color: #16a34a; color: white; border-color: #16a34a; font-weight: 700;">Confirm &amp; Submit</button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Right Column: Previews and History -->
@@ -8138,31 +8466,66 @@
 
                     <div style="margin-bottom: 20px;">
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Funding Source</label>
-                      <select id="wireSourceAccount" class="modal-input" style="background: #f8fafc;" required onchange="updateWireTransferPreview()">
+                      <select id="wireSourceAccount" class="modal-input" style="background: #f8fafc;" required onchange="markWireDirty('src'); updateWireTransferPreview()">
                         <option value="checking" selected>Checking Account (Avail: $318,750.00)</option>
                         <option value="credit">Apex Credit Line (Avail: $200.00)</option>
                       </select>
+                      <p id="wireSourceError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 6px 0 0 0;"></p>
                     </div>
 
                     <div style="margin-bottom: 20px;">
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">External Beneficiary</label>
-                      <select id="wireBeneficiary" class="modal-input" style="background: #f8fafc;" required onchange="fillWireBeneficiaryFromSelection()">
+                      <select id="wireBeneficiary" class="modal-input" style="background: #f8fafc;" required onchange="markWireDirty('ben'); fillWireBeneficiaryFromSelection()">
                         <option value="" disabled selected>Loading beneficiaries...</option>
                       </select>
+                      <p id="wireBenError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 6px 0 0 0;"></p>
+                      <div id="wireRecipientPanel" style="display: none; margin-top: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px;">
+                        <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">Recipient &amp; Bank Details</div>
+                        <div class="transfer-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                          <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Recipient Name</label>
+                            <input type="text" id="wireRecipientName" class="modal-input" placeholder="Full legal name" style="font-size: 13px; padding: 8px;" oninput="markWireDirty('recipient'); updateWireTransferPreview()">
+                          </div>
+                          <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Account Number</label>
+                            <input type="text" id="wireRecipientAccount" class="modal-input" placeholder="Recipient account no." style="font-size: 13px; padding: 8px;" oninput="markWireDirty('recipient'); updateWireTransferPreview()">
+                          </div>
+                          <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Bank Name</label>
+                            <input type="text" id="wireBankName" class="modal-input" placeholder="Receiving bank" style="font-size: 13px; padding: 8px;" oninput="markWireDirty('recipient'); updateWireTransferPreview()">
+                          </div>
+                          <div>
+                            <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Bank Address</label>
+                            <input type="text" id="wireBankAddress" class="modal-input" placeholder="Street, City, State, ZIP / Country" style="font-size: 13px; padding: 8px;" oninput="markWireDirty('recipient'); updateWireTransferPreview()">
+                          </div>
+                        </div>
+                        <p id="wireRecipientError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 8px 0 0 0;"></p>
+                      </div>
                     </div>
 
                     <!-- Dynamic Domestic Fields -->
                     <div id="wireDomesticFields" style="display: block; border-left: 2px solid #e2e8f0; padding-left: 12px; margin-bottom: 20px;">
                       <div class="transfer-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 12px;">
                         <div>
-                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Routing Number (ABA)</label>
-                          <input type="text" id="wireDomesticRouting" class="modal-input" placeholder="9-digit ABA" style="font-size: 13px; padding: 8px;">
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Routing Number (ABA)
+                            <span class="tooltip">
+                              <i class="info-icon">?</i>
+                              <span class="tooltiptext">The 9-digit routing number for domestic wire transfers.</span>
+                            </span>
+                          </label>
+                          <input type="text" id="wireDomesticRouting" class="modal-input" placeholder="9-digit ABA" style="font-size: 13px; padding: 8px;" oninput="markWireDirty('routing'); updateWireTransferPreview()">
                         </div>
                         <div>
-                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Account Number</label>
-                          <input type="text" id="wireDomesticAccount" class="modal-input" placeholder="Account No." style="font-size: 13px; padding: 8px;">
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Account Number
+                            <span class="tooltip">
+                              <i class="info-icon">?</i>
+                              <span class="tooltiptext">The account number for domestic wire transfers.</span>
+                            </span>
+                          </label>
+                          <input type="text" id="wireDomesticAccount" class="modal-input" placeholder="Account No." style="font-size: 13px; padding: 8px;" oninput="markWireDirty('account'); updateWireTransferPreview()">
                         </div>
                       </div>
+                      <p id="wireDomesticError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 0 0 8px 0;"></p>
                     </div>
 
                     <!-- Dynamic SWIFT Fields -->
@@ -8178,38 +8541,57 @@
                           </select>
                         </div>
                         <div>
-                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">SWIFT / BIC Code</label>
-                          <input type="text" id="wireSwiftBic" class="modal-input" placeholder="8 or 11 chars" style="font-size: 13px; padding: 8px; text-transform: uppercase;">
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">SWIFT / BIC Code
+                            <span class="tooltip">
+                              <i class="info-icon">?</i>
+                              <span class="tooltiptext">The 8 or 11 character code that identifies a specific bank in an international transaction.</span>
+                            </span>
+                          </label>
+                          <input type="text" id="wireSwiftBic" class="modal-input" placeholder="8 or 11 chars" style="font-size: 13px; padding: 8px; text-transform: uppercase;" oninput="markWireDirty('bic'); updateWireTransferPreview()">
                         </div>
                       </div>
                       <div>
-                        <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">IBAN</label>
-                        <input type="text" id="wireSwiftIban" class="modal-input" placeholder="International Bank Account Number" style="font-size: 13px; padding: 8px; text-transform: uppercase;">
+                        <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">IBAN
+                          <span class="tooltip">
+                            <i class="info-icon">?</i>
+                            <span class="tooltiptext">The International Bank Account Number used to identify a specific bank account for international transfers.</span>
+                          </span>
+                        </label>
+                        <input type="text" id="wireSwiftIban" class="modal-input" placeholder="International Bank Account Number" style="font-size: 13px; padding: 8px; text-transform: uppercase;" oninput="markWireDirty('iban'); updateWireTransferPreview()">
                       </div>
+                      <p id="wireSwiftError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 8px 0 0 0;"></p>
                     </div>
 
                     <div class="transfer-form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
                       <div>
-                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Transfer Amount</label>
+                        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Transfer Amount
+                          <span class="info-icon" data-tippy-content="The amount for the wire transfer. This must be a positive number."></span>
+                        </label>
                         <div style="position: relative;">
                           <span style="position: absolute; left: 14px; top: 12px; color: #94a3b8; font-weight: 600;" id="wireAmountCurrencySymbol">$</span>
-                          <input type="number" id="wireAmount" class="modal-input" style="padding-left: 28px;" placeholder="0.00" min="0.01" step="0.01" required oninput="updateWireTransferPreview()">
+                          <input type="number" id="wireAmount" class="modal-input" style="padding-left: 28px;" placeholder="0.00" min="0.01" step="0.01" required oninput="markWireDirty('amount'); updateWireTransferPreview()">
                         </div>
+                        <p id="wireAmountError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: 6px 0 0 0;"></p>
                         <p class="field-hint">Transfers of $25,000 or more require secondary approver release.</p>
                       </div>
                       <div>
                         <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Priority Level</label>
-                        <select id="wirePriority" class="modal-input" style="background: #f8fafc;" required>
+                        <select id="wirePriority" class="modal-input" style="background: #f8fafc;" required onchange="markWireDirty('priority'); updateWireTransferPreview()">
                           <option value="Standard">Standard Wire</option>
                           <option value="SameDay">Same-Day Priority</option>
-                          <option value="Urgent">Urgent Treasury Wire</option>
+                          <option value="Urgent">Urgent Treasury Wire (+$15.00)</option>
                         </select>
                       </div>
                     </div>
 
                     <div style="margin-bottom: 24px;">
-                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Transfer Purpose</label>
-                      <input type="text" id="wireMemo" class="modal-input" placeholder="e.g. Asset Acquisition">
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Transfer Purpose
+                        <span class="tooltip">
+                          <i class="info-icon">?</i>
+                          <span class="tooltiptext">A short description of the purpose of the wire transfer.</span>
+                        </span>
+                      </label>
+                      <input type="text" id="wireMemo" class="modal-input" placeholder="e.g. Asset Acquisition" oninput="markWireDirty('memo'); updateWireTransferPreview()">
                     </div>
 
                     <!-- Review Transfer Section -->
@@ -8235,6 +8617,11 @@
                         <strong style="color: #16a34a;">Pre-Screening Cleared</strong>
                       </div>
 
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span>Expected Settlement:</span>
+                        <strong id="wireReviewSettlement">-</strong>
+                      </div>
+
                       <div style="display: flex; justify-content: space-between; border-top: 1px solid #cbd5e1; padding-top: 8px; margin-top: 8px;">
                         <span>Total USD Liquidity Deduction:</span>
                         <strong id="wireReviewTotal" style="color: #0f172a; font-size: 14px;">$0.00</strong>
@@ -8250,15 +8637,36 @@
                     </div>
 
                     <label style="display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: #475569; margin-bottom: 20px;">
-                      <input type="checkbox" id="wireAmlAck" required style="margin-top: 2px;">
+                      <input type="checkbox" id="wireAmlAck" required style="margin-top: 2px;" onchange="markWireDirty('aml'); updateWireTransferPreview()">
                       I confirm this transfer complies with applicable AML and OFAC requirements and authorize Northern Trust to release the wire on my behalf. Wires are final once submitted.
                     </label>
+                    <p id="wireAmlError" style="display: none; color: #dc2626; font-size: 12px; font-weight: 600; margin: -10px 0 16px 0;">You must confirm AML / OFAC compliance before dispatching the wire.</p>
 
-                    <button type="submit" class="dropdown-btn" style="width: 100%; justify-content: center; background-color: var(--primary); color: white; border-color: var(--primary); padding: 12px; font-size: 14px;">
-                      Authorize Wire Dispatch
+                    <button type="button" id="wireSubmitBtn" class="dropdown-btn" style="width: 100%; justify-content: center; background-color: var(--primary); color: white; border-color: var(--primary); padding: 12px; font-size: 14px;" onclick="wireReviewAndContinue()">
+                      Review &amp; Continue
                     </button>
                     <p class="regulatory-footnote">Domestic Fedwire cut-off: 5:00 PM CT (banking days). International SWIFT cut-off varies by corridor. FX rates shown are indicative until the wire is released.</p>
                   </form>
+
+                  <!-- Wire Review & Confirm modal -->
+                  <div id="wireReviewModal" class="modal-overlay">
+                    <div class="modal-sheet" style="max-width: 480px;">
+                      <div class="modal-header">
+                        <h4 class="modal-title">Review Wire Transfer</h4>
+                        <button class="modal-close-btn" onclick="closeBenModal('wireReviewModal')">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        </button>
+                      </div>
+                      <div style="padding: 8px 4px 0 4px; font-size: 13px; color: #475569; line-height: 1.7;" id="wireReviewSummary">
+                        <!-- Populated by JS -->
+                      </div>
+                      <div id="wireReviewWarning" style="display: none; margin-top: 14px; padding: 12px 14px; border-radius: 8px; border: 1px solid #fde68a; background-color: #fffbeb; color: #92400e; font-size: 12.5px; line-height: 1.5;"></div>
+                      <div style="display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end;">
+                        <button type="button" class="dropdown-btn" onclick="closeBenModal('wireReviewModal')" style="padding: 8px 16px;">Edit</button>
+                        <button type="button" class="dropdown-btn" onclick="wireConfirmAndSubmit()" style="padding: 8px 24px; background-color: #16a34a; color: white; border-color: #16a34a; font-weight: 700;">Confirm &amp; Dispatch</button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Right Column: Previews and History -->
@@ -8370,10 +8778,31 @@
 
                     <div style="margin-bottom: 20px;">
                       <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Global Beneficiary</label>
-                      <select id="intlBeneficiary" class="modal-input" style="background: #f8fafc;" required onchange="updateIntlTransferPreview()">
+                      <select id="intlBeneficiary" class="modal-input" style="background: #f8fafc;" required onchange="fillIntlBeneficiaryFromSelection(); updateIntlTransferPreview()">
                         <option value="" disabled selected>Loading beneficiaries...</option>
                       </select>
                     </div>
+
+                    <div style="border-left: 2px solid #8b5cf6; padding-left: 12px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 12px;">
+                      <div>
+                        <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Recipient Full Name
+                          <span class="tooltip">
+                            <i class="info-icon">?</i>
+                            <span class="tooltiptext">Full legal name of the person or entity receiving the funds.</span>
+                          </span>
+                        </label>
+                        <input type="text" id="intlRecipientName" class="modal-input" placeholder="Full legal name" style="font-size: 13px; padding: 8px;" required>
+                      </div>
+                      <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px;">
+                        <div>
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Receiving Bank</label>
+                          <input type="text" id="intlBankName" class="modal-input" placeholder="Bank name" style="font-size: 13px; padding: 8px;">
+                        </div>
+                        <div>
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Bank Address</label>
+                          <input type="text" id="intlBankAddress" class="modal-input" placeholder="Street, City, Country" style="font-size: 13px; padding: 8px;">
+                        </div>
+                      </div>
 
                     <div style="border-left: 2px solid #8b5cf6; padding-left: 12px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 12px;">
                       <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px;">
@@ -8391,14 +8820,24 @@
                           </select>
                         </div>
                         <div>
-                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">IBAN</label>
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">IBAN
+                            <span class="tooltip">
+                              <i class="info-icon">?</i>
+                              <span class="tooltiptext">The International Bank Account Number for the recipient's account.</span>
+                            </span>
+                          </label>
                           <input type="text" id="intlIban" class="modal-input" placeholder="International Bank Account No." style="font-size: 13px; padding: 8px; text-transform: uppercase;">
                         </div>
                       </div>
                       
                       <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 12px;">
                         <div>
-                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">SWIFT / BIC Code</label>
+                          <label style="display: block; font-size: 11px; font-weight: 600; color: #64748b; margin-bottom: 4px;">SWIFT / BIC Code
+                            <span class="tooltip">
+                              <i class="info-icon">?</i>
+                              <span class="tooltiptext">The 8-11 character SWIFT or BIC code for the recipient's bank.</span>
+                            </span>
+                          </label>
                           <input type="text" id="intlSwiftBic" class="modal-input" placeholder="8-11 Characters" style="font-size: 13px; padding: 8px; text-transform: uppercase;">
                         </div>
                         <div>
@@ -8409,7 +8848,12 @@
                     </div>
 
                     <div style="margin-bottom: 24px;">
-                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Transfer Amount (in Recipient Currency)</label>
+                      <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Transfer Amount (in Recipient Currency)
+                        <span class="tooltip">
+                          <i class="info-icon">?</i>
+                          <span class="tooltiptext">The amount to be received by the beneficiary in their local currency.</span>
+                        </span>
+                      </label>
                       <div style="position: relative;">
                         <span style="position: absolute; left: 14px; top: 12px; color: #94a3b8; font-weight: 600;" id="intlAmountCurrencySymbol">€</span>
                         <input type="number" id="intlAmount" class="modal-input" style="padding-left: 28px; border: 1px solid #3b82f6;" placeholder="0.00" min="0.01" step="0.01" required oninput="updateIntlTransferPreview()">
@@ -8927,7 +9371,9 @@
                 
                 <form id="formAddBen" class="modal-sheet-scroll" onsubmit="handleFormAddBen(event)">
                   <div class="modal-form-group">
-                    <label class="modal-label">Display Name</label>
+                    <label class="modal-label">Display Name
+                      <span class="info-icon" data-tippy-content="A friendly name to identify this beneficiary."></span>
+                    </label>
                     <input type="text" id="addBenName" class="modal-input" placeholder="e.g. Acme Holdings Escrow Account" required>
                   </div>
                   
@@ -8942,46 +9388,83 @@
                   </div>
 
                   <div class="modal-form-group">
-                    <label class="modal-label">Relationship / Business Purpose</label>
+                    <label class="modal-label">Relationship / Business Purpose
+                      <span class="info-icon" data-tippy-content="The business relationship or purpose of this beneficiary."></span>
+                    </label>
                     <input type="text" id="addBenRel" class="modal-input" placeholder="e.g. Legal reserve sweep" required>
                   </div>
 
                   <!-- Dynamic Sub-Forms depending on Type -->
                   <div id="subFormBank" style="display: block; border-top: 1px dashed #e2e8f0; padding-top: 14px; margin-top: 14px;">
                     <div class="modal-form-group">
-                      <label class="modal-label">Bank Name</label>
+                      <label class="modal-label">Bank Name
+                        <span class="tooltip">
+                          <i class="info-icon">?</i>
+                          <span class="tooltiptext">The name of the beneficiary's bank.</span>
+                        </span>
+                      </label>
                       <input type="text" id="addBankName" class="modal-input" placeholder="e.g. JPMorgan Chase Bank">
                     </div>
                     <div class="ben-form-grid">
                       <div class="modal-form-group">
-                        <label class="modal-label">Account Number</label>
+                        <label class="modal-label">Account Number
+                          <span class="tooltip">
+                            <i class="info-icon">?</i>
+                            <span class="tooltiptext">The beneficiary's bank account number.</span>
+                          </span>
+                        </label>
                         <input type="text" id="addBankAccount" class="modal-input" placeholder="e.g. 1029837490">
                       </div>
                       <div class="modal-form-group">
-                        <label class="modal-label">Routing / SWIFT</label>
+                        <label class="modal-label">Routing / SWIFT
+                          <span class="tooltip">
+                            <i class="info-icon">?</i>
+                            <span class="tooltiptext">The routing number (for US banks) or SWIFT/BIC code (for non-US banks).</span>
+                          </span>
+                        </label>
                         <input type="text" id="addBankRouting" class="modal-input" placeholder="e.g. CHASUS33">
                       </div>
                     </div>
                     <div class="modal-form-group">
-                      <label class="modal-label">Destination Country</label>
+                      <label class="modal-label">Destination Country
+                        <span class="tooltip">
+                          <i class="info-icon">?</i>
+                          <span class="tooltiptext">The country where the beneficiary's bank is located.</span>
+                        </span>
+                      </label>
                       <input type="text" id="addBankCountry" class="modal-input" placeholder="e.g. United States">
                     </div>
                   </div>
 
                   <div id="subFormInternal" style="display: none; border-top: 1px dashed #e2e8f0; padding-top: 14px; margin-top: 14px;">
                     <div class="modal-form-group">
-                      <label class="modal-label">Northern Trust User ID</label>
+                      <label class="modal-label">Northern Trust User ID
+                        <span class="tooltip">
+                          <i class="info-icon">?</i>
+                          <span class="tooltiptext">The recipient's Northern Trust User ID for internal transfers.</span>
+                        </span>
+                      </label>
                       <input type="text" id="addInternalUserId" class="modal-input" placeholder="e.g. USR-90214">
                     </div>
                     <div class="modal-form-group">
-                      <label class="modal-label">Registered Email / Phone</label>
+                      <label class="modal-label">Registered Email / Phone
+                        <span class="tooltip">
+                          <i class="info-icon">?</i>
+                          <span class="tooltiptext">The recipient's email or phone number registered with their Northern Trust account.</span>
+                        </span>
+                      </label>
                       <input type="text" id="addInternalContact" class="modal-input" placeholder="e.g. recipient@northerntrust.com">
                     </div>
                   </div>
 
                   <div id="subFormCredit" style="display: none; border-top: 1px dashed #e2e8f0; padding-top: 14px; margin-top: 14px;">
                     <div class="modal-form-group">
-                      <label class="modal-label">Credit Account Reference ID</label>
+                      <label class="modal-label">Credit Account Reference ID
+                        <span class="tooltip">
+                          <i class="info-icon">?</i>
+                          <span class="tooltiptext">The reference ID for the recipient's credit account.</span>
+                        </span>
+                      </label>
                       <input type="text" id="addCreditId" class="modal-input" placeholder="e.g. NT-CRD-8902">
                     </div>
                     <div class="modal-form-group">
@@ -9104,7 +9587,7 @@
                 </p>
                 
                 <div style="font-weight: 700; font-size: 15px; color: #4f46e5; text-align: center; margin-bottom: 12px; letter-spacing: 0.5px;">
-                  <span id="mockOtpDemoBlock">Verification code sent to your registered device. <span id="mockOtpValue" style="font-weight:700;color:#004225;"></span></span>
+                  <span id="mockOtpDemoBlock">Verification code sent to your registered device. <span id="mockOtpValue" style="font-weight:700;color:#115740;"></span></span>
                 </div>
                 
                 <div class="otp-digits-container">
@@ -9303,7 +9786,15 @@
                 </div>
                 <button type="button" class="dropdown-btn" style="padding: 8px 16px; font-size: 12px; font-weight: 600;" onclick="NTNotifications.markAllRead()">Mark all as read</button>
               </div>
-              <div id="notificationsList" class="notif-center__list"></div>
+
+            </div>
+
+            <!-- Regulatory & trust disclosures (banking standard) -->
+            <div class="nt-fdic-strip">
+              <span>© 2026 Northern Trust Corporation</span>
+              <span>Member FDIC</span>
+              <span>Equal Housing Lender &#174;</span>
+              <span>Routing (ABA) 021000021 · SWIFT / BIC NORUS33XXX</span>
             </div>
           `;
               if (window.NTNotifications) window.NTNotifications.renderCenter();
@@ -9318,6 +9809,7 @@
                 navLoadingOverlay.style.display = "none";
               }, 300);
             }
+            ensureSharedModals();
           }
 
           // Trigger data hydration
@@ -10984,6 +11476,9 @@
           document.getElementById("sendMoneyAmount").value = "";
           document.getElementById("sendWarningBanner").style.display = "none";
 
+          window.refreshSourceAccountDropdowns &&
+            window.refreshSourceAccountDropdowns();
+
           document.getElementById("modalSendMoney").classList.add("active");
         };
 
@@ -11217,14 +11712,42 @@
       // =========================================
       const achTransferHistory = [];
 
+      window.fillAchBeneficiaryFromSelection = function () {
+        const panel = document.getElementById("achRecipientPanel");
+        const benId = document.getElementById("achBeneficiary")?.value;
+        const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
+        const setVal = (id, v) => {
+          const el = document.getElementById(id);
+          if (el) el.value = v || "";
+        };
+        if (!ben || ben.type !== "BANK" || !ben.destinationDetails) {
+          if (panel) panel.style.display = "none";
+          if (typeof window.updateACHTransferPreview === "function")
+            window.updateACHTransferPreview();
+          return;
+        }
+        const d = ben.destinationDetails;
+        setVal("achRecipientName", ben.displayName || "");
+        setVal("achRecipientAccount", (d.accountNumber || "").replace(/[^0-9]/g, ""));
+        setVal("achRoutingNumber", (d.routingOrSwift || "").replace(/[^0-9]/g, ""));
+        setVal("achBankName", d.bankName || "");
+        setVal("achBankAddress", d.bankAddress || "");
+        if (panel) panel.style.display = "block";
+        if (typeof window.updateACHTransferPreview === "function")
+          window.updateACHTransferPreview();
+      };
+
       window.initACHTransferView = function () {
-        // Populate beneficiaries
+        // Populate beneficiaries (ACTIVE external accounts only)
         const benSelect = document.getElementById("achBeneficiary");
         if (benSelect) {
           benSelect.innerHTML =
             '<option value="" disabled selected>Select beneficiary...</option>';
           const externalBens = beneficiariesMock.filter(
-            (b) => b.type === "BANK",
+            (b) =>
+              b.type === "BANK" &&
+              b.status !== "BLOCKED" &&
+              b.status !== "PENDING_REVIEW",
           );
           externalBens.forEach((b) => {
             const opt = document.createElement("option");
@@ -11232,8 +11755,360 @@
             opt.text = `${b.displayName} - ${b.destinationDetails.bankName} (...${b.destinationDetails.accountNumber.slice(-4)})`;
             benSelect.appendChild(opt);
           });
+          const benError = document.getElementById("achBenError");
+          if (
+            benError &&
+            externalBens.length !==
+              beneficiariesMock.filter((b) => b.type === "BANK").length
+          ) {
+            benError.style.display = "block";
+            benError.style.color = "#b45309";
+            benError.textContent =
+              "Blocked or pending-review beneficiaries are not available for ACH.";
+          }
         }
+        // Default effective date to today and prevent past dates
+        const effEl = document.getElementById("achEffectiveDate");
+        if (effEl) {
+          const today = new Date();
+          const iso =
+            today.getFullYear() +
+            "-" +
+            String(today.getMonth() + 1).padStart(2, "0") +
+            "-" +
+            String(today.getDate()).padStart(2, "0");
+          effEl.min = iso;
+          if (!effEl.value) effEl.value = iso;
+        }
+        window._achFormDirty = {};
+        window.refreshSourceAccountDropdowns &&
+          window.refreshSourceAccountDropdowns();
         renderACHTransferHistory();
+        window.updateACHTransferPreview && window.updateACHTransferPreview();
+      };
+
+      window._achFormDirty = {};
+      window.markAchDirty = function (field) {
+        window._achFormDirty[field] = true;
+        if (typeof window.validateACHTransferForm === "function") {
+          window.validateACHTransferForm();
+        }
+      };
+
+      window.achFeeFor = function (sameDay) {
+        return sameDay ? 15.0 : 0.0;
+      };
+
+      window.computeAchSettlementDate = function (effectiveIso, sameDay) {
+        if (!effectiveIso) return "-";
+        const d = new Date(effectiveIso + "T00:00:00");
+        if (isNaN(d.getTime())) return "-";
+        if (!sameDay) d.setDate(d.getDate() + 1);
+        const skipWeekend = () => {
+          const day = d.getDay();
+          if (day === 0) d.setDate(d.getDate() + 1);
+          else if (day === 6) d.setDate(d.getDate() + 2);
+        };
+        skipWeekend();
+        return d.toISOString().split("T")[0];
+      };
+
+      window.validateACHTransferForm = function (opts) {
+        opts = opts || {};
+        const src = document.getElementById("achSourceAccount")?.value || "";
+        const benId = document.getElementById("achBeneficiary")?.value || "";
+        const amtStr = document.getElementById("achAmount")?.value || "";
+        const amt = parseFloat(amtStr);
+        const eff = document.getElementById("achEffectiveDate")?.value || "";
+        const sameDay =
+          document.querySelector('input[name="achDelivery"]:checked')?.value ===
+          "same_day";
+        const direction =
+          document.querySelector('input[name="achDirection"]:checked')?.value ||
+          "credit";
+        const fee = window.achFeeFor(sameDay);
+        const ben = beneficiariesMock.find(
+          (b) => b.beneficiaryId === benId,
+        );
+        const balance = window.ntBalanceEntry(src);
+
+        const dirty = (f) =>
+          window._achFormDirty[f] === true || opts.force === true;
+        const setError = (id, msg) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (msg) {
+            el.textContent = msg;
+            el.style.display = "block";
+          } else el.style.display = "none";
+        };
+        const fmtAmt = (v) =>
+          "$" +
+          Number(v).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+
+        let valid = true;
+
+        if (!src) {
+          if (dirty("src"))
+            setError("achSourceError", "Please select a funding source.");
+          valid = false;
+        } else setError("achSourceError", null);
+
+        if (!benId) {
+          if (dirty("ben"))
+            setError("achBenError", "Please select a beneficiary.");
+          valid = false;
+        } else setError("achBenError", null);
+
+        if (benId && ben && ben.type === "BANK" && ben.destinationDetails) {
+          const rName =
+            document.getElementById("achRecipientName")?.value.trim() || "";
+          const rAcct =
+            document.getElementById("achRecipientAccount")?.value.trim() || "";
+          const rRouting = (
+            document.getElementById("achRoutingNumber")?.value || ""
+          ).replace(/\D/g, "");
+          const rBank = document.getElementById("achBankName")?.value.trim() || "";
+          const rAddr =
+            document.getElementById("achBankAddress")?.value.trim() || "";
+          if (!rName || !rAcct || !rBank || !rAddr) {
+            if (dirty("recipient"))
+              setError(
+                "achRecipientError",
+                "Please complete recipient name, account number, bank name, and bank address.",
+              );
+            valid = false;
+          } else if (rRouting.length !== 9) {
+            if (dirty("recipient"))
+              setError(
+                "achRecipientError",
+                "Enter a valid 9-digit ABA routing number for the receiving bank.",
+              );
+            valid = false;
+          } else setError("achRecipientError", null);
+        }
+
+        if (!amtStr || isNaN(amt) || amt <= 0) {
+          if (dirty("amount"))
+            setError(
+              "achAmountError",
+              "Please enter an amount greater than $0.00.",
+            );
+          valid = false;
+        } else {
+          setError("achAmountError", null);
+          const limitHint = document.getElementById("achBenLimitHint");
+          if (limitHint) {
+            if (ben && ben.transferLimits) {
+              limitHint.style.display = "block";
+              limitHint.textContent =
+                "Single limit: " +
+                fmtAmt(ben.transferLimits.single) +
+                " · Daily limit: " +
+                fmtAmt(ben.transferLimits.daily);
+            } else limitHint.style.display = "none";
+          }
+          if (ben && ben.transferLimits) {
+            if (amt > ben.transferLimits.single) {
+              if (dirty("amount"))
+                setError(
+                  "achAmountError",
+                  "Amount exceeds the single-transfer limit (" +
+                    fmtAmt(ben.transferLimits.single) +
+                    ") for this beneficiary.",
+                );
+              valid = false;
+            } else if (amt > ben.transferLimits.daily) {
+              if (dirty("amount"))
+                setError(
+                  "achAmountError",
+                  "Amount exceeds the daily limit (" +
+                    fmtAmt(ben.transferLimits.daily) +
+                    ") for this beneficiary.",
+                );
+              valid = false;
+            }
+          }
+          if (balance && balance.limit && amt > balance.limit) {
+            if (dirty("amount"))
+              setError(
+                "achAmountError",
+                "Amount exceeds the daily ACH origination limit (" +
+                  fmtAmt(balance.limit) +
+                  ").",
+              );
+            valid = false;
+          }
+          if (src && balance && direction === "credit" && amt + fee > balance.val) {
+            if (dirty("amount"))
+              setError(
+                "achAmountError",
+                "Amount plus fee (" +
+                  fmtAmt(amt + fee) +
+                  ") exceeds available funds (" +
+                  fmtAmt(balance.val) +
+                  ").",
+              );
+            valid = false;
+          }
+        }
+
+        if (!eff) {
+          if (dirty("date"))
+            setError("achDateError", "Please choose an effective date.");
+          valid = false;
+        } else {
+          const today = new Date();
+          const todayIso =
+            today.getFullYear() +
+            "-" +
+            String(today.getMonth() + 1).padStart(2, "0") +
+            "-" +
+            String(today.getDate()).padStart(2, "0");
+          if (eff < todayIso) {
+            if (dirty("date"))
+              setError("achDateError", "Effective date cannot be in the past.");
+            valid = false;
+          } else setError("achDateError", null);
+        }
+
+        const isDebit = direction === "debit";
+        if (isDebit) {
+          const ack = document.getElementById("achAuthAck");
+          if (!ack || !ack.checked) {
+            if (dirty("auth"))
+              setError(
+                "achAuthError",
+                "Authorization is required to initiate an ACH debit.",
+              );
+            valid = false;
+          } else setError("achAuthError", null);
+        }
+
+        const btn = document.getElementById("achSubmitBtn");
+        if (btn) {
+          btn.style.opacity = valid ? "1" : "0.55";
+          btn.style.cursor = valid ? "pointer" : "not-allowed";
+          btn.setAttribute("aria-disabled", valid ? "false" : "true");
+        }
+        return valid;
+      };
+
+      window.achReviewAndContinue = function () {
+        if (!window.validateACHTransferForm({ force: true })) {
+          const firstInvalid = [
+            ["achSourceAccount", "achSourceError"],
+            ["achBeneficiary", "achBenError"],
+            ["achRecipientName", "achRecipientError"],
+            ["achAmount", "achAmountError"],
+            ["achEffectiveDate", "achDateError"],
+            ["achAuthAck", "achAuthError"],
+          ].find(([, errId]) => {
+            const el = document.getElementById(errId);
+            return el && el.style.display !== "none";
+          });
+          if (firstInvalid) {
+            const fieldEl = document.getElementById(firstInvalid[0]);
+            if (fieldEl) {
+              fieldEl.focus();
+              fieldEl.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+          }
+          return;
+        }
+        window.renderAchReviewSummary && window.renderAchReviewSummary();
+        document.getElementById("achReviewModal").classList.add("active");
+      };
+
+      window.achConfirmAndSubmit = function () {
+        closeBenModal("achReviewModal");
+        const form = document.getElementById("achTransferForm");
+        if (form && typeof form.requestSubmit === "function") {
+          form.requestSubmit();
+        } else {
+          window.handleACHTransferSubmit(new Event("submit"));
+        }
+      };
+
+      window.renderAchReviewSummary = function () {
+        const direction =
+          document.querySelector('input[name="achDirection"]:checked')?.value ||
+          "credit";
+        const sameDay =
+          document.querySelector('input[name="achDelivery"]:checked')?.value ===
+          "same_day";
+        const fee = window.achFeeFor(sameDay);
+        const src = document.getElementById("achSourceAccount")?.value || "";
+        const srcEntry = window.ntBalanceEntry(src);
+        const benId = document.getElementById("achBeneficiary")?.value || "";
+        const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
+        const amt = parseFloat(document.getElementById("achAmount")?.value) || 0;
+        const eff = document.getElementById("achEffectiveDate")?.value || "-";
+        const settlement = window.computeAchSettlementDate(eff, sameDay);
+        const sec = document.getElementById("achSecCode")?.value || "-";
+        const scheduling =
+          document.getElementById("achScheduling")?.value || "once";
+        const memo = document.getElementById("achMemo")?.value || "-";
+        const fmtAmt = (v) =>
+          "$" +
+          Number(v).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+        const total = direction === "credit" ? amt + fee : amt - fee;
+
+        const row = (label, value, strong) =>
+          `<div style="display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #eef2f7;">` +
+          `<span style="color: #64748b; font-weight: 500;">${label}</span>` +
+          `<strong>${value}</strong></div>`;
+
+        const details = ben && ben.destinationDetails ? ben.destinationDetails : {};
+        const rName =
+          document.getElementById("achRecipientName")?.value ||
+          (ben ? ben.displayName : "-");
+        const rAcct =
+          document.getElementById("achRecipientAccount")?.value || "";
+        const rBank = document.getElementById("achBankName")?.value || "";
+        const rAddr = document.getElementById("achBankAddress")?.value || "";
+        const destLine =
+          (rName || "-") +
+          (rBank ? " · " + rBank : "") +
+          (rAcct ? " (Acct: " + rAcct.slice(-4) + ")" : "");
+
+        document.getElementById("achReviewSummary").innerHTML =
+          row("Direction", direction === "credit" ? "ACH Credit (Push)" : "ACH Debit (Pull)", true) +
+          row("Recipient", destLine, true) +
+          (rAddr ? row("Bank Address", rAddr) : "") +
+          row("From Account", (srcEntry ? srcEntry.name : src) || "-") +
+          row("Amount", fmtAmt(amt), true) +
+          row("ACH Fee", fmtAmt(fee)) +
+          row("Total " + (direction === "credit" ? "Debit" : "Credit"), fmtAmt(total), true) +
+          row("Effective Date", eff) +
+          row("Expected Settlement", settlement, true) +
+          row("Delivery", sameDay ? "Same-Day ACH" : "Standard ACH") +
+          row("SEC Code", sec) +
+          row("Schedule", scheduling === "once" ? "One-time" : scheduling) +
+          (memo !== "-" ? row("Memo", memo) : "");
+
+        const warn = document.getElementById("achReviewWarning");
+        if (warn) {
+          if (amt > 25000) {
+            warn.style.display = "block";
+            warn.innerHTML =
+              "🛡️ <strong>Large transfer:</strong> ACH amounts above $25,000 are routed to treasury approval before release to the NACHA batch.";
+          } else if (direction === "debit") {
+            warn.style.display = "block";
+            warn.innerHTML =
+              "📄 <strong>Debit authorization</strong> on file with the external account holder is required by NACHA Rules.";
+          } else if (ben && ben.trustLevel === "New" && amt > 10000) {
+            warn.style.display = "block";
+            warn.innerHTML =
+              "🛡️ <strong>Security hold:</strong> This transfer requires OTP multi-factor verification.";
+          } else warn.style.display = "none";
+        }
       };
 
       window.updateACHTransferPreview = function () {
@@ -11248,25 +12123,47 @@
         const effectiveDateStr =
           document.getElementById("achEffectiveDate").value;
         const amt = parseFloat(amtStr) || 0;
+        const sameDay =
+          document.querySelector('input[name="achDelivery"]:checked')?.value ===
+          "same_day";
+        const fee = window.achFeeFor(sameDay);
+        const total = direction === "credit" ? amt + fee : amt - fee;
+
+        // Show/hide debit authorization panel
+        const authPanel = document.getElementById("achDebitAuthPanel");
+        if (authPanel) authPanel.style.display = direction === "debit" ? "block" : "none";
+
+        // Recipient details panel (editable fields)
+        const panel = document.getElementById("achRecipientPanel");
+        const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
+        if (panel) {
+          panel.style.display =
+            ben && ben.type === "BANK" && ben.destinationDetails
+              ? "block"
+              : "none";
+        }
 
         const warningBox = document.getElementById("achWarningBanner");
-        warningBox.style.display = "none";
+        if (warningBox) warningBox.style.display = "none";
 
         const balances = {
           checking: window.ntBalanceEntry("checking"),
           credit: window.ntBalanceEntry("credit"),
         };
 
-        // Date processing
-        let settlementStr = "-";
-        if (effectiveDateStr) {
-          const effDate = new Date(effectiveDateStr);
-          // Simulate NACHA T+1 / T+2 based on amount size
-          effDate.setDate(effDate.getDate() + (amt > 25000 ? 2 : 1));
-          settlementStr = effDate.toISOString().split("T")[0];
-        }
+        // Settlement date
         document.getElementById("achReviewSettlementDate").innerText =
-          settlementStr;
+          window.computeAchSettlementDate(effectiveDateStr, sameDay);
+
+        // Fee + total
+        const fmtAmt = (v) =>
+          "$" +
+          Number(v).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+        document.getElementById("achReviewFee").innerText = fmtAmt(fee);
+        document.getElementById("achReviewTotal").innerText = fmtAmt(total);
 
         if (src && balances[src]) {
           document.getElementById("achPreviewSourceLabel").innerText =
@@ -11279,18 +12176,20 @@
 
           let newBal = balances[src].val;
           if (direction === "credit") {
-            // Push out (reduce balance)
-            newBal = balances[src].val - amt;
-            if (amt > balances[src].val) {
+            // Push out (reduce balance) - include fee
+            newBal = balances[src].val - total;
+            if (total > balances[src].val) {
               warningBox.style.display = "block";
               warningBox.innerHTML =
-                "⚠️ <strong>Insufficient Liquidity:</strong> ACH Push exceeds available funds in " +
+                "⚠️ <strong>Insufficient Liquidity:</strong> ACH Push (" +
+                fmtAmt(total) +
+                ") exceeds available funds in " +
                 balances[src].name +
                 ".";
             }
           } else {
             // Pull in (increase balance)
-            newBal = balances[src].val + amt;
+            newBal = balances[src].val + total;
           }
 
           document.getElementById("achPreviewSourceNew").innerText =
@@ -11298,7 +12197,7 @@
             newBal.toLocaleString(undefined, { minimumFractionDigits: 2 });
 
           // Limit utilization
-          const util = ((amt / balances[src].limit) * 100).toFixed(2);
+          const util = ((total / balances[src].limit) * 100).toFixed(2);
           const limitEl = document.getElementById("achReviewLimit");
           limitEl.innerText = util + "%";
           if (util > 100) {
@@ -11318,13 +12217,16 @@
         }
 
         // Beneficiary Warnings
-        if (benId) {
-          const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
-          if (ben && ben.trustLevel === "New" && amt > 10000) {
+        if (benId && ben) {
+          if (ben.trustLevel === "New" && amt > 10000) {
             warningBox.style.display = "block";
             warningBox.innerHTML =
               "🛡️ <strong>Security Hold:</strong> Transfers over $10,000 to new beneficiaries require OTP validation.";
           }
+        }
+
+        if (typeof window.validateACHTransferForm === "function") {
+          window.validateACHTransferForm();
         }
       };
 
@@ -11344,24 +12246,24 @@
         const benId = document.getElementById("achBeneficiary").value;
         const amt = parseFloat(document.getElementById("achAmount").value) || 0;
         const sec = document.getElementById("achSecCode").value;
+        const effectiveDateStr =
+          document.getElementById("achEffectiveDate").value;
+        const sameDay =
+          document.querySelector('input[name="achDelivery"]:checked')?.value ===
+          "same_day";
+        const fee = window.achFeeFor(sameDay);
+        const scheduling = document.getElementById("achScheduling").value;
+        const authAck =
+          document.getElementById("achAuthAck") &&
+          document.getElementById("achAuthAck").checked;
         const settlementDate = document.getElementById(
           "achReviewSettlementDate",
         ).innerText;
+        const ref =
+          "ACH-" + String(Math.floor(100000 + Math.random() * 900000));
 
-        const balances = {
-          checking: window.ntBalanceEntry("checking"),
-          credit: window.ntBalanceEntry("credit"),
-        };
-
-        if (!src || !benId) return;
-        if (direction === "credit" && amt > balances[src].val) {
-          alert(
-            "Insufficient funds in the selected source account for ACH Credit.",
-          );
-          return;
-        }
-        if (amt > balances[src].limit) {
-          alert("Amount exceeds daily ACH origination limits.");
+        if (!window.validateACHTransferForm({ force: true })) {
+          window.achReviewAndContinue();
           return;
         }
 
@@ -11372,14 +12274,24 @@
           achTransferHistory.unshift({
             date: new Date().toISOString().split("T")[0],
             benName: ben.displayName,
+            recipient:
+              document.getElementById("achRecipientName")?.value ||
+              ben.displayName,
+            bank: document.getElementById("achBankName")?.value || "",
+            bankAddress:
+              document.getElementById("achBankAddress")?.value || "",
             sec: sec,
             amount: amt,
+            fee: fee,
             type: direction === "credit" ? "Push" : "Pull",
             status: "Pending NACHA Batch",
             settlement: settlementDate,
+            effective: effectiveDateStr,
+            ref: ref,
           });
 
           document.getElementById("achTransferForm").reset();
+          window._achFormDirty = {};
           updateACHTransferPreview();
           renderACHTransferHistory();
 
@@ -11388,15 +12300,17 @@
           document.getElementById("achStep2").style.color = "white";
           document.getElementById("achStep2Text").style.color = "#475569";
 
+          const total =
+            direction === "credit" ? amt + fee : amt - fee;
           showTransferSuccessPrompt(
-            `Successfully queued $${amt.toLocaleString()} transfer to NACHA batch processing. Expected Settlement: ${settlementDate}`,
+            `Successfully queued $${amt.toLocaleString()} ${direction === "credit" ? "credit" : "debit"} for ${effectiveDateStr}. Expected Settlement: ${settlementDate}. Reference: ${ref}`,
             {
               type: "ACH Transfer",
-              amount: amt,
+              amount: total,
               source: src.toUpperCase(),
               beneficiary: ben.displayName,
               status: "PENDING BATCH",
-              ref: "ACH-" + Math.floor(Math.random() * 100000),
+              ref: ref,
             },
           );
         };
@@ -11404,6 +12318,7 @@
         if (amt > 50000 || (ben && ben.trustLevel === "New" && amt > 10000)) {
           // Trigger OTP
           generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+          window.ensureSharedModals && window.ensureSharedModals();
           document.getElementById("mockOtpValue").innerText = generatedOTP;
           document.getElementById("otpErrorMsg").style.display = "none";
 
@@ -11479,12 +12394,22 @@
         const accountEl = document.getElementById("wireDomesticAccount");
         const bicEl = document.getElementById("wireSwiftBic");
         const ibanEl = document.getElementById("wireSwiftIban");
+        const panel = document.getElementById("wireRecipientPanel");
+        const setVal = (id, v) => {
+          const el = document.getElementById(id);
+          if (el) el.value = v || "";
+        };
 
         const clearFields = () => {
           if (routingEl) routingEl.value = "";
           if (accountEl) accountEl.value = "";
           if (bicEl) bicEl.value = "";
           if (ibanEl) ibanEl.value = "";
+          setVal("wireRecipientName", "");
+          setVal("wireRecipientAccount", "");
+          setVal("wireBankName", "");
+          setVal("wireBankAddress", "");
+          if (panel) panel.style.display = "none";
         };
 
         if (!benId) {
@@ -11529,7 +12454,11 @@
         }
 
         if (routingEl)
-          routingEl.value = isNineDigitAba ? abaDigits : isUS ? rs : "";
+          routingEl.value = isNineDigitAba
+            ? abaDigits
+            : isUS
+              ? "021000021"
+              : "";
         if (accountEl) accountEl.value = acct;
         if (bicEl)
           bicEl.value = looksLikeSwift
@@ -11539,7 +12468,42 @@
               : "";
         if (ibanEl) ibanEl.value = !isUS ? d.iban || acct : d.iban || "";
 
+        setVal("wireRecipientName", ben.displayName || "");
+        setVal("wireRecipientAccount", acct.replace(/[^0-9]/g, "") || acct);
+        setVal("wireBankName", d.bankName || "");
+        setVal("wireBankAddress", d.bankAddress || "");
+        if (panel) panel.style.display = "block";
+
         updateWireTransferPreview();
+      };
+
+      window.fillIntlBeneficiaryFromSelection = function () {
+        const benId = document.getElementById("intlBeneficiary")?.value;
+        const setVal = (id, v) => {
+          const el = document.getElementById(id);
+          if (el) el.value = v || "";
+        };
+        if (!benId) {
+          setVal("intlRecipientName", "");
+          setVal("intlBankName", "");
+          setVal("intlBankAddress", "");
+          setVal("intlIban", "");
+          setVal("intlSwiftBic", "");
+          return;
+        }
+        const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
+        const d = (ben && ben.destinationDetails) || {};
+        setVal("intlRecipientName", ben?.displayName || "");
+        setVal("intlBankName", d.bankName || "");
+        setVal("intlBankAddress", d.bankAddress || "");
+        setVal("intlIban", d.iban || "");
+        const rs = (d.routingOrSwift || "").replace(/\s/g, "");
+        setVal(
+          "intlSwiftBic",
+          /^[A-Za-z]{6}[A-Za-z0-9]{2}([A-Za-z0-9]{3})?$/.test(rs)
+            ? rs.toUpperCase()
+            : "",
+        );
       };
 
       window.initWireTransferView = function () {
@@ -11548,7 +12512,10 @@
           benSelect.innerHTML =
             '<option value="" disabled selected>Select beneficiary...</option>';
           const externalBens = beneficiariesMock.filter(
-            (b) => b.type === "BANK",
+            (b) =>
+              b.type === "BANK" &&
+              b.status !== "BLOCKED" &&
+              b.status !== "PENDING_REVIEW",
           );
           externalBens.forEach((b) => {
             const opt = document.createElement("option");
@@ -11558,6 +12525,17 @@
             opt.text = `${b.displayName} - ${b.destinationDetails.bankName} (...${last4})`;
             benSelect.appendChild(opt);
           });
+          const benError = document.getElementById("wireBenError");
+          if (
+            benError &&
+            externalBens.length !==
+              beneficiariesMock.filter((b) => b.type === "BANK").length
+          ) {
+            benError.style.display = "block";
+            benError.style.color = "#b45309";
+            benError.textContent =
+              "Blocked or pending-review beneficiaries are not available for wire.";
+          }
         }
         const wireForm = document.getElementById("wireTransferForm");
         if (wireForm && !wireForm._ntWireResetBound) {
@@ -11566,8 +12544,291 @@
             setTimeout(() => fillWireBeneficiaryFromSelection(), 0);
           });
         }
+        window._wireFormDirty = {};
+        window.refreshSourceAccountDropdowns &&
+          window.refreshSourceAccountDropdowns();
         renderWireTransferHistory();
         updateWireTransferPreview();
+      };
+
+      window._wireFormDirty = {};
+      window.markWireDirty = function (field) {
+        window._wireFormDirty[field] = true;
+        if (typeof window.validateWireTransferForm === "function") {
+          window.validateWireTransferForm();
+        }
+      };
+
+      window.WIRE_FX_RATES = { EUR: 1.09, GBP: 1.25, JPY: 0.0065, CHF: 1.11 };
+
+      window.wireFeeFor = function (isSwift, amt, priority) {
+        if (isSwift) return 35.0 + amt * 0.005;
+        const base = 25.0;
+        return priority && priority.toLowerCase() === "urgent" ? base + 15.0 : base;
+      };
+
+      window.computeWireSettlementDate = function (isSwift) {
+        const d = new Date();
+        if (isSwift) {
+          let added = 0;
+          while (added < 2) {
+            d.setDate(d.getDate() + 1);
+            const day = d.getDay();
+            if (day !== 0 && day !== 6) added++;
+          }
+        }
+        return d.toISOString().split("T")[0];
+      };
+
+      window.validateWireTransferForm = function (opts) {
+        opts = opts || {};
+        const isSwift =
+          document.querySelector('input[name="wireType"]:checked')?.value ===
+          "swift";
+        const src = document.getElementById("wireSourceAccount")?.value || "";
+        const benId = document.getElementById("wireBeneficiary")?.value || "";
+        const amt = parseFloat(document.getElementById("wireAmount")?.value) || 0;
+        const priority = document.getElementById("wirePriority")?.value || "Standard";
+        const currency = document.getElementById("wireSwiftCurrency")?.value || "USD";
+        const usdPrincipal = isSwift
+          ? amt * (window.WIRE_FX_RATES[currency] || 1)
+          : amt;
+        const fee = window.wireFeeFor(isSwift, usdPrincipal, priority);
+        const routing = document.getElementById("wireDomesticRouting")?.value || "";
+        const account = document.getElementById("wireDomesticAccount")?.value || "";
+        const bic = document.getElementById("wireSwiftBic")?.value || "";
+        const iban = document.getElementById("wireSwiftIban")?.value || "";
+        const aml = document.getElementById("wireAmlAck")?.checked;
+        const balance = window.ntBalanceEntry(src);
+        const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
+
+        const dirty = (f) =>
+          window._wireFormDirty[f] === true || opts.force === true;
+        const setError = (id, msg) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          if (msg) {
+            el.textContent = msg;
+            el.style.display = "block";
+          } else el.style.display = "none";
+        };
+        const fmtAmt = (v) =>
+          "$" +
+          Number(v).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+
+        let valid = true;
+
+        if (!src) {
+          if (dirty("src"))
+            setError("wireSourceError", "Please select a funding source.");
+          valid = false;
+        } else setError("wireSourceError", null);
+
+        if (!benId) {
+          if (dirty("ben"))
+            setError("wireBenError", "Please select a beneficiary.");
+          valid = false;
+        } else setError("wireBenError", null);
+
+        if (benId && ben && ben.type === "BANK" && ben.destinationDetails) {
+          const rName =
+            document.getElementById("wireRecipientName")?.value.trim() || "";
+          const rAcct =
+            document.getElementById("wireRecipientAccount")?.value.trim() || "";
+          const rBank = document.getElementById("wireBankName")?.value.trim() || "";
+          const rAddr =
+            document.getElementById("wireBankAddress")?.value.trim() || "";
+          if (!rName || !rAcct || !rBank || !rAddr) {
+            if (dirty("recipient"))
+              setError(
+                "wireRecipientError",
+                "Please complete recipient name, account number, bank name, and bank address.",
+              );
+            valid = false;
+          } else setError("wireRecipientError", null);
+        }
+
+        if (!amt || isNaN(amt) || amt <= 0) {
+          if (dirty("amount"))
+            setError("wireAmountError", "Please enter an amount greater than $0.00.");
+          valid = false;
+        } else {
+          setError("wireAmountError", null);
+          if (balance && usdPrincipal + fee > balance.val) {
+            if (dirty("amount"))
+              setError(
+                "wireAmountError",
+                "Amount plus fee (" +
+                  fmtAmt(usdPrincipal + fee) +
+                  ") exceeds available funds (" +
+                  fmtAmt(balance.val) +
+                  ").",
+              );
+            valid = false;
+          }
+        }
+
+        if (isSwift) {
+          if (!bic.trim()) {
+            if (dirty("bic"))
+              setError("wireSwiftError", "SWIFT / BIC code is required.");
+            valid = false;
+          } else if (!/^[A-Za-z]{6}[A-Za-z0-9]{2}([A-Za-z0-9]{3})?$/.test(bic.replace(/\s/g, ""))) {
+            if (dirty("bic"))
+              setError("wireSwiftError", "Enter a valid 8 or 11 character SWIFT / BIC code.");
+            valid = false;
+          } else setError("wireSwiftError", null);
+          if (!iban.trim()) {
+            if (dirty("iban"))
+              setError("wireSwiftError", "IBAN is required for international wires.");
+            valid = false;
+          } else if (!/^[A-Z]{2}[0-9A-Z]{2}[0-9A-Z]{11,30}$/.test(iban.replace(/\s/g, "").toUpperCase())) {
+            if (dirty("iban"))
+              setError("wireSwiftError", "Enter a valid IBAN (starts with a 2-letter country code).");
+            valid = false;
+          } else setError("wireSwiftError", null);
+        } else {
+          const aba = routing.replace(/\D/g, "");
+          if (!routing.trim() || aba.length !== 9) {
+            if (dirty("routing"))
+              setError("wireDomesticError", "Enter a valid 9-digit ABA routing number.");
+            valid = false;
+          } else setError("wireDomesticError", null);
+          if (!account.trim()) {
+            if (dirty("account"))
+              setError("wireDomesticError", "Recipient account number is required.");
+            valid = false;
+          } else setError("wireDomesticError", null);
+        }
+
+        if (!aml) {
+          if (dirty("aml"))
+            setError("wireAmlError", "You must confirm AML / OFAC compliance before dispatching the wire.");
+          valid = false;
+        } else setError("wireAmlError", null);
+
+        const btn = document.getElementById("wireSubmitBtn");
+        if (btn) {
+          btn.style.opacity = valid ? "1" : "0.55";
+          btn.style.cursor = valid ? "pointer" : "not-allowed";
+          btn.setAttribute("aria-disabled", valid ? "false" : "true");
+        }
+        return valid;
+      };
+
+      window.wireReviewAndContinue = function () {
+        if (!window.validateWireTransferForm({ force: true })) {
+          const firstInvalid = [
+            ["wireSourceAccount", "wireSourceError"],
+            ["wireBeneficiary", "wireBenError"],
+            ["wireRecipientName", "wireRecipientError"],
+            ["wireAmount", "wireAmountError"],
+            ["wireDomesticRouting", "wireDomesticError"],
+            ["wireSwiftBic", "wireSwiftError"],
+            ["wireAmlAck", "wireAmlError"],
+          ].find(([, errId]) => {
+            const el = document.getElementById(errId);
+            return el && el.style.display !== "none";
+          });
+          if (firstInvalid) {
+            const fieldEl = document.getElementById(firstInvalid[0]);
+            if (fieldEl) {
+              fieldEl.focus();
+              fieldEl.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+          }
+          return;
+        }
+        window.renderWireReviewSummary && window.renderWireReviewSummary();
+        document.getElementById("wireReviewModal").classList.add("active");
+      };
+
+      window.wireConfirmAndSubmit = function () {
+        closeBenModal("wireReviewModal");
+        const form = document.getElementById("wireTransferForm");
+        if (form && typeof form.requestSubmit === "function") {
+          form.requestSubmit();
+        } else {
+          window.handleWireTransferSubmit(new Event("submit"));
+        }
+      };
+
+      window.renderWireReviewSummary = function () {
+        const isSwift =
+          document.querySelector('input[name="wireType"]:checked')?.value ===
+          "swift";
+        const src = document.getElementById("wireSourceAccount")?.value || "";
+        const srcEntry = window.ntBalanceEntry(src);
+        const benId = document.getElementById("wireBeneficiary")?.value || "";
+        const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
+        const amt = parseFloat(document.getElementById("wireAmount")?.value) || 0;
+        const priority = document.getElementById("wirePriority")?.value || "Standard";
+        const cur = document.getElementById("wireSwiftCurrency")?.value || "USD";
+        const rate = window.WIRE_FX_RATES[cur] || 1;
+        const usdPrincipal = isSwift ? amt * rate : amt;
+        const fee = window.wireFeeFor(isSwift, usdPrincipal, priority);
+        const total = usdPrincipal + fee;
+        const settlement = window.computeWireSettlementDate(isSwift);
+        const memo = document.getElementById("wireMemo")?.value || "-";
+        const fmtAmt = (v) =>
+          "$" +
+          Number(v).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+
+        const row = (label, value, strong) =>
+          `<div style="display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid #eef2f7;">` +
+          `<span style="color: #64748b; font-weight: 500;">${label}</span>` +
+          `<strong>${value}</strong></div>`;
+
+        const details = ben && ben.destinationDetails ? ben.destinationDetails : {};
+        const rName =
+          document.getElementById("wireRecipientName")?.value ||
+          (ben ? ben.displayName : "-");
+        const rAcct =
+          document.getElementById("wireRecipientAccount")?.value || "";
+        const rBank = document.getElementById("wireBankName")?.value || "";
+        const rAddr = document.getElementById("wireBankAddress")?.value || "";
+        const destLine =
+          (rName || "-") +
+          (rBank ? " · " + rBank : "") +
+          (details.country ? " · " + details.country : "") +
+          (rAcct ? " (Acct: " + rAcct.slice(-4) + ")" : "");
+
+        document.getElementById("wireReviewSummary").innerHTML =
+          row("Network", isSwift ? "International SWIFT" : "Domestic Fedwire", true) +
+          row("Recipient", destLine, true) +
+          (rAddr ? row("Bank Address", rAddr) : "") +
+          row("From Account", (srcEntry ? srcEntry.name : src) || "-") +
+          row("Priority", priority === "Urgent" ? "Urgent Treasury Wire" : priority) +
+          row("Amount", isSwift ? fmtAmt(amt) + " " + cur : fmtAmt(amt) + " USD", true) +
+          (isSwift
+            ? row("FX Rate", rate.toFixed(4) + " USD / " + cur)
+            : "") +
+          row("USD Principal", fmtAmt(usdPrincipal), true) +
+          row("Network Fee", fmtAmt(fee)) +
+          row("Total Debit", fmtAmt(total), true) +
+          row("Expected Settlement", settlement, true) +
+          row("Purpose", memo);
+
+        const warn = document.getElementById("wireReviewWarning");
+        if (warn) {
+          if (usdPrincipal >= 100000) {
+            warn.style.display = "block";
+            warn.innerHTML =
+              "🛡️ <strong>Large wire:</strong> $100,000+ wires are routed to secondary approver (dual-control) release.";
+          } else if (usdPrincipal >= 25000) {
+            warn.style.display = "block";
+            warn.innerHTML =
+              "🛡️ <strong>Dual control:</strong> This wire meets the $25,000 threshold for secondary approver confirmation.";
+          } else {
+            warn.style.display = "none";
+          }
+        }
       };
 
       window.toggleWireFields = function () {
@@ -11605,7 +12866,8 @@
           "swift";
         const src = document.getElementById("wireSourceAccount")?.value;
         const amtStr = document.getElementById("wireAmount")?.value;
-        let amt = parseFloat(amtStr) || 0;
+        const amt = parseFloat(amtStr) || 0;
+        const priority = document.getElementById("wirePriority")?.value || "Standard";
 
         const warningBox = document.getElementById("wireWarningBanner");
         if (warningBox) warningBox.style.display = "none";
@@ -11615,36 +12877,48 @@
           credit: window.ntBalanceEntry("credit"),
         };
 
-        let fee = isSwift ? 45.0 : 25.0; // Int'l fee is higher
         let usdPrincipal = amt;
-
-        // Mock FX Rates against USD (as base currency for deduction)
-        const rates = { EUR: 1.09, GBP: 1.25, JPY: 0.0065, CHF: 1.11 };
+        const rates = window.WIRE_FX_RATES;
 
         if (isSwift) {
-          const cur = document.getElementById("wireSwiftCurrency").value;
+          const cur = document.getElementById("wireSwiftCurrency")?.value || "USD";
           if (rates[cur]) {
             usdPrincipal = amt * rates[cur];
-            document.getElementById("wireReviewFxRate").innerText =
-              rates[cur].toFixed(4) + " USD / " + cur;
+            const fxEl = document.getElementById("wireReviewFxRate");
+            if (fxEl) fxEl.innerText = rates[cur].toFixed(4) + " USD / " + cur;
           }
         }
 
+        const fee = window.wireFeeFor(isSwift, usdPrincipal, priority);
         const totalUsdDeduction = usdPrincipal > 0 ? usdPrincipal + fee : 0;
+        const fmtAmt = (v) =>
+          "$" +
+          Number(v).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+
+        // Recipient details panel (editable fields)
+        const panel = document.getElementById("wireRecipientPanel");
+        const benId = document.getElementById("wireBeneficiary")?.value || "";
+        const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
+        if (panel) {
+          panel.style.display =
+            ben && ben.type === "BANK" && ben.destinationDetails
+              ? "block"
+              : "none";
+        }
 
         if (document.getElementById("wireReviewPrincipal")) {
           document.getElementById("wireReviewPrincipal").innerText =
-            "$" +
-            usdPrincipal.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-            });
+            fmtAmt(usdPrincipal);
           document.getElementById("wireReviewFee").innerText =
             "$" + fee.toFixed(2);
+          document.getElementById("wireReviewSettlement").innerText =
+            window.computeWireSettlementDate(isSwift) +
+            (isSwift ? " (T+2)" : " (same-day)");
           document.getElementById("wireReviewTotal").innerText =
-            "$" +
-            totalUsdDeduction.toLocaleString(undefined, {
-              minimumFractionDigits: 2,
-            });
+            fmtAmt(totalUsdDeduction);
         }
 
         if (src && balances[src]) {
@@ -11664,13 +12938,21 @@
           if (totalUsdDeduction > balances[src].val && warningBox) {
             warningBox.style.display = "block";
             warningBox.innerHTML =
-              "⚠️ <strong>Insufficient Liquidity:</strong> Total USD deduction exceeds available funds.";
+              "⚠️ <strong>Insufficient Liquidity:</strong> Total USD deduction (" +
+              fmtAmt(totalUsdDeduction) +
+              ") exceeds available funds (" +
+              fmtAmt(balances[src].val) +
+              ").";
           }
         }
 
         const dualNote = document.getElementById("wireDualControlNote");
         if (dualNote)
           dualNote.style.display = usdPrincipal >= 25000 ? "block" : "none";
+
+        if (typeof window.validateWireTransferForm === "function") {
+          window.validateWireTransferForm();
+        }
       };
 
       window.handleWireTransferSubmit = function (event) {
@@ -11687,93 +12969,129 @@
           "swift";
         const benId = document.getElementById("wireBeneficiary").value;
         const src = document.getElementById("wireSourceAccount").value;
-        const amt =
-          parseFloat(document.getElementById("wireAmount").value) || 0;
-
-        const balances = {
-          checking: window.ntAccountBal("checking"),
-          credit: window.ntAccountBal("credit"),
-        };
-
-        let fee = isSwift ? 45.0 : 25.0;
-        let usdPrincipal = amt;
-        let currencyStr = "USD";
-
-        if (isSwift) {
-          const rates = { EUR: 1.09, GBP: 1.25, JPY: 0.0065, CHF: 1.11 };
-          currencyStr = document.getElementById("wireSwiftCurrency").value;
-          usdPrincipal = amt * (rates[currencyStr] || 1);
-        }
-
+        const amt = parseFloat(document.getElementById("wireAmount").value) || 0;
+        const priority = document.getElementById("wirePriority").value || "Standard";
+        const currencyStr = isSwift
+          ? document.getElementById("wireSwiftCurrency").value
+          : "USD";
+        const rate = window.WIRE_FX_RATES[currencyStr] || 1;
+        const usdPrincipal = isSwift ? amt * rate : amt;
+        const fee = window.wireFeeFor(isSwift, usdPrincipal, priority);
         const totalUsdDeduction = usdPrincipal + fee;
+        const settlementDate = document.getElementById(
+          "wireReviewSettlement",
+        ).innerText;
+        const memo = document.getElementById("wireMemo").value || "Wire transfer";
+        const ref = "WIRE-" + String(Math.floor(100000 + Math.random() * 900000));
 
-        if (!benId || !src) return;
-        if (totalUsdDeduction > balances[src]) {
-          alert("Insufficient funds in the selected account.");
+        if (!window.validateWireTransferForm({ force: true })) {
+          window.wireReviewAndContinue();
           return;
         }
 
         const ben = beneficiariesMock.find((b) => b.beneficiaryId === benId);
+        const held = usdPrincipal >= 100000;
 
         const executeTransfer = () => {
-          const ref = "WIRE-" + Math.floor(Math.random() * 100000);
           wireTransferHistory.unshift({
             date: new Date().toISOString().split("T")[0],
             benName: ben.displayName,
+            recipient:
+              document.getElementById("wireRecipientName")?.value ||
+              ben.displayName,
+            bank: document.getElementById("wireBankName")?.value || "",
+            bankAddress:
+              document.getElementById("wireBankAddress")?.value || "",
             type: isSwift ? "SWIFT" : "Fedwire",
             currency: currencyStr,
             amount: amt,
-            status: "Compliance Hold",
+            fee: fee,
+            ref: ref,
+            status: held ? "Compliance Hold" : isSwift ? "In Transit" : "Settled",
+            settlement: settlementDate,
           });
 
           document.getElementById("wireTransferForm").reset();
+          window._wireFormDirty = {};
           toggleWireFields();
           renderWireTransferHistory();
 
-          document.getElementById("wireStep2").style.background = "#eab308";
-          document.getElementById("wireStep2").style.color = "white";
-          document.getElementById("wireStep2Text").style.color = "#ca8a04";
-
-          if (window.NTUI) {
-            window.NTUI.warn(
-              "AML / Risk Controls: Wire initiated but placed on compliance hold (Ref: " +
-                ref +
-                "). Funds were not released. Volume spikes, structuring patterns, or savings withdrawal limits may require manual treasury review.",
-              14000,
-            );
-          } else {
-            alert(
-              "Wire on compliance hold — funds not released. Reference: " + ref,
-            );
+          if (held) {
+            document.getElementById("wireStep2").style.background = "#eab308";
+            document.getElementById("wireStep2").style.color = "white";
+            document.getElementById("wireStep2Text").style.color = "#ca8a04";
+            if (window.NTUI) {
+              window.NTUI.warn(
+                "AML / Risk Controls: Wire initiated but placed on compliance hold (Ref: " +
+                  ref +
+                  "). Funds were not released. Large wires, structuring patterns, or savings withdrawal limits require manual treasury review.",
+                14000,
+              );
+            } else {
+              alert(
+                "Wire on compliance hold — funds not released. Reference: " + ref,
+              );
+            }
+            return;
           }
+
+          // Domestic Fedwire settles same-day; SWIFT is queued In Transit.
+          const stepColors = (step, bg, color) => {
+            const el = document.getElementById(step);
+            if (el) {
+              el.style.background = bg;
+              el.style.color = "white";
+            }
+          };
+          stepColors("wireStep2", "#16a34a");
+          if (!isSwift) {
+            stepColors("wireStep3", "#3b82f6");
+            stepColors("wireStep4", "#16a34a");
+          } else {
+            stepColors("wireStep3", "#3b82f6");
+            document.getElementById("wireStep4Text").style.color = "#475569";
+          }
+
+          showTransferSuccessPrompt(
+            (isSwift ? "SWIFT wire queued for cross-border settlement. " : "Fedwire dispatched and settled same-day. ") +
+              "Reference: " +
+              ref +
+              ". Fee: $" +
+              fee.toFixed(2) +
+              ". Expected settlement: " +
+              settlementDate,
+            {
+              type: isSwift ? "SWIFT Wire" : "Fedwire",
+              amount: totalUsdDeduction,
+              source: src.toUpperCase(),
+              beneficiary: ben.displayName,
+              status: held ? "PENDING COMPLIANCE" : isSwift ? "IN TRANSIT" : "SETTLED",
+              ref: ref,
+            },
+          );
         };
 
-        // Strict OTP threshold for advanced treasury
-        if (usdPrincipal > 25000 || isSwift) {
-          generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-          document.getElementById("mockOtpValue").innerText = generatedOTP;
-          document.getElementById("otpErrorMsg").style.display = "none";
+        // Wires always require strong multi-factor authentication.
+        window.ensureSharedModals && window.ensureSharedModals();
+        generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+        document.getElementById("mockOtpValue").innerText = generatedOTP;
+        document.getElementById("otpErrorMsg").style.display = "none";
 
-          document.querySelectorAll(".otp-digit-input").forEach((el) => {
-            el.value = "";
-            el.classList.remove("success");
-          });
+        document.querySelectorAll(".otp-digit-input").forEach((el) => {
+          el.value = "";
+          el.classList.remove("success");
+        });
 
-          otpSuccessCallback = function () {
-            triggerTransferOverlay(() => {
-              executeTransfer();
-            }, 5000);
-          };
-
-          document.getElementById("modalOTP").classList.add("active");
-          setTimeout(() => {
-            document.getElementById("otpDigit1").focus();
-          }, 100);
-        } else {
+        otpSuccessCallback = function () {
           triggerTransferOverlay(() => {
             executeTransfer();
           }, 5000);
-        }
+        };
+
+        document.getElementById("modalOTP").classList.add("active");
+        setTimeout(() => {
+          document.getElementById("otpDigit1").focus();
+        }, 100);
       };
 
       function renderWireTransferHistory() {
@@ -11852,6 +13170,8 @@
           });
         }
 
+        window.refreshSourceAccountDropdowns &&
+          window.refreshSourceAccountDropdowns();
         renderIntlTransferHistory();
         updateIntlTransferPreview();
 
@@ -12104,7 +13424,97 @@
       const internalTransferHistory = [];
 
       window.initInternalTransferView = function () {
+        window.refreshSourceAccountDropdowns &&
+          window.refreshSourceAccountDropdowns();
         renderInternalTransferHistory();
+      };
+
+      window._internalFormDirty = {};
+      window.markInternalDirty = function (field) {
+        window._internalFormDirty[field] = true;
+        if (typeof window.validateInternalTransferForm === "function") {
+          window.validateInternalTransferForm();
+        }
+      };
+
+      window.validateInternalTransferForm = function (opts) {
+        opts = opts || {};
+        const src = document.getElementById("transferFromAccount")?.value || "";
+        const dst = document.getElementById("transferToAccount")?.value || "";
+        const amtStr = document.getElementById("transferAmount")?.value || "";
+        const amt = parseFloat(amtStr);
+
+        const fromErr = document.getElementById("internalFromError");
+        const toErr = document.getElementById("internalToError");
+        const amtErr = document.getElementById("internalAmountError");
+        const btn = document.getElementById("internalTransferSubmitBtn");
+
+        const dirty = (f) =>
+          window._internalFormDirty[f] === true || opts.force === true;
+
+        const setError = (el, msg) => {
+          if (!el) return;
+          if (msg) {
+            el.textContent = msg;
+            el.style.display = "block";
+          } else {
+            el.style.display = "none";
+          }
+        };
+
+        const fmtAmt = (v) =>
+          "$" +
+          Number(v).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          });
+
+        let valid = true;
+
+        if (!src) {
+          if (dirty("from")) setError(fromErr, "Please select a funding source.");
+          valid = false;
+        } else setError(fromErr, null);
+
+        if (!dst) {
+          if (dirty("to"))
+            setError(toErr, "Please select a destination account.");
+          valid = false;
+        } else if (src && dst === src) {
+          if (dirty("to"))
+            setError(
+              toErr,
+              "Destination account must be different from the source.",
+            );
+          valid = false;
+        } else setError(toErr, null);
+
+        if (!amtStr || isNaN(amt) || amt <= 0) {
+          if (dirty("amount"))
+            setError(
+              amtErr,
+              "Please enter an amount greater than $0.00.",
+            );
+          valid = false;
+        } else {
+          const bal = window.ntBalanceEntry(src);
+          if (src && bal && amt > bal.val) {
+            if (dirty("amount"))
+              setError(
+                amtErr,
+                "Amount exceeds available funds (" + fmtAmt(bal.val) + ") in the selected account.",
+              );
+            valid = false;
+          } else setError(amtErr, null);
+        }
+
+        if (btn) {
+          btn.style.opacity = valid ? "1" : "0.55";
+          btn.style.cursor = valid ? "pointer" : "not-allowed";
+          btn.setAttribute("aria-disabled", valid ? "false" : "true");
+        }
+
+        return valid;
       };
 
       window.updateInternalTransferPreview = function () {
@@ -12186,6 +13596,9 @@
           warningBox.style.borderColor = "#3b82f6";
           warningBox.style.color = "#1e3a8a";
         }
+
+        window.validateInternalTransferForm &&
+          window.validateInternalTransferForm();
       };
 
       window.handleInternalTransferSubmit = function (event) {
@@ -12204,13 +13617,24 @@
           invest: window.ntAccountBal("invest"),
         };
 
-        if (!src || !dst) return;
-        if (src === dst) {
-          alert("Source and destination accounts must be different.");
-          return;
-        }
-        if (amt > balances[src]) {
-          alert("Insufficient funds in the selected source account.");
+        if (!window.validateInternalTransferForm({ force: true })) {
+          const firstInvalid = [
+            ["transferFromAccount", "internalFromError"],
+            ["transferToAccount", "internalToError"],
+            ["transferAmount", "internalAmountError"],
+          ].find(
+            ([fieldId, errId]) => {
+              const err = document.getElementById(errId);
+              return err && err.style.display !== "none";
+            },
+          );
+          if (firstInvalid) {
+            const el = document.getElementById(firstInvalid[0]);
+            if (el) {
+              el.focus();
+              el.scrollIntoView({ behavior: "smooth", block: "center" });
+            }
+          }
           return;
         }
 
@@ -12227,6 +13651,8 @@
                 await NTApi.loadDashboard();
                 document.getElementById("internalTransferForm").reset();
                 updateInternalTransferPreview();
+                window.refreshSourceAccountDropdowns &&
+                  window.refreshSourceAccountDropdowns();
                 showTransferSuccessPrompt(res.message, {
                   type: "Internal Transfer",
                   amount: amt,
@@ -12253,6 +13679,8 @@
 
           document.getElementById("internalTransferForm").reset();
           updateInternalTransferPreview();
+          window.refreshSourceAccountDropdowns &&
+            window.refreshSourceAccountDropdowns();
           renderInternalTransferHistory();
           showTransferSuccessPrompt(
             `Successfully moved $${amt.toLocaleString()} from ${src} to ${dst}.`,
@@ -13835,5 +15263,11 @@
         </div>
       </div>
     </div>
-  </body>
+  <script>
+  tippy('[data-tippy-content]', {
+    arrow: true,
+    animation: 'scale',
+  });
+</script>
+</body>
 </html>

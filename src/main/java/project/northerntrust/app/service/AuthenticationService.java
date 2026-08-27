@@ -13,6 +13,8 @@ import project.northerntrust.app.entity.enums.OtpPurpose;
 import project.northerntrust.app.repository.UserRepository;
 import project.northerntrust.app.repository.AccountRepository;
 
+import java.time.LocalDateTime;
+
 import java.util.Map;
 import java.util.Optional;
 
@@ -61,7 +63,7 @@ public class AuthenticationService {
     /**
      * Step 2: verify LOGIN OTP and complete authentication.
      */
-    public LoginResponse verifyLoginOtp(String accountNumber, String code) {
+    public LoginResponse verifyLoginOtp(String accountNumber, String code, String ipAddress, String userAgent) {
         if (accountNumber == null || accountNumber.isBlank() || code == null || code.isBlank()) {
             return new LoginResponse(false, false, "Account number and verification code are required");
         }
@@ -72,6 +74,11 @@ public class AuthenticationService {
 
         Map<String, Object> result = otpService.verifyOtp(accountNumber.trim(), code.trim(), OtpPurpose.LOGIN);
         if (Boolean.TRUE.equals(result.get("valid"))) {
+            User user = userRepository.findByAccountNumber(accountNumber).get();
+            user.setLastLoginAt(LocalDateTime.now());
+            user.setLastLoginIp(ipAddress);
+            user.setLastLoginUserAgent(userAgent);
+            userRepository.save(user);
             return new LoginResponse(true, false, "Login successful");
         }
         return new LoginResponse(false, false, (String) result.get("message"));

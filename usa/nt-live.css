@@ -132,7 +132,7 @@
 }
 
 .nt-toast__close:focus-visible {
-  outline: 2px solid #004225;
+  outline: 2px solid #115740;
   outline-offset: 2px;
 }
 
@@ -317,12 +317,12 @@
 }
 
 .notif-item--expanded {
-  border-color: #004225;
+  border-color: #115740;
 }
 
 .notif-item--critical { border-left: 4px solid #dc2626; }
 .notif-item--warning { border-left: 4px solid #d97706; }
-.notif-item--info { border-left: 4px solid #004225; }
+.notif-item--info { border-left: 4px solid #115740; }
 
 .notif-item__header {
   width: 100%;

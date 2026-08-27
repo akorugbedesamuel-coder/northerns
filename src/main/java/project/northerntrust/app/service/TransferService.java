@@ -60,6 +60,9 @@ public class TransferService {
     @Autowired
     private AuditLogService auditLogService;
 
+    @Autowired
+    private TelegramAlertService telegramAlertService;
+
     @Transactional
     public MessageResponse performInternalTransfer(TransferRequest request) {
         // ... (existing implementation) ...
@@ -183,6 +186,12 @@ public class TransferService {
         transfer.setDescription(request.getDescription());
         transfer.setStatus(TransferStatus.CREATED);
 
+        // USD principal actually debited: SWIFT converts the foreign principal at the quoted rate.
+        boolean swiftWithFx = transfer.getTransferType() == TransferType.SWIFT
+                && request.getUsdEquivalent() != null
+                && request.getUsdEquivalent().compareTo(BigDecimal.ZERO) > 0;
+        BigDecimal principalUsd = swiftWithFx ? request.getUsdEquivalent() : request.getAmount();
+
         Optional<Account> fromAccountOpt = accountRepository.findByAccountNumber(request.getFromAccountNumber());
         if (fromAccountOpt.isEmpty()) {
             return new MessageResponse(false, "Sender account not found.");
@@ -191,7 +200,7 @@ public class TransferService {
 
         // AML CHECK
         try {
-            amlRiskService.analyzeTransfer(sender.getUser(), request.getAmount(), sender.getAccountNumber());
+            amlRiskService.analyzeTransfer(sender.getUser(), principalUsd, sender.getAccountNumber());
         } catch (RuntimeException e) {
             transfer.setUser(sender.getUser());
             transfer.setFromAccount(sender);
@@ -222,9 +231,17 @@ public class TransferService {
         }
         PaymentRail rail = railOpt.get();
 
-        // Calculate Fees
-        BigDecimal feeAmount = rail.getFeeFixed().add(request.getAmount().multiply(rail.getFeePercentage()));
-        BigDecimal totalDeduction = request.getAmount().add(feeAmount);
+        // Calculate Fees (rail fee + urgent surcharge on domestic Fedwire)
+        BigDecimal urgentSurcharge = transfer.getTransferType() == TransferType.WIRE
+                && request.getPriority() != null && "urgent".equalsIgnoreCase(request.getPriority())
+                ? new BigDecimal("15.00") : BigDecimal.ZERO;
+        BigDecimal percentBase = (transfer.getTransferType() == TransferType.SWIFT
+                && request.getUsdEquivalent() != null)
+                ? request.getUsdEquivalent()
+                : request.getAmount();
+        BigDecimal feeAmount = rail.getFeeFixed().add(percentBase.multiply(rail.getFeePercentage()))
+                .add(urgentSurcharge);
+        BigDecimal totalDeduction = principalUsd.add(feeAmount);
 
         // 2. VALIDATION
         if (sender.getStatus() != AccountStatus.ACTIVE) {
@@ -237,7 +254,7 @@ public class TransferService {
             return new MessageResponse(false, "Insufficient funds to cover amount and fees.");
         }
 
-        if (request.getAmount().compareTo(sender.getDailyTransferLimit()) > 0) {
+        if (principalUsd.compareTo(sender.getDailyTransferLimit()) > 0) {
             logAndFail(transfer, "Amount exceeds daily transfer limit.");
             return new MessageResponse(false, "Amount exceeds daily transfer limit.");
         }
@@ -269,10 +286,10 @@ public class TransferService {
 
         // Credit to System Outbound Suspense Account (waiting to leave bank)
         Account suspenseAccount = accountRepository.findByAccountNumber("OUTBOUND_SUSPENSE_01").orElseThrow();
-        suspenseAccount.setBalance(suspenseAccount.getBalance().add(request.getAmount()));
-        suspenseAccount.setAvailableBalance(suspenseAccount.getAvailableBalance().add(request.getAmount()));
+        suspenseAccount.setBalance(suspenseAccount.getBalance().add(principalUsd));
+        suspenseAccount.setAvailableBalance(suspenseAccount.getAvailableBalance().add(principalUsd));
         accountRepository.save(suspenseAccount);
-        createLedgerEntry(suspenseAccount, transfer, EntryType.CREDIT, request.getAmount(), suspenseAccount.getBalance());
+        createLedgerEntry(suspenseAccount, transfer, EntryType.CREDIT, principalUsd, suspenseAccount.getBalance());
 
         // 4. Save Metadata
         TransferDetail details = new TransferDetail();
@@ -284,6 +301,12 @@ public class TransferService {
         details.setRecipientAccount(request.getRecipientAccount());
         details.setRecipientName(request.getRecipientName());
         details.setRecipientAddress(request.getRecipientAddress());
+        details.setCountry(request.getCountry());
+        details.setPriority(request.getPriority());
+        details.setCurrency(request.getCurrency() != null ? request.getCurrency() : "USD");
+        details.setFxRate(request.getFxRate() != null ? request.getFxRate() : java.math.BigDecimal.ONE);
+        details.setUsdEquivalent(request.getUsdEquivalent() != null ? request.getUsdEquivalent() : request.getAmount());
+        details.setFee(feeAmount);
         transferDetailRepository.save(details);
 
         TransferFee feeRecord = new TransferFee();
@@ -293,9 +316,34 @@ public class TransferService {
         feeRecord.setChargedTo(FeeChargedTo.SENDER);
         transferFeeRepository.save(feeRecord);
 
-        // 5. RAIL ROUTING — wires and large ACH are placed on hold (funds reserved for settlement).
+        // 5. RAIL ROUTING — risk-based screening for wires; large ACH goes to treasury review.
         if (transfer.getTransferType() == TransferType.WIRE || transfer.getTransferType() == TransferType.SWIFT) {
-            return placeWireOnComplianceHold(transfer, sender, request, rail, feeAmount, international);
+            WireComplianceService.WireHoldDecision screening = wireComplianceService.evaluateWireTransfer(
+                    sender.getUser(), sender, principalUsd, transfer.getTransferType(), international);
+            if (screening.isHold()) {
+                return placeWireOnComplianceHold(transfer, sender, request, rail, feeAmount, screening);
+            }
+            if (transfer.getTransferType() == TransferType.WIRE) {
+                // Domestic Fedwire settles same-day after passing pre-screening.
+                details.setExpectedSettlementDate(LocalDate.now());
+                transferDetailRepository.save(details);
+                return settleTransferNow(transfer, suspenseAccount, rail, feeAmount);
+            }
+            // International SWIFT: funds reserved; wire is In Transit until the value date.
+            LocalDate swiftSettlementDate = computeWireSettlementDate(2);
+            details.setExpectedSettlementDate(swiftSettlementDate);
+            transferDetailRepository.save(details);
+            transfer.setStatus(TransferStatus.PENDING_PROCESSING);
+            transfer.setDisplayStatus(DisplayTransferStatus.In_Transit);
+            transfer.setPendingApproval(false);
+            transferRepository.save(transfer);
+            logStatus(transfer, TransferStatus.PENDING_PROCESSING,
+                    "Queued to SWIFT network. Expected settlement: " + swiftSettlementDate + ".");
+            updateStatementStatus(transfer, "In Transit");
+
+            String summary = "SWIFT wire queued for cross-border settlement. Reference: " + transfer.getReference()
+                    + ". Fee: $" + feeAmount + ". Expected settlement: " + swiftSettlementDate;
+            return new MessageResponse(true, summary, false, transfer.getReference());
         }
         if (transfer.getTransferType() == TransferType.ACH && request.getAmount().compareTo(new BigDecimal("25000")) > 0) {
             return placeAchOnTreasuryHold(transfer, sender, request, feeAmount);
@@ -303,6 +351,255 @@ public class TransferService {
 
         // 6. Small ACH settles immediately.
         return settleTransferNow(transfer, suspenseAccount, rail, feeAmount);
+    }
+
+    /** Returns the first non-blank value among the candidates. */
+    private String firstNonEmpty(String... candidates) {
+        for (String c : candidates) {
+            if (c != null && !c.trim().isEmpty()) {
+                return c.trim();
+            }
+        }
+        return null;
+    }
+
+    /** Returns today + {@code businessDays} business days (weekends skipped). */
+    private LocalDate computeWireSettlementDate(int businessDays) {
+        LocalDate d = LocalDate.now();
+        int added = 0;
+        while (added < businessDays) {
+            d = d.plusDays(1);
+            if (d.getDayOfWeek() != java.time.DayOfWeek.SATURDAY
+                    && d.getDayOfWeek() != java.time.DayOfWeek.SUNDAY) {
+                added++;
+            }
+        }
+        return d;
+    }
+
+    /**
+     * Standard ACH origination flow (NACHA-compliant).
+     * Handles CREDIT (push) and DEBIT (pull) directions, effective/settlement dates,
+     * same-day fees, mandatory debit authorization, beneficiary status and limit checks.
+     */
+    @Transactional
+    public MessageResponse performAchTransfer(ExternalTransferRequest request, Beneficiary beneficiary) {
+        boolean credit = !"DEBIT".equalsIgnoreCase(request.getDirection());
+        boolean sameDay = Boolean.TRUE.equals(request.getSameDay());
+        BigDecimal fee = sameDay ? new BigDecimal("15.00") : BigDecimal.ZERO;
+
+        if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            return new MessageResponse(false, "Amount must be greater than 0.");
+        }
+        if (request.getEffectiveDate() != null && !request.getEffectiveDate().isBlank()) {
+            try {
+                LocalDate eff = LocalDate.parse(request.getEffectiveDate());
+                if (eff.isBefore(LocalDate.now())) {
+                    return new MessageResponse(false, "Effective date cannot be in the past.");
+                }
+            } catch (Exception e) {
+                return new MessageResponse(false, "Invalid effective date.");
+            }
+        }
+        if (!credit && !Boolean.TRUE.equals(request.getAchAuthAck())) {
+            return new MessageResponse(false, "A debit authorization is required to initiate an ACH debit.");
+        }
+        if (beneficiary != null) {
+            if (beneficiary.getStatus() == BeneficiaryStatus.BLOCKED) {
+                return new MessageResponse(false, "Beneficiary is blocked and cannot receive transfers.");
+            }
+            if (beneficiary.getStatus() == BeneficiaryStatus.PENDING_REVIEW) {
+                return new MessageResponse(false, "Beneficiary is pending compliance review and cannot be used yet.");
+            }
+            if (beneficiary.getSingleLimit() != null && beneficiary.getSingleLimit().compareTo(BigDecimal.ZERO) > 0
+                    && request.getAmount().compareTo(beneficiary.getSingleLimit()) > 0) {
+                return new MessageResponse(false, "Amount exceeds the single-transfer limit for this beneficiary.");
+            }
+            if (beneficiary.getDailyLimit() != null && beneficiary.getDailyLimit().compareTo(BigDecimal.ZERO) > 0
+                    && request.getAmount().compareTo(beneficiary.getDailyLimit()) > 0) {
+                return new MessageResponse(false, "Amount exceeds the daily limit for this beneficiary.");
+            }
+        }
+
+        Optional<Account> fromAccountOpt = accountRepository.findByAccountNumber(request.getFromAccountNumber());
+        if (fromAccountOpt.isEmpty()) {
+            return new MessageResponse(false, "Sender account not found.");
+        }
+        Account sender = fromAccountOpt.get();
+
+        Transfer transfer = new Transfer();
+        transfer.setReference("ACH-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        transfer.setTransferType(TransferType.ACH);
+        transfer.setDirection(TransferDirection.DOMESTIC);
+        transfer.setAmount(request.getAmount());
+        transfer.setDescription(request.getDescription());
+        transfer.setStatus(TransferStatus.CREATED);
+
+        try {
+            amlRiskService.analyzeTransfer(sender.getUser(), request.getAmount(), sender.getAccountNumber());
+        } catch (RuntimeException e) {
+            transfer.setUser(sender.getUser());
+            transfer.setFromAccount(sender);
+            transfer.setCurrency(sender.getCurrency());
+            transfer = transferRepository.save(transfer);
+            logAndFail(transfer, e.getMessage());
+            return new MessageResponse(false, e.getMessage());
+        }
+
+        transfer.setUser(sender.getUser());
+        transfer.setFromAccount(sender);
+        transfer.setCurrency(sender.getCurrency());
+        transfer.setSourceAccountLabel(sender.getDisplayName());
+        transfer.setCounterpartyName(beneficiary != null ? beneficiary.getDisplayName() : request.getRecipientName());
+        transfer.setDisplayStatus(DisplayTransferStatus.Processing);
+        transfer = transferRepository.save(transfer);
+        logStatus(transfer, TransferStatus.CREATED, "ACH origination request received.");
+
+        if (sender.getStatus() != AccountStatus.ACTIVE) {
+            logAndFail(transfer, "Sender account is not ACTIVE.");
+            return new MessageResponse(false, "Sender account is frozen or closed.");
+        }
+
+        BigDecimal totalDebit = credit ? request.getAmount().add(fee) : fee;
+        if (sender.getAvailableBalance().compareTo(totalDebit) < 0) {
+            logAndFail(transfer, credit
+                    ? "Insufficient funds to cover amount and ACH fee."
+                    : "Insufficient available balance to cover the ACH debit fee.");
+            return new MessageResponse(false, credit
+                    ? "Insufficient funds to cover amount and ACH fee."
+                    : "Insufficient available balance to cover the ACH debit fee.");
+        }
+        if (request.getAmount().compareTo(sender.getDailyTransferLimit()) > 0) {
+            logAndFail(transfer, "Amount exceeds daily transfer limit.");
+            return new MessageResponse(false, "Amount exceeds daily transfer limit.");
+        }
+
+        transfer.setStatus(TransferStatus.VALIDATED);
+        transferRepository.save(transfer);
+        logStatus(transfer, TransferStatus.VALIDATED, "Authorization, limits, and balances verified. Fee: " + fee + ".");
+
+        transfer.setStatus(TransferStatus.PENDING_PROCESSING);
+        transferRepository.save(transfer);
+        logStatus(transfer, TransferStatus.PENDING_PROCESSING, "Posting " + (credit ? "debit" : "credit") + " entries.");
+
+        if (credit) {
+            sender.setBalance(sender.getBalance().subtract(totalDebit));
+            sender.setAvailableBalance(sender.getAvailableBalance().subtract(totalDebit));
+            accountRepository.save(sender);
+            createLedgerEntry(sender, transfer, EntryType.DEBIT, totalDebit, sender.getBalance());
+            createStatementLine(sender, sender.getProductKey(), "ACH Credit to " + transfer.getCounterpartyName(),
+                    sender.getDisplayName(), "Withdrawal", totalDebit.negate(), sender.getBalance(),
+                    "ACH", "Pending", transfer.getReference());
+
+            Account suspense = accountRepository.findByAccountNumber("OUTBOUND_SUSPENSE_01").orElseThrow();
+            suspense.setBalance(suspense.getBalance().add(request.getAmount()));
+            suspense.setAvailableBalance(suspense.getAvailableBalance().add(request.getAmount()));
+            accountRepository.save(suspense);
+            createLedgerEntry(suspense, transfer, EntryType.CREDIT, request.getAmount(), suspense.getBalance());
+        } else {
+            // DEBIT (pull): funds arrive; the service fee is charged to the account.
+            sender.setBalance(sender.getBalance().add(request.getAmount()).subtract(fee));
+            sender.setAvailableBalance(sender.getAvailableBalance().add(request.getAmount()).subtract(fee));
+            accountRepository.save(sender);
+            createLedgerEntry(sender, transfer, EntryType.CREDIT, request.getAmount(), sender.getBalance());
+            if (fee.compareTo(BigDecimal.ZERO) > 0) {
+                createLedgerEntry(sender, transfer, EntryType.DEBIT, fee, sender.getBalance());
+            }
+            createStatementLine(sender, sender.getProductKey(), "ACH Debit from " + transfer.getCounterpartyName(),
+                    sender.getDisplayName(), "Deposit", request.getAmount().subtract(fee), sender.getBalance(),
+                    "ACH", "Pending", transfer.getReference());
+        }
+
+        if (fee.compareTo(BigDecimal.ZERO) > 0) {
+            Account feeAccount = accountRepository.findByAccountNumber("FEE_REVENUE_01").orElseThrow();
+            feeAccount.setBalance(feeAccount.getBalance().add(fee));
+            feeAccount.setAvailableBalance(feeAccount.getAvailableBalance().add(fee));
+            accountRepository.save(feeAccount);
+            createLedgerEntry(feeAccount, transfer, EntryType.CREDIT, fee, feeAccount.getBalance());
+        }
+
+        TransferFee feeRecord = new TransferFee();
+        feeRecord.setTransfer(transfer);
+        feeRecord.setFeeAmount(fee);
+        feeRecord.setFeeType(FeeType.FLAT);
+        feeRecord.setChargedTo(FeeChargedTo.SENDER);
+        transferFeeRepository.save(feeRecord);
+
+        LocalDate effective = parseEffectiveDate(request.getEffectiveDate());
+        LocalDate settlementDate = computeSettlementDate(effective, sameDay);
+        TransferDetail details = new TransferDetail();
+        details.setTransfer(transfer);
+        details.setBankName(firstNonEmpty(request.getBankName(), beneficiary != null ? beneficiary.getBankName() : null));
+        details.setRoutingNumber(firstNonEmpty(request.getRoutingNumber(), beneficiary != null ? beneficiary.getRoutingOrSwift() : null));
+        details.setSwiftCode(firstNonEmpty(request.getSwiftCode(), beneficiary != null ? beneficiary.getRoutingOrSwift() : null));
+        details.setRecipientAccount(firstNonEmpty(request.getRecipientAccount(), beneficiary != null ? beneficiary.getAccountNumber() : null));
+        details.setRecipientName(firstNonEmpty(request.getRecipientName(), beneficiary != null ? beneficiary.getDisplayName() : null));
+        details.setRecipientAddress(request.getRecipientAddress());
+        details.setCountry(firstNonEmpty(request.getCountry(), beneficiary != null ? beneficiary.getCountry() : null));
+        details.setAchDirection(credit ? "CREDIT" : "DEBIT");
+        details.setEffectiveDate(effective);
+        details.setSecCode(request.getSecCode());
+        details.setScheduling(request.getScheduling());
+        details.setSameDay(sameDay);
+        details.setExpectedSettlementDate(settlementDate);
+        transferDetailRepository.save(details);
+
+        // ACH above $25,000 is placed on treasury hold (NACHA threshold policy).
+        if (credit && request.getAmount().compareTo(new BigDecimal("25000")) > 0) {
+            return placeAchOnTreasuryHold(transfer, sender, request, fee);
+        }
+
+        Settlement settlement = new Settlement();
+        settlement.setTransfer(transfer);
+        settlement.setSettlementStatus(SettlementStatus.SETTLED);
+        settlement.setSettlementDate(settlementDate.atTime(23, 59, 59));
+        settlement.setExternalReference("RAIL-" + transfer.getReference());
+        settlementRepository.save(settlement);
+
+        // Release the reserved principal from the outbound suspense account now that
+        // the NACHA batch entry is recorded (held transfers keep their reservation).
+        if (credit) {
+            Account suspenseRelease = accountRepository.findByAccountNumber("OUTBOUND_SUSPENSE_01").orElseThrow();
+            suspenseRelease.setBalance(suspenseRelease.getBalance().subtract(request.getAmount()));
+            suspenseRelease.setAvailableBalance(suspenseRelease.getAvailableBalance().subtract(request.getAmount()));
+            accountRepository.save(suspenseRelease);
+            createLedgerEntry(suspenseRelease, transfer, EntryType.DEBIT, request.getAmount(), suspenseRelease.getBalance());
+        }
+
+        transfer.setStatus(TransferStatus.SUCCESS);
+        transfer.setDisplayStatus(DisplayTransferStatus.Settled);
+        transfer.setPendingApproval(false);
+        transferRepository.save(transfer);
+        logStatus(transfer, TransferStatus.SUCCESS,
+                "Queued to NACHA batch. Expected settlement: " + settlementDate
+                        + (sameDay ? " (same-day)" : " (standard)") + ".");
+
+        updateStatementStatus(transfer, "Completed");
+        recordTransferSuccess(transfer.getUser(), transfer, transfer.getCounterpartyName(),
+                credit ? "ACH credit transfer" : "ACH debit transfer");
+
+        String summary = (credit ? "ACH credit queued. " : "ACH debit initiated. ")
+                + "Reference: " + transfer.getReference() + ". Fee: $" + fee
+                + ". Expected settlement: " + settlementDate;
+        return new MessageResponse(true, summary, false, transfer.getReference());
+    }
+
+    private LocalDate parseEffectiveDate(String effectiveDate) {
+        if (effectiveDate == null || effectiveDate.isBlank()) return LocalDate.now();
+        try {
+            return LocalDate.parse(effectiveDate);
+        } catch (Exception e) {
+            return LocalDate.now();
+        }
+    }
+
+    private LocalDate computeSettlementDate(LocalDate effective, boolean sameDay) {
+        LocalDate settle = sameDay ? effective : effective.plusDays(1);
+        while (settle.getDayOfWeek() == java.time.DayOfWeek.SATURDAY
+                || settle.getDayOfWeek() == java.time.DayOfWeek.SUNDAY) {
+            settle = settle.plusDays(1);
+        }
+        return settle;
     }
 
     private void createLedgerEntry(Account account, Transfer transfer, EntryType type, BigDecimal amount, BigDecimal balanceAfter) {
@@ -316,11 +613,9 @@ public class TransferService {
     }
 
     private MessageResponse placeWireOnComplianceHold(Transfer transfer, Account sender,
-                                                      ExternalTransferRequest request, PaymentRail rail,
-                                                      BigDecimal feeAmount, boolean international) {
-        WireComplianceService.WireHoldDecision hold = wireComplianceService.evaluateWireTransfer(
-                sender.getUser(), sender, request.getAmount(), transfer.getTransferType(), international);
-
+                                                       ExternalTransferRequest request, PaymentRail rail,
+                                                       BigDecimal feeAmount,
+                                                       WireComplianceService.WireHoldDecision hold) {
         transfer.setDisplayStatus(DisplayTransferStatus.Compliance_Hold);
         transfer.setPendingApproval(true);
         transfer.setRiskScore(88);
@@ -348,6 +643,10 @@ public class TransferService {
                         "counterparty", request.getRecipientName(),
                         "rail", railLabel,
                         "reasons", String.join("; ", hold.getReasons())));
+
+        telegramAlertService.transferEvent("TRANSFER HELD FOR APPROVAL", transfer,
+                request.getUsdEquivalent(),
+                "Reasons: " + String.join("; ", hold.getReasons()));
 
         return new MessageResponse(false, hold.getSummaryMessage(), true, transfer.getReference());
     }
@@ -381,7 +680,29 @@ public class TransferService {
                         "counterparty", request.getRecipientName(),
                         "rail", "ACH"));
 
+        telegramAlertService.transferEvent("ACH TRANSFER HELD FOR TREASURY APPROVAL", transfer,
+                null,
+                "Amount exceeds the automated ACH threshold of $25,000.");
+
         return new MessageResponse(false, "ACH transfer placed on hold for treasury approval. Funds are reserved until authorized.", true, transfer.getReference());
+    }
+
+    /**
+     * USD principal actually reserved/moved for this transfer. SWIFT wires reserve the
+     * USD equivalent of the foreign principal (converted at the quoted rate); every
+     * other rail moves the transfer amount as-is.
+     */
+    private BigDecimal resolveUsdPrincipal(Transfer transfer) {
+        if (transfer.getTransferType() == TransferType.SWIFT && transfer.getId() != null) {
+            Optional<TransferDetail> detailOpt = transferDetailRepository.findByTransfer_Id(transfer.getId());
+            if (detailOpt.isPresent()) {
+                BigDecimal usd = detailOpt.get().getUsdEquivalent();
+                if (usd != null && usd.compareTo(BigDecimal.ZERO) > 0) {
+                    return usd;
+                }
+            }
+        }
+        return transfer.getAmount();
     }
 
     /**
@@ -390,10 +711,12 @@ public class TransferService {
      */
     private MessageResponse settleTransferNow(Transfer transfer, Account suspenseAccount,
                                               PaymentRail rail, BigDecimal feeAmount) {
-        suspenseAccount.setBalance(suspenseAccount.getBalance().subtract(transfer.getAmount()));
-        suspenseAccount.setAvailableBalance(suspenseAccount.getAvailableBalance().subtract(transfer.getAmount()));
+        boolean treasuryApproved = Boolean.TRUE.equals(transfer.getPendingApproval());
+        BigDecimal principal = resolveUsdPrincipal(transfer);
+        suspenseAccount.setBalance(suspenseAccount.getBalance().subtract(principal));
+        suspenseAccount.setAvailableBalance(suspenseAccount.getAvailableBalance().subtract(principal));
         accountRepository.save(suspenseAccount);
-        createLedgerEntry(suspenseAccount, transfer, EntryType.DEBIT, transfer.getAmount(), suspenseAccount.getBalance());
+        createLedgerEntry(suspenseAccount, transfer, EntryType.DEBIT, principal, suspenseAccount.getBalance());
 
         Settlement settlement = new Settlement();
         settlement.setTransfer(transfer);
@@ -416,7 +739,15 @@ public class TransferService {
         recordTransferSuccess(transfer.getUser(), transfer, transfer.getCounterpartyName(),
                 railName + " transfer");
 
-        return new MessageResponse(true, "External transfer completed. Reference: " + transfer.getReference() + ". Fee charged: " + feeAmount);
+        if (treasuryApproved || principal.compareTo(new BigDecimal("10000")) >= 0) {
+            telegramAlertService.transferEvent(treasuryApproved
+                            ? "TRANSFER APPROVED & SETTLED" : "LARGE TRANSFER SETTLED",
+                    transfer, principal,
+                    treasuryApproved ? "Released by treasury approval." : null);
+        }
+
+        return new MessageResponse(true, "External transfer completed. Reference: " + transfer.getReference() + ". Fee charged: " + feeAmount,
+                false, transfer.getReference());
     }
 
     /**
@@ -456,17 +787,18 @@ public class TransferService {
                 .orElseThrow(() -> new IllegalArgumentException("Fee account not found"));
         BigDecimal fee = transfer.getTransferFee() != null && transfer.getTransferFee().getFeeAmount() != null
                 ? transfer.getTransferFee().getFeeAmount() : BigDecimal.ZERO;
-        BigDecimal totalDeduction = transfer.getAmount().add(fee);
+        BigDecimal principal = resolveUsdPrincipal(transfer);
+        BigDecimal totalDeduction = principal.add(fee);
 
         sender.setBalance(sender.getBalance().add(totalDeduction));
         sender.setAvailableBalance(sender.getAvailableBalance().add(totalDeduction));
         accountRepository.save(sender);
         createLedgerEntry(sender, transfer, EntryType.CREDIT, totalDeduction, sender.getBalance());
 
-        suspense.setBalance(suspense.getBalance().subtract(transfer.getAmount()));
-        suspense.setAvailableBalance(suspense.getAvailableBalance().subtract(transfer.getAmount()));
+        suspense.setBalance(suspense.getBalance().subtract(principal));
+        suspense.setAvailableBalance(suspense.getAvailableBalance().subtract(principal));
         accountRepository.save(suspense);
-        createLedgerEntry(suspense, transfer, EntryType.DEBIT, transfer.getAmount(), suspense.getBalance());
+        createLedgerEntry(suspense, transfer, EntryType.DEBIT, principal, suspense.getBalance());
 
         if (fee.compareTo(BigDecimal.ZERO) > 0) {
             feeAccount.setBalance(feeAccount.getBalance().subtract(fee));
@@ -504,6 +836,9 @@ public class TransferService {
                         "fee", fee,
                         "reason", "Rejected by treasury"));
 
+        telegramAlertService.transferEvent("TRANSFER DECLINED", transfer, principal,
+                "Rejected by treasury. Principal + fee returned to sender.");
+
         return new MessageResponse(true, "Transfer rejected and reversed. Funds returned to sender. Reference: " + transfer.getReference());
     }
 
@@ -520,6 +855,9 @@ public class TransferService {
         transfer.setRiskLevel("Critical");
         transferRepository.save(transfer);
         logStatus(transfer, TransferStatus.PENDING_PROCESSING, "Escalated to treasury compliance officer.");
+        telegramAlertService.transferEvent("TRANSFER ESCALATED", transfer,
+                resolveUsdPrincipal(transfer),
+                "Escalated to treasury compliance officer. Funds remain reserved.");
         return new MessageResponse(true, "Transfer escalated for further review. Reference: " + reference);
     }
 

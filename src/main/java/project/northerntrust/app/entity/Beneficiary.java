@@ -56,6 +56,9 @@ public class Beneficiary {
     @Column(length = 100)
     private String country;
 
+    @Column(name = "bank_address", length = 200)
+    private String bankAddress;
+
     @Column(name = "destination_user_id", length = 50)
     private String destinationUserId;
 
@@ -192,6 +195,14 @@ public class Beneficiary {
 
     public void setCountry(String country) {
         this.country = country;
+    }
+
+    public String getBankAddress() {
+        return bankAddress;
+    }
+
+    public void setBankAddress(String bankAddress) {
+        this.bankAddress = bankAddress;
     }
 
     public String getDestinationUserId() {
