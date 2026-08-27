@@ -155,30 +155,30 @@ public class DashboardDataSeeder implements CommandLineRunner {
 
     private void seedBeneficiaries(User user) {
         saveBen(user, "BEN-001", BeneficiaryType.BANK, "Lindqvist & Strand Law LLP", "Entertainment Legal Counsel",
-                "Citibank N.A.", "•••• •••• •••• 7834", "021000089", "United States",
+                "Citibank N.A.", "•••••••7834", "021000089", "United States",
                 new BigDecimal("50000"), new BigDecimal("150000"), TrustLevel.Trusted, true,
                 LocalDateTime.now().minusDays(5), "388 Greenwich Street, New York, NY 10013, United States");
         saveBen(user, "BEN-002", BeneficiaryType.INTERNAL, "Skarsgard Reserve Sweep", "Internal Savings Transfer",
-                null, null, null, null, new BigDecimal("10000"), new BigDecimal("25000"),
+                null, "INT-221457-002", null, null, new BigDecimal("10000"), new BigDecimal("25000"),
                 TrustLevel.Trusted, true, LocalDateTime.now().minusDays(1), null);
         patchBen("BEN-002", b -> {
             b.setDestinationUserId("USR-221457");
             b.setEmailOrPhone("alexander.skarsgard@northerntrust.com");
         });
         saveBen(user, "BEN-003", BeneficiaryType.BANK, "Gustafsson Properties AB", "Real Estate Holding Company",
-                "Handelsbanken", "•••• •••• •••• 2156", "SWedishSESS", "Sweden",
+                "Handelsbanken", "SE35 5000 9420 0007 84", "HANDSESS", "Sweden",
                 new BigDecimal("75000"), new BigDecimal("200000"), TrustLevel.Verified, true,
                 LocalDateTime.now().minusDays(12), "Kungsgatan 1, 111 43 Stockholm, Sweden");
         saveBen(user, "BEN-004", BeneficiaryType.BANK, "Meridian Capital Partners", "Investment Advisory Fees",
-                "Goldman Sachs Bank USA", "•••• •••• •••• 5501", "021000218", "United States",
+                "Goldman Sachs Bank USA", "•••••••5501", "021000021", "United States",
                 new BigDecimal("25000"), new BigDecimal("100000"), TrustLevel.Verified, true,
                 LocalDateTime.now().minusDays(8), "200 West Street, New York, NY 10282, United States");
         saveBen(user, "BEN-005", BeneficiaryType.BANK, "Swedish Red Cross Foundation", "Annual Charitable Contribution",
-                "Nordea Bank Abp", "•••• •••• •••• 8843", "NDEAFIHH", "Finland",
+                "Nordea Bank Abp", "FI35 5000 9420 0007 84", "NDEAFIHH", "Finland",
                 new BigDecimal("5000"), new BigDecimal("50000"), TrustLevel.Verified, true,
                 LocalDateTime.now().minusDays(30), "Satamakatu 3, 00020 Helsinki, Finland");
         saveBen(user, "BEN-006", BeneficiaryType.BANK, "Lloyd's of London Syndicate", "Keyman Insurance Premium",
-                "Barclays Bank PLC", "•••• •••• •••• 6697", "BARCGB22XXX", "United Kingdom",
+                "Barclays Bank PLC", "20-45-67 / 73846219", "BARCGB22XXX", "United Kingdom",
                 new BigDecimal("15000"), new BigDecimal("15000"), TrustLevel.New, false, null,
                 "1 Churchill Place, London E14 5HP, United Kingdom");
     }
