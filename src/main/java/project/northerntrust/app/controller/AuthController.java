@@ -44,11 +44,13 @@ public class AuthController {
     public ResponseEntity<LoginResponse> verifyLoginOtp(
             @RequestBody OtpVerifyRequest request,
             HttpServletRequest httpRequest) {
+        String ip = clientIp(httpRequest);
         LoginResponse response = authenticationService.verifyLoginOtp(
                 request.getAccountNumber(),
-                request.getCode());
+                request.getCode(),
+                ip,
+                httpRequest.getHeader("User-Agent"));
         if (response.isSuccess()) {
-            String ip = clientIp(httpRequest);
             notificationService.recordLogin(
                     request.getAccountNumber(),
                     ip,

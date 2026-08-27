@@ -30,7 +30,7 @@ public class PaymentRail {
     @Column(name = "fee_fixed", precision = 15, scale = 2)
     private BigDecimal feeFixed;
 
-    @Column(name = "fee_percentage", precision = 5, scale = 2)
+    @Column(name = "fee_percentage", precision = 7, scale = 4)
     private BigDecimal feePercentage;
 
     @Column(name = "supported_currencies", columnDefinition = "TEXT")

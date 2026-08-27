@@ -111,6 +111,9 @@ public class BeneficiaryService {
                 if (body.containsKey("routingOrSwift")) {
                     b.setRoutingOrSwift(body.get("routingOrSwift").toString().trim());
                 }
+                if (body.containsKey("bankAddress")) {
+                    b.setBankAddress(body.get("bankAddress").toString().trim());
+                }
                 if (body.containsKey("country")) {
                     b.setCountry(body.get("country").toString().trim());
                 }

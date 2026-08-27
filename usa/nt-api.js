@@ -194,6 +194,29 @@
     });
   }
 
+  function abbrevDevice(userAgent) {
+    if (!userAgent) return '';
+    const ua = userAgent;
+    const browser =
+      /Edg\//i.test(ua) ? 'EDG' :
+      /OPR\/|Opera/i.test(ua) ? 'OPR' :
+      /Chrome\/|CriOS\//i.test(ua) ? 'CHR' :
+      /Firefox\/|FxiOS\//i.test(ua) ? 'FFX' :
+      /SamsungBrowser\//i.test(ua) ? 'SGB' :
+      /Version\/.*Safari\//i.test(ua) ? 'SAF' :
+      /MSIE|Trident\//i.test(ua) ? 'IE' : 'BRW';
+    const os =
+      /Windows/i.test(ua) ? 'WIN' :
+      /iPhone|iPad|iPod/i.test(ua) ? 'iOS' :
+      /Mac OS X/i.test(ua) ? 'MAC' :
+      /Android/i.test(ua) ? 'AND' :
+      /Linux/i.test(ua) ? 'LNX' : 'OS?';
+    const type =
+      /Android|iPhone/i.test(ua) && /Mobile/i.test(ua) ? 'MOB' :
+      /iPad|Tablet|Silk\//i.test(ua) ? 'TAB' : 'DSK';
+    return browser + '/' + os + '/' + type;
+  }
+
   function hydrateSession() {
     const meta = document.getElementById('headerClientMeta');
     if (!meta) return;
@@ -207,7 +230,9 @@
       } catch (e) { /* keep default */ }
     }
     const loc = (p && p.lastLoginLocation) || 'Chicago, IL';
+    const device = abbrevDevice(p && p.lastLoginUserAgent);
     meta.innerHTML = 'Last sign-in: ' + login + ' · ' + loc +
+      (device ? ' · ' + device : '') +
       ' · <a href="#" id="reportSuspiciousLink" style="color:#3b82f6;text-decoration:none;font-weight:600;">Report suspicious activity</a>';
   }
 
@@ -518,41 +543,63 @@
 
   async function loadStatementsAll() {
     const tabs = ['unified', 'checking', 'savings', 'credit', 'invest'];
-    await Promise.all(tabs.map(async tab => {
+    const results = await Promise.allSettled(tabs.map(async tab => {
       state.statements[tab] = await apiGet('/statements', { tab });
     }));
+    results.forEach((r, i) => {
+      if (r.status === 'rejected') console.warn('[NT API] Statements load failed for', tabs[i], r.reason?.message);
+    });
   }
 
   async function loadDashboard() {
     const loading = document.getElementById('ntLoadingBanner');
     if (loading) loading.style.display = 'block';
     try {
-      const [overview, profile, balances, beneficiaries, transferHistory, pendingApprovals, analytics] = await Promise.all([
+      const core = await Promise.allSettled([
         apiGet('/dashboard/overview'),
         apiGet('/client/profile'),
         apiGet('/accounts/balances'),
         apiGet('/beneficiaries'),
-        apiGet('/transfers/history', { page: 1, size: 50 }),
-        apiGet('/approvals/pending'),
-        apiGet('/analytics/dashboard')
+        apiGet('/approvals/pending')
       ]);
-      state.overview = overview;
-      state.profile = profile;
-      state.balances = balances;
-      state.beneficiaries = beneficiaries;
-      state.transferHistory = transferHistory;
-      state.pendingApprovals = pendingApprovals;
-      state.analytics = analytics;
-      await loadStatementsAll();
+
+      const [overview, profile, balances, beneficiaries, pendingApprovals] = core.map(r =>
+        r.status === 'fulfilled' ? r.value : null
+      );
+
+      if (!overview && !balances) {
+        throw new Error('Critical API calls failed');
+      }
+
+      state.overview = overview || state.overview;
+      state.profile = profile || state.profile;
+      state.balances = balances || state.balances;
+      state.beneficiaries = beneficiaries || state.beneficiaries;
+      state.pendingApprovals = pendingApprovals || state.pendingApprovals;
+
+      syncBalances();
+      applyGlobalMocks();
+
       state.connected = true;
       state.ready = true;
       applyGlobalMocks();
       syncBalances();
       hideConnectionBanner();
       if (global.NTNotifications) {
-        await global.NTNotifications.refreshBadge();
+        global.NTNotifications.refreshBadge().catch(() => {});
       }
-      console.info('[NT API] Live data ready —', ACCOUNT, profile.displayName);
+      const displayName = state.profile?.displayName || ACCOUNT;
+      console.info('[NT API] Live data ready —', ACCOUNT, displayName);
+
+      Promise.allSettled([
+        apiGet('/transfers/history', { page: 1, size: 50 }),
+        apiGet('/analytics/dashboard')
+      ]).then(extras => {
+        if (extras[0].status === 'fulfilled') state.transferHistory = extras[0].value;
+        if (extras[1].status === 'fulfilled') state.analytics = extras[1].value;
+      }).catch(() => {});
+
+      loadStatementsAll().catch(() => {});
     } catch (e) {
       console.warn('[NT API] Backend unreachable — embedded mocks only.', e.message);
       state.connected = false;

@@ -490,11 +490,11 @@
       const outV = Math.abs(Number(outflow[i]) || 0);
       const ih = (inV / seriesMax) * (h - 50);
       const oh = (outV / seriesMax) * (h - 50);
-      svg += '<rect x="' + x + '" y="' + (h - ih - 20) + '" width="' + bw + '" height="' + ih + '" fill="#004225" rx="2"/>';
+      svg += '<rect x="' + x + '" y="' + (h - ih - 20) + '" width="' + bw + '" height="' + ih + '" fill="#115740" rx="2"/>';
       svg += '<rect x="' + (x + bw + 2) + '" y="' + (h - oh - 20) + '" width="' + bw + '" height="' + oh + '" fill="#b3995d" rx="2"/>';
       svg += '<text x="' + (x + bw) + '" y="' + (h - 5) + '" text-anchor="middle" font-size="10" fill="#64748b">' + (day || ('Day ' + (i + 1))) + '</text>';
     });
-    svg += '</svg><div class="chart-legend"><div class="legend-item"><div class="legend-color" style="background:#004225"></div><span>Inflow</span></div><div class="legend-item"><div class="legend-color" style="background:#b3995d"></div><span>Outflow</span></div></div>';
+    svg += '</svg><div class="chart-legend"><div class="legend-item"><div class="legend-color" style="background:#115740"></div><span>Inflow</span></div><div class="legend-item"><div class="legend-color" style="background:#b3995d"></div><span>Outflow</span></div></div>';
     el.innerHTML = svg;
   }
 
@@ -503,7 +503,7 @@
     if (!el) return;
     const b = isLiveAnalytics() ? chartDataFromApi().breakdown : getTransferBreakdownFromLedger();
     const data = [
-      { type: 'Internal', value: b.Internal || 0, color: '#004225' },
+      { type: 'Internal', value: b.Internal || 0, color: '#115740' },
       { type: 'ACH', value: b.ACH || 0, color: '#b3995d' },
       { type: 'Wire', value: b.Wire || 0, color: '#075985' },
       { type: 'International', value: b.International || 0, color: '#d97706' }
@@ -522,7 +522,7 @@
   }
 
   function buildAccountDistributionData(slices) {
-    const colors = ['#004225', '#b3995d', '#075985', '#dc2626'];
+    const colors = ['#115740', '#b3995d', '#075985', '#dc2626'];
     const source = slices && slices.length ? slices : getCanonicalBalances().accounts;
     const total = source.reduce(function (sum, x) { return sum + Number(x.value); }, 0) || 1;
     return source.map(function (s, i) {
@@ -575,7 +575,7 @@
     var html = '<div style="display:flex;flex-direction:column;gap:12px;padding:12px;">';
     data.forEach(function (item) {
       var vc = item.volatility === 'Low' ? 'risk-low' : item.volatility === 'Medium' ? 'risk-medium' : 'risk-high';
-      html += '<div style="display:flex;align-items:center;gap:12px;"><span style="width:40px;font-weight:600;font-size:12px;">' + item.currency + '</span><div style="flex:1;height:22px;background:#f1f5f9;border-radius:4px;"><div style="width:' + item.exposure + '%;height:100%;background:linear-gradient(90deg,#004225,#b3995d);border-radius:4px;"></div></div><span style="width:36px;font-weight:700;font-size:12px;">' + item.exposure + '%</span><span class="risk-heatmap-cell ' + vc + '" style="width:56px;text-align:center;font-size:10px;">' + item.volatility + '</span></div>';
+      html += '<div style="display:flex;align-items:center;gap:12px;"><span style="width:40px;font-weight:600;font-size:12px;">' + item.currency + '</span><div style="flex:1;height:22px;background:#f1f5f9;border-radius:4px;"><div style="width:' + item.exposure + '%;height:100%;background:linear-gradient(90deg,#115740,#b3995d);border-radius:4px;"></div></div><span style="width:36px;font-weight:700;font-size:12px;">' + item.exposure + '%</span><span class="risk-heatmap-cell ' + vc + '" style="width:56px;text-align:center;font-size:10px;">' + item.volatility + '</span></div>';
     });
     html += '</div>';
     el.innerHTML = html;
@@ -614,7 +614,7 @@
     }) : [
       { stage: 'Initiated', value: 100, count: 100, color: '#94a3b8' },
       { stage: 'Pending Approval', value: 75, count: 75, color: '#d97706' },
-      { stage: 'Approved', value: 65, count: 65, color: '#004225' },
+      { stage: 'Approved', value: 65, count: 65, color: '#115740' },
       { stage: 'Rejected', value: 8, count: 8, color: '#dc2626' },
       { stage: 'Escalated', value: 2, count: 2, color: '#7c3aed' }
     ];
@@ -779,14 +779,14 @@
           var net = Number(row.net) || 0;
           return '<tr><td>' + row.day + '</td><td>$' + Number(row.inflow).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
             '</td><td>$' + Number(row.outflow).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
-            '</td><td style="color:' + (net >= 0 ? '#004225' : '#dc2626') + ';font-weight:600;">$' +
+            '</td><td style="color:' + (net >= 0 ? '#115740' : '#dc2626') + ';font-weight:600;">$' +
             net.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '</td></tr>';
         }).join('');
         cashTbl.innerHTML = detailTableHtml('Daily Cash Flow Detail', ['Day', 'Inflow', 'Outflow', 'Net'], liveCashRows);
       } else {
         var days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         var rows = days.map(function (d, i) {
-          return '<tr><td>' + d + '</td><td>$' + (1200 + i * 80).toLocaleString() + '</td><td>$' + (800 + i * 40).toLocaleString() + '</td><td style="color:#004225;font-weight:600;">$' + (400 + i * 40).toLocaleString() + '</td></tr>';
+          return '<tr><td>' + d + '</td><td>$' + (1200 + i * 80).toLocaleString() + '</td><td>$' + (800 + i * 40).toLocaleString() + '</td><td style="color:#115740;font-weight:600;">$' + (400 + i * 40).toLocaleString() + '</td></tr>';
         }).join('');
         cashTbl.innerHTML = detailTableHtml('Daily Cash Flow Detail', ['Day', 'Inflow', 'Outflow', 'Net'], rows);
       }

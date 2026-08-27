@@ -27,25 +27,25 @@ public class DashboardController {
 
     @GetMapping("/dashboard/overview")
     public ResponseEntity<Map<String, Object>> overview(
-            @RequestParam(defaultValue = "8902410001") String accountNumber) {
+            @RequestParam(defaultValue = "2214578903") String accountNumber) {
         return ResponseEntity.ok(dashboardService.getOverview(accountNumber));
     }
 
     @GetMapping("/client/profile")
     public ResponseEntity<Map<String, Object>> clientProfile(
-            @RequestParam(defaultValue = "8902410001") String accountNumber) {
+            @RequestParam(defaultValue = "2214578903") String accountNumber) {
         return ResponseEntity.ok(dashboardService.getClientProfile(accountNumber));
     }
 
     @GetMapping("/accounts/balances")
     public ResponseEntity<Map<String, Object>> allBalances(
-            @RequestParam(defaultValue = "8902410001") String accountNumber) {
+            @RequestParam(defaultValue = "2214578903") String accountNumber) {
         return ResponseEntity.ok(dashboardService.getAccountBalances(accountNumber));
     }
 
     @PostMapping("/beneficiaries")
     public ResponseEntity<MessageResponse> createBeneficiary(
-            @RequestParam(defaultValue = "8902410001") String accountNumber,
+            @RequestParam(defaultValue = "2214578903") String accountNumber,
             @RequestBody Map<String, Object> body) {
         MessageResponse response = beneficiaryService.createBeneficiaryV1(accountNumber, body);
         if (response.isSuccess()) {
@@ -57,7 +57,7 @@ public class DashboardController {
     @PatchMapping("/beneficiaries/{code}/limits")
     public ResponseEntity<MessageResponse> updateBeneficiaryLimits(
             @PathVariable String code,
-            @RequestParam(defaultValue = "8902410001") String accountNumber,
+            @RequestParam(defaultValue = "2214578903") String accountNumber,
             @RequestParam BigDecimal single,
             @RequestParam BigDecimal daily) {
         return ResponseEntity.ok(beneficiaryService.updateLimits(accountNumber, code, single, daily));
@@ -66,7 +66,7 @@ public class DashboardController {
     @PatchMapping("/beneficiaries/{code}/trust")
     public ResponseEntity<MessageResponse> updateBeneficiaryTrust(
             @PathVariable String code,
-            @RequestParam(defaultValue = "8902410001") String accountNumber,
+            @RequestParam(defaultValue = "2214578903") String accountNumber,
             @RequestParam boolean trusted) {
         return ResponseEntity.ok(beneficiaryService.updateTrust(accountNumber, code, trusted));
     }
@@ -74,14 +74,14 @@ public class DashboardController {
     @PatchMapping("/beneficiaries/{code}/status")
     public ResponseEntity<MessageResponse> updateBeneficiaryStatus(
             @PathVariable String code,
-            @RequestParam(defaultValue = "8902410001") String accountNumber,
+            @RequestParam(defaultValue = "2214578903") String accountNumber,
             @RequestParam String status) {
         return ResponseEntity.ok(beneficiaryService.updateStatus(accountNumber, code, BeneficiaryStatus.valueOf(status)));
     }
 
     @GetMapping("/beneficiaries")
     public ResponseEntity<List<Map<String, Object>>> beneficiaries(
-            @RequestParam(defaultValue = "8902410001") String accountNumber,
+            @RequestParam(defaultValue = "2214578903") String accountNumber,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String search) {
         return ResponseEntity.ok(dashboardService.getBeneficiaries(accountNumber, type, search));
@@ -89,7 +89,7 @@ public class DashboardController {
 
     @GetMapping("/transfers/history")
     public ResponseEntity<Map<String, Object>> transferHistory(
-            @RequestParam(defaultValue = "8902410001") String accountNumber,
+            @RequestParam(defaultValue = "2214578903") String accountNumber,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String status,
@@ -101,7 +101,7 @@ public class DashboardController {
 
     @GetMapping("/statements")
     public ResponseEntity<List<Map<String, Object>>> statements(
-            @RequestParam(defaultValue = "8902410001") String accountNumber,
+            @RequestParam(defaultValue = "2214578903") String accountNumber,
             @RequestParam(defaultValue = "unified") String tab,
             @RequestParam(required = false) String period,
             @RequestParam(required = false) String type,
@@ -112,7 +112,7 @@ public class DashboardController {
 
     @GetMapping("/approvals/pending")
     public ResponseEntity<List<Map<String, Object>>> pendingApprovals(
-            @RequestParam(defaultValue = "8902410001") String accountNumber) {
+            @RequestParam(defaultValue = "2214578903") String accountNumber) {
         return ResponseEntity.ok(dashboardService.getPendingApprovals(accountNumber));
     }
 
@@ -120,13 +120,13 @@ public class DashboardController {
     public ResponseEntity<MessageResponse> approvalAction(
             @PathVariable String reference,
             @PathVariable String action,
-            @RequestParam(defaultValue = "8902410001") String accountNumber) {
+            @RequestParam(defaultValue = "2214578903") String accountNumber) {
         return ResponseEntity.ok(dashboardService.approveTransfer(accountNumber, reference, action));
     }
 
     @GetMapping("/analytics/dashboard")
     public ResponseEntity<Map<String, Object>> analytics(
-            @RequestParam(defaultValue = "8902410001") String accountNumber,
+            @RequestParam(defaultValue = "2214578903") String accountNumber,
             @RequestParam(required = false) String timeRange,
             @RequestParam(required = false) String accountScope,
             @RequestParam(required = false) String currency,
@@ -145,21 +145,21 @@ public class DashboardController {
 
     @PatchMapping("/cards/freeze")
     public ResponseEntity<MessageResponse> freezeCard(
-            @RequestParam(defaultValue = "8902410001") String accountNumber,
+            @RequestParam(defaultValue = "2214578903") String accountNumber,
             @RequestParam boolean frozen) {
         return ResponseEntity.ok(dashboardService.freezeCard(accountNumber, frozen));
     }
 
     @PostMapping("/otp/request")
     public ResponseEntity<Map<String, Object>> requestOtp(
-            @RequestParam(defaultValue = "8902410001") String accountNumber,
+            @RequestParam(defaultValue = "2214578903") String accountNumber,
             @RequestParam(defaultValue = "TRANSFER") String purpose) {
         return ResponseEntity.ok(otpService.requestOtp(accountNumber, purpose));
     }
 
     @PostMapping("/otp/verify")
     public ResponseEntity<Map<String, Object>> verifyOtp(
-            @RequestParam(defaultValue = "8902410001") String accountNumber,
+            @RequestParam(defaultValue = "2214578903") String accountNumber,
             @RequestParam String code,
             @RequestParam(defaultValue = "TRANSFER") String purpose) {
         project.northerntrust.app.entity.enums.OtpPurpose otpPurpose;
@@ -173,7 +173,7 @@ public class DashboardController {
 
     @GetMapping("/accounts/balance")
     public ResponseEntity<Map<String, Object>> accountBalance(
-            @RequestParam(defaultValue = "8902410001") String accountNumber,
+            @RequestParam(defaultValue = "2214578903") String accountNumber,
             @RequestParam(defaultValue = "checking") String productKey) {
         Map<String, Object> body = new java.util.LinkedHashMap<>();
         body.put("productKey", productKey);

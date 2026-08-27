@@ -6,7 +6,7 @@
   <meta name="description" content="Northern Trust Treasury Administration — review and approve transfers.">
   <title>Treasury Administration | Northern Trust</title>
   <link rel="icon" href="public/favicon.svg" type="image/svg+xml">
-  <meta name="theme-color" content="#004225">
+  <meta name="theme-color" content="#115740">
   <link rel="stylesheet" href="admin.css">
 </head>
 <body>
@@ -31,7 +31,7 @@
       <form id="adminLoginForm" novalidate>
         <div class="admin-field">
           <label for="adminUserId">Admin User ID</label>
-          <input type="text" id="adminUserId" autocomplete="username" placeholder="0000" inputmode="numeric" required>
+          <input type="text" id="adminUserId" autocomplete="username" placeholder="100000" inputmode="numeric" required>
         </div>
         <div class="admin-field">
           <label for="adminPassword">Password</label>
@@ -147,6 +147,7 @@
       <section id="tab-accounts" class="admin-tab-panel">
         <div class="admin-panel-head">
           <h2>Accounts</h2>
+          <input type="text" id="accountsSearch" class="admin-search" placeholder="Search account, owner, product…">
         </div>
         <div class="admin-table-wrap">
           <table class="admin-table">
@@ -167,6 +168,6 @@
     </main>
   </div>
 
-  <script src="admin.js"></script>
+  <script src="admin.js?v=4"></script>
 </body>
 </html>

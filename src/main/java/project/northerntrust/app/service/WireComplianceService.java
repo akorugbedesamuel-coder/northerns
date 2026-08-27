@@ -18,7 +18,9 @@ import java.util.List;
 
 /**
  * AML / risk and savings-withdrawal policy for outbound wires.
- * All wire and SWIFT transfers are held for manual review (no funds released to rail).
+ * Wires are screened automatically; only transfers that breach policy
+ * (large amounts, savings withdrawal caps, or AML freezes) are held for
+ * manual treasury review. Standard Fedwire/SWIFT wires pass pre-screening.
  */
 @Service
 public class WireComplianceService {
@@ -29,6 +31,9 @@ public class WireComplianceService {
     /** Typical monthly wire volume used for spike detection (demo profile) */
     private static final BigDecimal BASELINE_MONTHLY_WIRE_USD = new BigDecimal("500");
 
+    /** Transfers at or above this USD amount are always routed to manual treasury review. */
+    private static final BigDecimal LARGE_WIRE_HOLD_USD = new BigDecimal("100000");
+
     @Autowired
     private TransferRepository transferRepository;
 
@@ -37,48 +42,59 @@ public class WireComplianceService {
 
     public WireHoldDecision evaluateWireTransfer(User user, Account sender, BigDecimal amount,
                                                  TransferType transferType, boolean international) {
-        List<String> reasons = new ArrayList<>();
+        List<String> holdReasons = new ArrayList<>();
+        List<String> infoNotes = new ArrayList<>();
 
-        if (transferType == TransferType.WIRE || transferType == TransferType.SWIFT) {
-            reasons.add("Outbound wire transfers are screened under Anti-Money Laundering (AML) controls.");
-            reasons.add("Sudden volume spikes, structuring patterns, or rapid repetitive wires may trigger a hold.");
+        // Large-value wires always go to dual-control review.
+        if (amount != null && amount.compareTo(LARGE_WIRE_HOLD_USD) >= 0) {
+            holdReasons.add("Amount materially exceeds typical wire activity and requires secondary approver release.");
         }
 
-        if (amount != null && amount.compareTo(new BigDecimal("100000")) >= 0) {
-            reasons.add("Amount materially exceeds typical monthly wire activity (e.g. $500/month baseline vs. large international wires).");
-        } else if (amount != null && amount.compareTo(new BigDecimal("10000")) > 0
-                && amount.compareTo(BASELINE_MONTHLY_WIRE_USD.multiply(new BigDecimal("20"))) > 0) {
-            reasons.add("Transfer volume spike detected relative to your recent wire profile.");
-        }
-
-        if (international) {
-            reasons.add("International / SWIFT destinations may require enhanced due diligence and OFAC screening.");
-        }
-
+        // Reg D-style savings outgoing transfer cap.
+        int outgoingThisMonth = 0;
         if (sender.getProductKey() == ProductKey.SAVINGS) {
             LocalDateTime monthStart = LocalDateTime.now()
                     .with(TemporalAdjusters.firstDayOfMonth())
                     .withHour(0).withMinute(0).withSecond(0).withNano(0);
-            long outgoingThisMonth = transferRepository.countByFromAccountAndCreatedAtAfterAndTransferTypeIn(
+            outgoingThisMonth = (int) transferRepository.countByFromAccountAndCreatedAtAfterAndTransferTypeIn(
                     sender, monthStart,
                     Arrays.asList(TransferType.WIRE, TransferType.SWIFT, TransferType.ACH));
 
             if (outgoingThisMonth >= SAVINGS_MONTHLY_OUTGOING_LIMIT) {
-                reasons.add("Savings withdrawal limit reached: "
+                holdReasons.add("Savings withdrawal limit reached: "
                         + SAVINGS_MONTHLY_OUTGOING_LIMIT
-                        + " outgoing transfers per month (Regulation D–style restriction). Further transfers may incur fees or temporary restriction.");
+                        + " outgoing transfers per month (Regulation D–style restriction).");
             } else if (outgoingThisMonth >= SAVINGS_MONTHLY_OUTGOING_LIMIT - 1) {
-                reasons.add("Approaching savings outgoing limit: "
+                infoNotes.add("Approaching savings outgoing limit: "
                         + (outgoingThisMonth + 1) + " of " + SAVINGS_MONTHLY_OUTGOING_LIMIT + " allowed this month.");
             }
         }
 
+        // Volume-spike note (informational unless combined with the caps above).
+        if (amount != null && amount.compareTo(new BigDecimal("10000")) > 0
+                && amount.compareTo(BASELINE_MONTHLY_WIRE_USD.multiply(new BigDecimal("20"))) > 0) {
+            infoNotes.add("Transfer volume spike detected relative to your recent wire profile.");
+        }
+
+        // International destinations get standard enhanced due diligence / OFAC screening.
+        if (international) {
+            infoNotes.add("International destination screened for OFAC / enhanced due diligence.");
+        }
+
+        // AML velocity/structuring/freeze rules throw on a hard block.
         amlRiskService.analyzeTransfer(user, amount, sender.getAccountNumber());
 
-        String summary = "Wire initiated — placed on compliance hold. Funds have not been released. "
-                + "Manual treasury review is required before settlement.";
+        boolean hold = !holdReasons.isEmpty();
+        List<String> allNotes = new ArrayList<>(infoNotes);
+        allNotes.addAll(holdReasons);
 
-        return new WireHoldDecision(true, reasons, summary);
+        if (hold) {
+            String summary = "Wire initiated — placed on compliance hold. Funds have not been released. "
+                    + "Manual treasury review is required before settlement.";
+            return new WireHoldDecision(true, allNotes, summary);
+        }
+        return new WireHoldDecision(false, allNotes,
+                "Wire cleared AML/OFAC pre-screening. Funds released per the selected rail processing timeline.");
     }
 
     public static final class WireHoldDecision {

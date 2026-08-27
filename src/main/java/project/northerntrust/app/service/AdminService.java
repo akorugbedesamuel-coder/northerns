@@ -52,16 +52,20 @@ public class AdminService {
     public Map<String, Object> login(String accountNumber, String password) {
         Map<String, Object> result = new LinkedHashMap<>();
         Optional<User> userOpt = userRepository.findByAccountNumber(accountNumber);
-        if (userOpt.isEmpty() || userOpt.get().getAdminRole() == null
-                || userOpt.get().getAdminRole() != AdminRole.ADMIN) {
+        if (userOpt.isEmpty()) {
             result.put("success", false);
-            result.put("message", "Invalid admin credentials");
+            result.put("message", "No account found for this Admin User ID");
             return result;
         }
         User user = userOpt.get();
+        if (user.getAdminRole() == null || user.getAdminRole() != AdminRole.ADMIN) {
+            result.put("success", false);
+            result.put("message", "This account does not have administrator access");
+            return result;
+        }
         if (!passwordEncoder.matches(password, user.getPassword())) {
             result.put("success", false);
-            result.put("message", "Invalid admin credentials");
+            result.put("message", "Incorrect password");
             return result;
         }
         String token = UUID.randomUUID().toString().replace("-", "");

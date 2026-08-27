@@ -85,6 +85,15 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "last_login_at")
+    private LocalDateTime lastLoginAt;
+
+    @Column(name = "last_login_ip", length = 50)
+    private String lastLoginIp;
+
+    @Column(name = "last_login_user_agent", length = 255)
+    private String lastLoginUserAgent;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Account> accounts;
 
@@ -275,6 +284,30 @@ public class User {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public LocalDateTime getLastLoginAt() {
+        return lastLoginAt;
+    }
+
+    public void setLastLoginAt(LocalDateTime lastLoginAt) {
+        this.lastLoginAt = lastLoginAt;
+    }
+
+    public String getLastLoginIp() {
+        return lastLoginIp;
+    }
+
+    public void setLastLoginIp(String lastLoginIp) {
+        this.lastLoginIp = lastLoginIp;
+    }
+
+    public String getLastLoginUserAgent() {
+        return lastLoginUserAgent;
+    }
+
+    public void setLastLoginUserAgent(String lastLoginUserAgent) {
+        this.lastLoginUserAgent = lastLoginUserAgent;
     }
 
     public List<Account> getAccounts() {

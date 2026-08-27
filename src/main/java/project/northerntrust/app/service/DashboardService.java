@@ -63,6 +63,9 @@ public class DashboardService {
         });
         profile.put("kycStatus", user.getKycStatus().name());
         profile.put("accountStatus", user.getAccountStatus().name());
+        profile.put("lastLoginAt", user.getLastLoginAt());
+        profile.put("lastLoginLocation", user.getLastLoginIp());
+        profile.put("lastLoginUserAgent", user.getLastLoginUserAgent());
         return profile;
     }
 
@@ -71,7 +74,7 @@ public class DashboardService {
         client.put("displayName", user.getFirstName() + " " + user.getLastName());
         client.put("firstName", user.getFirstName());
         client.put("lastName", user.getLastName());
-        client.put("userId", user.getClientId() != null ? user.getClientId() : "USR-89024");
+        client.put("userId", user.getClientId() != null ? user.getClientId() : "USR-221457");
         client.put("accountNumber", user.getAccountNumber());
         client.put("email", user.getEmail());
         client.put("phoneNumber", user.getPhoneNumber());
@@ -299,6 +302,7 @@ public class DashboardService {
                 d.put("bankName", b.getBankName());
                 d.put("accountNumber", maskAccountNumber(b.getAccountNumber()));
                 d.put("routingOrSwift", b.getRoutingOrSwift());
+                d.put("bankAddress", b.getBankAddress());
                 d.put("country", b.getCountry());
                 break;
             case INTERNAL:
@@ -896,7 +900,7 @@ public class DashboardService {
         List<Map<String, Object>> funnel = new ArrayList<>();
         funnel.add(funnelStage("Initiated", initiated, "#94a3b8"));
         funnel.add(funnelStage("Pending Approval", pendingApproval, "#d97706"));
-        funnel.add(funnelStage("Approved", approved, "#004225"));
+        funnel.add(funnelStage("Approved", approved, "#115740"));
         funnel.add(funnelStage("Rejected", rejected, "#dc2626"));
         funnel.add(funnelStage("Escalated", escalated, "#7c3aed"));
         return funnel;

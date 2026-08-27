@@ -164,9 +164,10 @@
     return false;
   }
 
-  async function runWithOtp(callback, amount, ben) {
+  async function runWithOtp(callback, amount, ben, force) {
     if (!global.NTApi?.state?.connected) return callback();
-    if (!needsOtp(amount, ben)) return callback();
+    if (!force && !needsOtp(amount, ben)) return callback();
+    global.ensureSharedModals?.();
     try {
       const req = await global.NTApi.requestOtp();
       const demo = document.getElementById('mockOtpDemoBlock');
@@ -178,7 +179,8 @@
       global.otpSuccessCallback = async () => {
         try { await callback(); } catch (e) { NTUI.error(e.message); }
       };
-      document.getElementById('otpErrorMsg').style.display = 'none';
+      const errEl = document.getElementById('otpErrorMsg');
+      if (errEl) errEl.style.display = 'none';
       document.querySelectorAll('.otp-digit-input').forEach(el => { el.value = ''; el.classList.remove('success'); });
       document.getElementById('modalOTP').classList.add('active');
       setTimeout(() => document.getElementById('otpDigit1')?.focus(), 100);
@@ -387,6 +389,7 @@
           NTUI.success(`Transaction Settled: $${amount.toLocaleString()} USD dispatched.`);
           global.closeBenModal('modalSendMoney');
           await refreshAfterMutation();
+          global.refreshSourceAccountDropdowns?.();
         } else NTUI.error(res.message);
       } catch (e) { NTUI.error(e.message); }
     };
@@ -411,7 +414,12 @@
     const amt = parseFloat(document.getElementById('achAmount').value) || 0;
     const ben = global.beneficiariesMock?.find(b => b.beneficiaryId === benId);
     const bal = balanceEntry(src);
-    if (document.querySelector('input[name="achDirection"]:checked')?.value === 'credit' && amt > bal.val) {
+    const direction = document.querySelector('input[name="achDirection"]:checked')?.value || 'credit';
+    const sameDay = document.querySelector('input[name="achDelivery"]:checked')?.value === 'same_day';
+    const fee = global.achFeeFor ? global.achFeeFor(sameDay) : (sameDay ? 15 : 0);
+    const total = direction === 'credit' ? amt + fee : amt - fee;
+    if (!window.validateACHTransferForm?.({ force: true })) return;
+    if (direction === 'credit' && total > bal.val) {
       NTUI.error('Insufficient funds'); return;
     }
     const execute = async () => {
@@ -422,13 +430,27 @@
             const res = await global.NTApi.postAchTransfer({
               sourceAccountKey: src, beneficiaryId: benId, amount: amt,
               memo: document.getElementById('achMemo')?.value || 'ACH Transfer',
-              direction: document.querySelector('input[name="achDirection"]:checked')?.value || 'credit'
+              direction,
+              effectiveDate: document.getElementById('achEffectiveDate')?.value,
+              secCode: document.getElementById('achSecCode')?.value || 'PPD',
+              scheduling: document.getElementById('achScheduling')?.value || 'once',
+              sameDay,
+              achAuthAck: document.getElementById('achAuthAck')?.checked || false,
+              recipientName: document.getElementById('achRecipientName')?.value || ben?.displayName || '',
+              accountNumber: document.getElementById('achRecipientAccount')?.value || '',
+              routingNumber: document.getElementById('achRoutingNumber')?.value || '',
+              bankName: document.getElementById('achBankName')?.value || '',
+              bankAddress: document.getElementById('achBankAddress')?.value || '',
+              fee
             });
             if (res.success) {
-              NTUI.success(`ACH Dispatched: $${amt.toLocaleString()} USD settlement initiated.`);
+              const settle = res.settlementDate || document.getElementById('achReviewSettlementDate')?.innerText || '1–3 business days';
+              NTUI.success(`ACH ${direction === 'debit' ? 'Debit' : 'Credit'} queued: $${amt.toLocaleString()} USD. Settlement: ${settle}` + (res.reference ? ` (Ref: ${res.reference})` : ''));
               document.getElementById('achTransferForm')?.reset();
+              if (global._achFormDirty) global._achFormDirty = {};
               global.updateACHTransferPreview?.();
               await refreshAfterMutation();
+              global.refreshSourceAccountDropdowns?.();
             } else NTUI.error(res.message);
           } catch (e) { NTUI.error(e.message); }
         });
@@ -438,13 +460,27 @@
           const res = await global.NTApi.postAchTransfer({
             sourceAccountKey: src, beneficiaryId: benId, amount: amt,
             memo: document.getElementById('achMemo')?.value || 'ACH Transfer',
-            direction: document.querySelector('input[name="achDirection"]:checked')?.value || 'credit'
+            direction,
+            effectiveDate: document.getElementById('achEffectiveDate')?.value,
+            secCode: document.getElementById('achSecCode')?.value || 'PPD',
+            scheduling: document.getElementById('achScheduling')?.value || 'once',
+            sameDay,
+            achAuthAck: document.getElementById('achAuthAck')?.checked || false,
+              recipientName: document.getElementById('achRecipientName')?.value || ben?.displayName || '',
+              accountNumber: document.getElementById('achRecipientAccount')?.value || '',
+              routingNumber: document.getElementById('achRoutingNumber')?.value || '',
+              bankName: document.getElementById('achBankName')?.value || '',
+              bankAddress: document.getElementById('achBankAddress')?.value || '',
+            fee
           });
           if (res.success) {
-            NTUI.success(`ACH Dispatched: $${amt.toLocaleString()} USD settlement initiated.`);
+            const settle = res.settlementDate || document.getElementById('achReviewSettlementDate')?.innerText || '1–3 business days';
+            NTUI.success(`ACH ${direction === 'debit' ? 'Debit' : 'Credit'} queued: $${amt.toLocaleString()} USD. Settlement: ${settle}` + (res.reference ? ` (Ref: ${res.reference})` : ''));
             document.getElementById('achTransferForm')?.reset();
+            if (global._achFormDirty) global._achFormDirty = {};
             global.updateACHTransferPreview?.();
             await refreshAfterMutation();
+            global.refreshSourceAccountDropdowns?.();
           } else NTUI.error(res.message);
         } catch (e) { NTUI.error(e.message); }
       }
@@ -466,10 +502,12 @@
       await global.NTNotifications.refreshBadge();
     }
     document.getElementById('wireTransferForm')?.reset();
+    if (global._wireFormDirty) global._wireFormDirty = {};
     global.fillWireBeneficiaryFromSelection?.();
     global.toggleWireFields?.();
     global.updateWireTransferPreview?.();
     await refreshAfterMutation();
+    global.refreshSourceAccountDropdowns?.();
   }
 
   /* ——— Wire ——— */
@@ -479,7 +517,15 @@
     const src = document.getElementById('wireSourceAccount').value;
     const benId = document.getElementById('wireBeneficiary').value;
     const amt = parseFloat(document.getElementById('wireAmount').value) || 0;
+    const priority = document.getElementById('wirePriority')?.value || 'Standard';
+    const currency = isSwift
+      ? (document.getElementById('wireSwiftCurrency')?.value || 'USD')
+      : 'USD';
+    const rate = global.WIRE_FX_RATES?.[currency] || 1;
+    const usdPrincipal = isSwift ? amt * rate : amt;
+    const fee = global.wireFeeFor ? global.wireFeeFor(isSwift, usdPrincipal, priority) : (isSwift ? 35 + usdPrincipal * 0.005 : 25);
     const ben = global.beneficiariesMock?.find(b => b.beneficiaryId === benId);
+    if (!window.validateWireTransferForm?.({ force: true })) return;
     const execute = async () => {
       if (!global.NTApi?.state?.connected) return global._handleWireTransferSubmitOrig?.(event);
       if (typeof window.triggerTransferOverlay === 'function') {
@@ -488,17 +534,33 @@
             const res = await global.NTApi.postWireTransfer({
               sourceAccountKey: src, beneficiaryId: benId, amount: amt,
               network: isSwift ? 'swift' : 'domestic',
-              memo: document.getElementById('wirePurpose')?.value || 'Wire transfer',
-              amlAcknowledged: document.getElementById('wireAmlAck')?.checked
+              memo: document.getElementById('wireMemo')?.value || 'Wire transfer',
+              amlAcknowledged: document.getElementById('wireAmlAck')?.checked,
+              priority,
+              currency,
+              fxRate: isSwift ? rate : 1,
+              usdEquivalent: usdPrincipal,
+              recipientName: document.getElementById('wireRecipientName')?.value || ben?.displayName || '',
+              accountNumber: document.getElementById('wireRecipientAccount')?.value || '',
+              routingNumber: document.getElementById('wireDomesticRouting')?.value || '',
+              bankName: document.getElementById('wireBankName')?.value || '',
+              bankAddress: document.getElementById('wireBankAddress')?.value || '',
+              fee
             });
             if (res.held) {
               await handleWireComplianceHold(res, ben);
             } else if (res.success) {
-              NTUI.success(`Wire Transmitted: Funds cleared for ${ben.displayName}.`);
+              const settle = document.getElementById('wireReviewSettlement')?.innerText || 'same-day';
+              NTUI.success(
+                `${isSwift ? 'SWIFT wire queued' : 'Fedwire settled'}: ${ben ? ben.displayName : 'recipient'}. ` +
+                (res.reference ? `Ref: ${res.reference}. ` : '') + `Settlement: ${settle}`
+              );
               document.getElementById('wireTransferForm')?.reset();
+              if (global._wireFormDirty) global._wireFormDirty = {};
               global.fillWireBeneficiaryFromSelection?.();
               global.updateWireTransferPreview?.();
               await refreshAfterMutation();
+              global.refreshSourceAccountDropdowns?.();
             } else NTUI.error(res.message);
           } catch (e) { NTUI.error(e.message); }
         });
@@ -507,22 +569,39 @@
           const res = await global.NTApi.postWireTransfer({
             sourceAccountKey: src, beneficiaryId: benId, amount: amt,
             network: isSwift ? 'swift' : 'domestic',
-            memo: document.getElementById('wirePurpose')?.value || 'Wire transfer',
-            amlAcknowledged: document.getElementById('wireAmlAck')?.checked
+            memo: document.getElementById('wireMemo')?.value || 'Wire transfer',
+            amlAcknowledged: document.getElementById('wireAmlAck')?.checked,
+            priority,
+            currency,
+            fxRate: isSwift ? rate : 1,
+            usdEquivalent: usdPrincipal,
+              recipientName: document.getElementById('wireRecipientName')?.value || ben?.displayName || '',
+              accountNumber: document.getElementById('wireRecipientAccount')?.value || '',
+              routingNumber: document.getElementById('wireDomesticRouting')?.value || '',
+              bankName: document.getElementById('wireBankName')?.value || '',
+              bankAddress: document.getElementById('wireBankAddress')?.value || '',
+            fee
           });
           if (res.held) {
             await handleWireComplianceHold(res, ben);
           } else if (res.success) {
-            NTUI.success(`Wire Transmitted: Funds cleared for ${ben.displayName}.`);
+            const settle = document.getElementById('wireReviewSettlement')?.innerText || 'same-day';
+            NTUI.success(
+              `${isSwift ? 'SWIFT wire queued' : 'Fedwire settled'}: ${ben ? ben.displayName : 'recipient'}. ` +
+              (res.reference ? `Ref: ${res.reference}. ` : '') + `Settlement: ${settle}`
+            );
             document.getElementById('wireTransferForm')?.reset();
+            if (global._wireFormDirty) global._wireFormDirty = {};
             global.fillWireBeneficiaryFromSelection?.();
             global.updateWireTransferPreview?.();
             await refreshAfterMutation();
+            global.refreshSourceAccountDropdowns?.();
           } else NTUI.error(res.message);
         } catch (e) { NTUI.error(e.message); }
       }
     };
-    await runWithOtp(execute, isSwift ? amt * 1.09 : amt, ben);
+    // Wires always require strong multi-factor authentication.
+    await runWithOtp(execute, amt, ben, true);
   };
 
   global._ntLiveHandleWireTransferSubmit = global.handleWireTransferSubmit;
@@ -530,6 +609,7 @@
   /* ——— International ——— */
   let fxRatesCache = { EUR: 0.92, GBP: 0.79, JPY: 157.2, CHF: 0.90 };
 
+  global._updateIntlTransferPreviewOrig = global.updateIntlTransferPreview;
   global.updateIntlTransferPreview = function () {
     if (global._updateIntlTransferPreviewOrig) global._updateIntlTransferPreviewOrig();
     const src = document.getElementById('intlSourceAccount')?.value;
@@ -556,35 +636,46 @@
     const src = document.getElementById('intlSourceAccount').value;
     const benId = document.getElementById('intlBeneficiary').value;
     const amt = parseFloat(document.getElementById('intlAmount')?.value) || 0;
+    const recipientName = (document.getElementById('intlRecipientName')?.value || '').trim();
+    if (!recipientName) {
+      NTUI.error('Recipient full name is required for international transfers.');
+      document.getElementById('intlRecipientName')?.focus();
+      return;
+    }
+    const bankName = (document.getElementById('intlBankName')?.value || '').trim();
+    const bankAddress = (document.getElementById('intlBankAddress')?.value || '').trim();
+    const iban = (document.getElementById('intlIban')?.value || '').trim();
+    const swiftBic = (document.getElementById('intlSwiftBic')?.value || '').trim();
     const ben = global.beneficiariesMock?.find(b => b.beneficiaryId === benId);
     const execute = async () => {
       if (!global.NTApi?.state?.connected) return global._handleIntlTransferSubmitOrig?.(event);
+      const payload = {
+        sourceAccountKey: src, beneficiaryId: benId,
+        amount: amt, targetCurrency: document.getElementById('intlTargetCurrency')?.value,
+        purpose: document.getElementById('intlPurpose')?.value,
+        recipientName: recipientName, bankName: bankName, bankAddress: bankAddress,
+        iban: iban, swiftBic: swiftBic
+      };
       if (typeof window.triggerTransferOverlay === 'function') {
         window.triggerTransferOverlay(async () => {
           try {
-            const res = await global.NTApi.postIntlTransfer({
-              sourceAccountKey: src, beneficiaryId: benId,
-              amount: amt, targetCurrency: document.getElementById('intlTargetCurrency')?.value,
-              purpose: document.getElementById('intlPurpose')?.value
-            });
+            const res = await global.NTApi.postIntlTransfer(payload);
             if (res.success) {
-              NTUI.success(`Global FX Settled: ${amt.toLocaleString()} ${document.getElementById('intlTargetCurrency')?.value} dispatched.`);
+              NTUI.success(`Global FX Settled: ${amt.toLocaleString()} ${document.getElementById('intlTargetCurrency')?.value} dispatched to ${recipientName}.`);
               document.getElementById('intlTransferForm')?.reset();
               await refreshAfterMutation();
+              global.refreshSourceAccountDropdowns?.();
             } else NTUI.error(res.message);
           } catch (e) { NTUI.error(e.message); }
         });
       } else {
         try {
-          const res = await global.NTApi.postIntlTransfer({
-            sourceAccountKey: src, beneficiaryId: benId,
-            amount: amt, targetCurrency: document.getElementById('intlTargetCurrency')?.value,
-            purpose: document.getElementById('intlPurpose')?.value
-          });
+          const res = await global.NTApi.postIntlTransfer(payload);
           if (res.success) {
-            NTUI.success(`Global FX Settled: ${amt.toLocaleString()} ${document.getElementById('intlTargetCurrency')?.value} dispatched.`);
+            NTUI.success(`Global FX Settled: ${amt.toLocaleString()} ${document.getElementById('intlTargetCurrency')?.value} dispatched to ${recipientName}.`);
             document.getElementById('intlTransferForm')?.reset();
             await refreshAfterMutation();
+            global.refreshSourceAccountDropdowns?.();
           } else NTUI.error(res.message);
         } catch (e) { NTUI.error(e.message); }
       }
@@ -603,6 +694,8 @@
     // Clear warning banner first
     const w = document.getElementById('transferWarningBanner');
     if (w) w.style.display = 'none';
+
+    global.validateInternalTransferForm?.();
 
     if (!src) return;
     const s = balanceEntry(src);
@@ -640,11 +733,15 @@
     }
   };
 
+  global._updateACHTransferPreviewOrig = global.updateACHTransferPreview;
   global.updateACHTransferPreview = function () {
     if (global._updateACHTransferPreviewOrig) global._updateACHTransferPreviewOrig();
     const src = document.getElementById('achSourceAccount')?.value;
     const direction = document.querySelector('input[name="achDirection"]:checked')?.value || 'credit';
     const amt = parseFloat(document.getElementById('achAmount')?.value) || 0;
+    const sameDay = document.querySelector('input[name="achDelivery"]:checked')?.value === 'same_day';
+    const fee = global.achFeeFor ? global.achFeeFor(sameDay) : (sameDay ? 15 : 0);
+    const total = direction === 'credit' ? amt + fee : amt - fee;
     
     if (!src) return;
     const s = balanceEntry(src);
@@ -653,32 +750,34 @@
     
     if (o) o.innerText = fmt(s.val);
     if (n) {
-      const newBal = direction === 'credit' ? s.val - amt : s.val + amt;
+      const newBal = direction === 'credit' ? s.val - total : s.val + total;
       n.innerText = fmt(newBal);
     }
   };
 
+  global._updateWireTransferPreviewOrig = global.updateWireTransferPreview;
   global.updateWireTransferPreview = function () {
     if (global._updateWireTransferPreviewOrig) global._updateWireTransferPreviewOrig();
     const src = document.getElementById('wireSourceAccount')?.value;
     const amt = parseFloat(document.getElementById('wireAmount')?.value) || 0;
     const isSwift = document.querySelector('input[name="wireType"]:checked')?.value === 'swift';
-    const fee = isSwift ? 45.00 : 25.00;
-    
+    const priority = document.getElementById('wirePriority')?.value || 'Standard';
+
     if (!src) return;
     const s = balanceEntry(src);
     const o = document.getElementById('wirePreviewSourceOld');
     const n = document.getElementById('wirePreviewSourceNew');
-    
+
     if (o) o.innerText = fmt(s.val);
     if (n) {
-      // Wire amount in USD + fee
+      // Wire amount in USD + fee (same model the backend charges)
       let usdPrincipal = amt;
       if (isSwift) {
-        const rates = { EUR: 1.09, GBP: 1.25, JPY: 0.0065, CHF: 1.11 };
+        const rates = global.WIRE_FX_RATES || { EUR: 1.09, GBP: 1.25, JPY: 0.0065, CHF: 1.11 };
         const cur = document.getElementById('wireSwiftCurrency')?.value || 'USD';
         usdPrincipal = amt * (rates[cur] || 1);
       }
+      const fee = global.wireFeeFor ? global.wireFeeFor(isSwift, usdPrincipal, priority) : 25.0;
       n.innerText = fmt(s.val - (usdPrincipal + fee));
     }
   };

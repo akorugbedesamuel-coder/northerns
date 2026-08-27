@@ -39,16 +39,16 @@ public class SystemDataSeeder implements CommandLineRunner {
     }
 
     private void seedAdminUser() {
-        if (userRepository.existsByAccountNumber("0000")) {
+        if (userRepository.existsByAccountNumber("100000")) {
             return;
         }
         User admin = new User();
-        admin.setAccountNumber("0000");
-        admin.setPassword(passwordEncoder.encode("admin"));
+        admin.setAccountNumber("100000");
+        admin.setPassword(passwordEncoder.encode("NT@Admin2026!"));
         admin.setFirstName("Bank");
         admin.setLastName("Administrator");
         admin.setEmail("admin@northerntrust.com");
-        admin.setPhoneNumber("+00000000001");
+        admin.setPhoneNumber("+1 (312) 555-0100");
         admin.setAdminRole(project.northerntrust.app.entity.enums.AdminRole.ADMIN);
         admin.setKycStatus(project.northerntrust.app.entity.enums.KycStatus.VERIFIED);
         userRepository.save(admin);
