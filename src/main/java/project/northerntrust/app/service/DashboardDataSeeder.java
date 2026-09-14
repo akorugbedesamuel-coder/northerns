@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 public class DashboardDataSeeder implements CommandLineRunner {
 
     public static final String DEMO_ACCOUNT_NUMBER = "2214578903";
+    public static final String ANGELINA_ACCOUNT_NUMBER = "3314805502";
 
     private static final BigDecimal CHECKING_BALANCE = new BigDecimal("318750.00");
     private static final BigDecimal SAVINGS_BALANCE = new BigDecimal("35180.38");
@@ -25,6 +26,13 @@ public class DashboardDataSeeder implements CommandLineRunner {
     private static final BigDecimal CREDIT_AVAILABLE = new BigDecimal("200.00");
     private static final BigDecimal CREDIT_OWED = CREDIT_LIMIT.subtract(CREDIT_AVAILABLE);
     private static final BigDecimal INVEST_MARKET_VALUE = new BigDecimal("169400000.00");
+
+    private static final BigDecimal ANGELA_CHECKING_BALANCE = new BigDecimal("1284650.22");
+    private static final BigDecimal ANGELA_SAVINGS_BALANCE = new BigDecimal("540330.18");
+    private static final BigDecimal ANGELA_CREDIT_LIMIT = new BigDecimal("500000.00");
+    private static final BigDecimal ANGELA_CREDIT_AVAILABLE = new BigDecimal("124802.16");
+    private static final BigDecimal ANGELA_CREDIT_OWED = ANGELA_CREDIT_LIMIT.subtract(ANGELA_CREDIT_AVAILABLE);
+    private static final BigDecimal ANGELA_INVEST_MARKET_VALUE = new BigDecimal("241750000.00");
 
     @Autowired
     private UserRepository userRepository;
@@ -49,9 +57,18 @@ public class DashboardDataSeeder implements CommandLineRunner {
     public void run(String... args) {
         if (userRepository.findByAccountNumber(DEMO_ACCOUNT_NUMBER).isPresent()) {
             refreshExistingDemoUser();
-            return;
+        } else {
+            seedAlexanderSkarsgard();
         }
 
+        if (userRepository.findByAccountNumber(ANGELINA_ACCOUNT_NUMBER).isPresent()) {
+            refreshAngelinaJolieUser();
+        } else {
+            seedAngelinaJolie();
+        }
+    }
+
+    private void seedAlexanderSkarsgard() {
         User user = new User();
         user.setAccountNumber(DEMO_ACCOUNT_NUMBER);
         user.setClientId("USR-221457");
@@ -413,6 +430,239 @@ public class DashboardDataSeeder implements CommandLineRunner {
             t.setApprovalHistoryJson(history);
             transferRepository.save(t);
         });
+    }
+
+    private void seedAngelinaJolie() {
+        User user = new User();
+        user.setAccountNumber(ANGELINA_ACCOUNT_NUMBER);
+        user.setClientId("USR-331480");
+        user.setFirstName("Angelina");
+        user.setLastName("Jolie");
+        user.setEmail("angelina.jolie@northerntrust.com");
+        user.setPhoneNumber("+1 (310) 555-4477");
+        user.setDateOfBirth(LocalDate.of(1975, 6, 4));
+        user.setStreetAddress("3417 Devereux Drive");
+        user.setCity("Los Angeles");
+        user.setState("California");
+        user.setPostalCode("90027");
+        user.setCountry("United States");
+        user.setPassword(passwordEncoder.encode("Angel$JL1975!4407"));
+        user.setTransactionPinHash(passwordEncoder.encode("5678"));
+        user.setKycStatus(KycStatus.VERIFIED);
+        user.setAccountStatus(UserStatus.ACTIVE);
+        user.setLastLoginAt(LocalDateTime.now().minusHours(3));
+        user.setLastLoginIp("98.35.12.66");
+        user.setLastLoginUserAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15");
+        user = userRepository.save(user);
+
+        KycProfile kyc = new KycProfile();
+        kyc.setUser(user);
+        kyc.setSsn("234-55-8906");
+        kyc.setTaxId("12-3456789");
+        kyc.setBvn("33456123456");
+        kyc.setNin("NT-US-33148-KYC");
+        kyc.setIdType("US_PASSPORT");
+        kyc.setIdNumber("P10458371");
+        kyc.setNationality("American");
+        kyc.setOccupation("Actor, Filmmaker & Humanitarian");
+        kyc.setResidentialAddress("3417 Devereux Drive, Los Feliz, Los Angeles, CA 90027, USA");
+        kyc.setVerificationStatus(VerificationStatus.VERIFIED);
+        kycRepository.save(kyc);
+
+        Account checking = createAccount(user, "CHK-331480001", ProductKey.CHECKING, AccountType.CHECKING,
+                "Checking Account", "Spending", ANGELA_CHECKING_BALANCE, new BigDecimal("-124.80"), "USD");
+        Account savings = createAccount(user, "SAV-331480002", ProductKey.SAVINGS, AccountType.SAVINGS,
+                "Savings Vault", "Vault", ANGELA_SAVINGS_BALANCE, BigDecimal.ZERO, "USD");
+        savings.setApyPercent(new BigDecimal("4.50"));
+        savings.setEarnedThisPeriod(new BigDecimal("2031.44"));
+        accountRepository.save(savings);
+        Account credit = createAccount(user, "CRD-331480003", ProductKey.CREDIT, AccountType.CREDIT,
+                "NT Private Reserve Line", null, ANGELA_CREDIT_AVAILABLE, BigDecimal.ZERO, "USD");
+        credit.setAmountOwed(ANGELA_CREDIT_OWED);
+        credit.setCreditLimit(ANGELA_CREDIT_LIMIT);
+        credit.setBalance(ANGELA_CREDIT_AVAILABLE);
+        credit.setAvailableBalance(ANGELA_CREDIT_AVAILABLE);
+        accountRepository.save(credit);
+        Account invest = createAccount(user, "INV-331480004", ProductKey.INVEST, AccountType.INVESTMENT,
+                "Managed Portfolio", null, ANGELA_INVEST_MARKET_VALUE, BigDecimal.ZERO, "USD");
+        invest.setMarketValue(ANGELA_INVEST_MARKET_VALUE);
+        invest.setTodayChange(new BigDecimal("18420.00"));
+        invest.setTodayChangePct(new BigDecimal("0.38"));
+        invest.setRoiPercent(new BigDecimal("16.80"));
+        accountRepository.save(invest);
+
+        PaymentCard card = new PaymentCard();
+        card.setUser(user);
+        card.setLastFour("9901");
+        card.setCardHolder("ANGELINA J");
+        card.setExpires("12/29");
+        card.setFrozen(false);
+        paymentCardRepository.save(card);
+
+        seedAngelinaBeneficiaries(user);
+        seedAngelinaStatementLines(user);
+        seedAngelinaTransfers(user, checking, savings, credit, invest);
+    }
+
+    private void seedAngelinaBeneficiaries(User user) {
+        saveBen(user, "JOL-001", BeneficiaryType.BANK, "Jolie-Pitt Foundation", "Annual Charitable Giving",
+                "Wells Fargo Bank N.A.", "•••••••4521", "121000248", "United States",
+                new BigDecimal("100000"), new BigDecimal("250000"), TrustLevel.Trusted, true,
+                LocalDateTime.now().minusDays(6), "420 Montgomery Street, San Francisco, CA 94163, United States");
+        saveBen(user, "JOL-002", BeneficiaryType.INTERNAL, "Jolie Reserve Sweep", "Internal Savings Transfer",
+                null, "INT-331480-002", null, null, new BigDecimal("15000"), new BigDecimal("50000"),
+                TrustLevel.Verified, true, LocalDateTime.now().minusDays(2), null);
+        patchBen("JOL-002", b -> {
+            b.setDestinationUserId("USR-331480");
+            b.setEmailOrPhone("angelina.jolie@northerntrust.com");
+        });
+        saveBen(user, "JOL-003", BeneficiaryType.BANK, "All Good Pictures, Inc.", "Production & Film Finance",
+                "City National Bank", "•••••••7703", "122016066", "United States",
+                new BigDecimal("75000"), new BigDecimal("200000"), TrustLevel.Verified, true,
+                LocalDateTime.now().minusDays(15), "555 S. Flower Street, Suite 1100, Los Angeles, CA 90071, United States");
+        saveBen(user, "JOL-004", BeneficiaryType.BANK, "Maddox Foundation", "Cambodian Conservation & Community Development",
+                "ACLEDA Bank Plc", "•••••••5248", "ACLDKHPP", "Cambodia",
+                new BigDecimal("25000"), new BigDecimal("100000"), TrustLevel.Verified, true,
+                LocalDateTime.now().minusDays(40), "No. 61 Preah Monivong Blvd, Daun Penh, Phnom Penh 12202, Cambodia");
+        saveBen(user, "JOL-005", BeneficiaryType.BANK, "UNHCR — UN Refugee Agency", "Refugee Relief & Protection",
+                "UBS Switzerland AG", "CH56 0023 0023 5000 9800 1", "UBSWCHZH80A", "Switzerland",
+                new BigDecimal("100000"), new BigDecimal("250000"), TrustLevel.Trusted, true,
+                LocalDateTime.now().minusDays(3), "Case Postale 2500, Chem. des Crêts 17, CH-1211 Geneva 2, Switzerland");
+        saveBen(user, "JOL-006", BeneficiaryType.BANK, "Miraval SAS", "Château Miraval Estate Operations",
+                "BNP Paribas", "FR76 3000 4021 8000 0104 8438 419", "BNPAFRPP", "France",
+                new BigDecimal("50000"), new BigDecimal("150000"), TrustLevel.Verified, true,
+                LocalDateTime.now().minusDays(9), "Domaine de Miraval, 83570 Correns, France");
+    }
+
+    private void seedAngelinaStatementLines(User user) {
+        unified(user, null, "2026-05-20", "Private Cinema & Premium Travel", "NT Private Reserve Line", "Fee", "-4200.00", ANGELA_CREDIT_AVAILABLE.toPlainString(), "Card");
+        unified(user, ProductKey.CHECKING, "2026-05-19", "Miraval Wine Distribution Revenue", "Checking Account", "Deposit", "11850.00", ANGELA_CHECKING_BALANCE.toPlainString(), "Wire");
+        unified(user, ProductKey.INVEST, "2026-05-18", "Vanguard Consolidated Dividend", "Managed Portfolio", "Interest", "8420.00", ANGELA_INVEST_MARKET_VALUE.toPlainString(), "Internal");
+        unified(user, ProductKey.CHECKING, "2026-05-16", "Netflix Streaming Rights Payment", "Checking Account", "Deposit", "125000.00", "559650.22", "ACH");
+        unified(user, ProductKey.SAVINGS, "2026-05-15", "Monthly Yield Accrual", "Savings Vault", "Interest", "2026.00", "540330.18", "Internal");
+        unified(user, ProductKey.CHECKING, "2026-05-13", "Skydance Media Film Earnings", "Checking Account", "Deposit", "84200.00", "434650.22", "ACH");
+        unified(user, null, "2026-05-14", "Château Miraval Management Fee", "NT Private Reserve Line", "Fee", "-3125.00", "129802.16", "Card");
+        unified(user, ProductKey.SAVINGS, "2026-05-01", "Reserve Sweep", "Savings Vault", "Deposit", "12000.00", "538304.18", "Internal");
+        unified(user, ProductKey.CHECKING, "2026-05-10", "Tom Ford Beauty Fragrance Royalties", "Checking Account", "Deposit", "1850.00", "350450.22", "ACH");
+        unified(user, ProductKey.INVEST, "2026-05-05", "SPY S&P 500 Rebalance Buy", "Managed Portfolio", "Investments", "-240000.00", "241450000.00", "Internal");
+        unified(user, ProductKey.INVEST, "2026-04-24", "Berkshire Hathaway Class B Purchase", "Managed Portfolio", "Investments", "-75000.00", "241690000.00", "Internal");
+        unified(user, ProductKey.SAVINGS, "2026-04-15", "Monthly Yield Accrual", "Savings Vault", "Interest", "2120.00", "526304.18", "Internal");
+        unified(user, ProductKey.CHECKING, "2026-05-04", "Estate Payroll & Grounds", "Checking Account", "Withdrawal", "-21800.00", "348600.22", "ACH");
+        unified(user, ProductKey.INVEST, "2026-04-20", "BlackRock Global Bond Yield", "Managed Portfolio", "Interest", "6310.00", "241765000.00", "Internal");
+        unified(user, null, "2026-04-12", "Boutique Fashion & Travel Purchases", "NT Private Reserve Line", "Fee", "-16850.00", "146570.00", "Card");
+        unified(user, ProductKey.SAVINGS, "2026-04-01", "Reserve Sweep", "Savings Vault", "Deposit", "15000.00", "524184.18", "Internal");
+        unified(user, ProductKey.INVEST, "2026-04-05", "NASDAQ 100 Index Purchase", "Managed Portfolio", "Investments", "-180000.00", "241758690.00", "Internal");
+        unified(user, ProductKey.INVEST, "2026-03-20", "Vanguard Treasury Fund Dividend", "Managed Portfolio", "Interest", "4120.00", "241938690.00", "Internal");
+        unified(user, ProductKey.SAVINGS, "2026-03-15", "Monthly Yield Accrual", "Savings Vault", "Interest", "2015.00", "509184.18", "Internal");
+
+        checking(user, "2026-05-19", "Miraval Wine Distribution Revenue", "11850.00", ANGELA_CHECKING_BALANCE.toPlainString(), "Wire", "Deposit");
+        checking(user, "2026-05-16", "Netflix Streaming Rights Payment", "125000.00", "559650.22", "ACH", "Deposit");
+        checking(user, "2026-05-13", "Skydance Media Film Earnings", "84200.00", "434650.22", "ACH", "Deposit");
+        checking(user, "2026-05-10", "Tom Ford Beauty Fragrance Royalties", "1850.00", "350450.22", "ACH", "Deposit");
+        checking(user, "2026-05-04", "Estate Payroll & Grounds", "-21800.00", "348600.22", "ACH", "Withdrawal");
+        checking(user, "2026-04-28", "Capital Reserve Sweep", "-15000.00", "370400.22", "ACH", "Withdrawal");
+
+        savings(user, "2026-05-15", "Interest", "2026.00", "4.50%", "540330.18");
+        savings(user, "2026-05-01", "Deposit", "12000.00", "4.50%", "538304.18");
+        savings(user, "2026-04-15", "Interest", "2120.00", "4.50%", "526304.18");
+        savings(user, "2026-04-01", "Deposit", "15000.00", "4.50%", "524184.18");
+        savings(user, "2026-03-15", "Interest", "2015.00", "4.50%", "509184.18");
+
+        credit(user, "2026-05-20", "Billing (Streaming, Travel & Dining)", "-4200.00", "0.00", ANGELA_CREDIT_OWED.toPlainString(), ANGELA_CREDIT_AVAILABLE.toPlainString());
+        credit(user, "2026-05-10", "Card Payment Auto-Pay", "0.00", "30000.00", ANGELA_CREDIT_OWED.toPlainString(), ANGELA_CREDIT_AVAILABLE.toPlainString());
+
+        invest(user, "2026-05-18", "Vanguard Treasury Fund", "Dividend", "842.00", "10.00", "8420.00", ANGELA_INVEST_MARKET_VALUE.toPlainString());
+        invest(user, "2026-05-05", "SPY S&P 500 ETF Index", "Buy", "1200.00", "200.00", "-240000.00", "241450000.00");
+        invest(user, "2026-04-24", "Berkshire Hathaway Class B", "Buy", "180.00", "416.67", "-75000.00", "241690000.00");
+        invest(user, "2026-04-20", "BlackRock Global Bond", "Dividend", "631.00", "10.00", "6310.00", "241765000.00");
+        invest(user, "2026-04-05", "NASDAQ 100 Index Trust", "Buy", "360.00", "500.00", "-180000.00", "241758690.00");
+    }
+
+    private void seedAngelinaTransfers(User user, Account checking, Account savings, Account credit, Account invest) {
+        tx(user, checking, "AJ-TXH-0091", TransferType.WIRE, "J.P. Morgan Private Bank (Fedwire)", "Checking Account",
+                "3500.00", "USD", DisplayTransferStatus.Settled, false, 10, "Low");
+        tx(user, checking, "AJ-TXH-0090", TransferType.SWIFT, "Coutts & Co (GBP)", "Checking Account",
+                "18400.00", "GBP", DisplayTransferStatus.OFAC_Hold, true, 88, "Critical", "United Kingdom (GB)");
+        tx(user, checking, "AJ-TXH-0089", TransferType.ACH, "Wells Fargo Wealth (External)", "Checking Account",
+                "5000.00", "USD", DisplayTransferStatus.Processing, false, 38, "Medium");
+        tx(user, savings, "AJ-TXH-0088", TransferType.INTERNAL, "Savings Vault → Checking", "Savings Vault",
+                "25000.00", "USD", DisplayTransferStatus.Settled, false, 5, "Low");
+        tx(user, credit, "AJ-TXH-0087", TransferType.WIRE, "Meridian Estates (SWIFT)", "NT Private Reserve Line",
+                "125000.00", "USD", DisplayTransferStatus.Compliance_Hold, true, 72, "High");
+        tx(user, checking, "AJ-TXH-0086", TransferType.SWIFT, "Canadia Bank (KHR/EUR)", "Checking Account",
+                "11800.00", "USD", DisplayTransferStatus.Settled, false, 22, "Low");
+        tx(user, checking, "AJ-TXH-0085", TransferType.ACH, "Fidelity Private Wealth", "Checking Account",
+                "3000.00", "USD", DisplayTransferStatus.Settled, false, 15, "Low");
+        tx(user, checking, "AJ-TXH-0084", TransferType.WIRE, "Morgan Stanley (Fedwire)", "Checking Account",
+                "15000.00", "USD", DisplayTransferStatus.Settled, false, 12, "Low");
+        tx(user, invest, "AJ-TXH-0083", TransferType.INTERNAL, "Managed Portfolio → Checking", "Managed Portfolio",
+                "40000.00", "USD", DisplayTransferStatus.Settled, false, 8, "Low");
+        tx(user, checking, "AJ-TXH-0082", TransferType.ACH, "Vanguard Charitable", "Checking Account",
+                "7500.00", "USD", DisplayTransferStatus.Returned, false, 32, "Medium");
+        tx(user, checking, "AJ-TXH-0081", TransferType.WIRE, "Chase Private Client (Fedwire)", "Checking Account",
+                "22000.00", "USD", DisplayTransferStatus.Settled, false, 25, "Low");
+        tx(user, checking, "AJ-TXH-0080", TransferType.SWIFT, "UBS Zurich (CHF)", "Checking Account",
+                "9500.00", "USD", DisplayTransferStatus.Failed, false, 51, "Medium");
+
+        enrichPending("AJ-TXH-0090", "18400.00",
+                "[\"Large amount threshold exceeded\",\"High-risk jurisdiction (United Kingdom)\",\"New Beneficiary\",\"Behavioral velocity anomaly\"]",
+                "[{\"time\":\"10:24 AM\",\"actor\":\"A. Jolie (Initiator)\",\"action\":\"Created Draft\"},{\"time\":\"10:25 AM\",\"actor\":\"System MFA\",\"action\":\"OTP Verified\"},{\"time\":\"10:26 AM\",\"actor\":\"Compliance Engine\",\"action\":\"Halted: OFAC Review Required\"}]");
+    }
+
+    private void refreshAngelinaJolieUser() {
+        User user = userRepository.findByAccountNumber(ANGELINA_ACCOUNT_NUMBER).orElse(null);
+        if (user == null) {
+            return;
+        }
+
+        boolean hasActivity = transferRepository.findByUserOrderByCreatedAtDesc(user).stream()
+                .anyMatch(t -> t.getCreatedAt() != null
+                        && t.getCreatedAt().isAfter(user.getCreatedAt().plusMinutes(2)));
+        if (hasActivity) {
+            return;
+        }
+
+        user.setFirstName("Angelina");
+        user.setLastName("Jolie");
+        user.setEmail("angelina.jolie@northerntrust.com");
+        userRepository.save(user);
+
+        for (Account account : accountRepository.findByUser(user)) {
+            switch (account.getProductKey()) {
+                case CHECKING:
+                    account.setBalance(ANGELA_CHECKING_BALANCE);
+                    account.setAvailableBalance(ANGELA_CHECKING_BALANCE);
+                    account.setPendingAmount(new BigDecimal("-124.80"));
+                    break;
+                case SAVINGS:
+                    account.setBalance(ANGELA_SAVINGS_BALANCE);
+                    account.setAvailableBalance(ANGELA_SAVINGS_BALANCE);
+                    break;
+                case CREDIT:
+                    account.setCreditLimit(ANGELA_CREDIT_LIMIT);
+                    account.setAmountOwed(ANGELA_CREDIT_OWED);
+                    account.setBalance(ANGELA_CREDIT_AVAILABLE);
+                    account.setAvailableBalance(ANGELA_CREDIT_AVAILABLE);
+                    break;
+                case INVEST:
+                    account.setBalance(ANGELA_INVEST_MARKET_VALUE);
+                    account.setAvailableBalance(ANGELA_INVEST_MARKET_VALUE);
+                    account.setMarketValue(ANGELA_INVEST_MARKET_VALUE);
+                    break;
+                default:
+                    break;
+            }
+            accountRepository.save(account);
+        }
+
+        paymentCardRepository.findByUser(user).ifPresent(card -> {
+            card.setCardHolder("ANGELINA J");
+            paymentCardRepository.save(card);
+        });
+
+        if (statementLineRepository.findByUserOrderByLineDateDesc(user).isEmpty()) {
+            seedAngelinaStatementLines(user);
+        }
     }
 
     private void refreshExistingDemoUser() {

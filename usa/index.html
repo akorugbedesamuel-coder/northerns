@@ -3698,6 +3698,7 @@
               "
             >
               <div
+                id="headerClientName"
                 style="font-size: 13px; font-weight: 700; letter-spacing: 0.5px"
               >
                 Alexander J Skarsgard
@@ -5072,10 +5073,29 @@
     <script src="nt-live.js"></script>
     <script>
       // ——— Client profile & professional UI helpers ———
+      const NT_ACCOUNT = (function () {
+        try {
+          if (typeof NTAuth !== "undefined" && NTAuth.getAccountNumber) {
+            const n = NTAuth.getAccountNumber();
+            if (n) return n;
+          }
+          return (
+            sessionStorage.getItem("nt_account_number") || "2214578903"
+          );
+        } catch (e) {
+          return "2214578903";
+        }
+      })();
+      const NT_IS_ANGELINA = NT_ACCOUNT === "3314805502";
       const NT_PROFILE = {
-        legalName: "Alexander J Skarsgard",
-        cardMonogram: "SKJ",
-        wiringBeneficiary: "Alexander J Skarsgard",
+        legalName: NT_IS_ANGELINA
+          ? "Angelina Jolie"
+          : "Alexander J Skarsgard",
+        cardMonogram: NT_IS_ANGELINA ? "AJ" : "SKJ",
+        wiringBeneficiary: NT_IS_ANGELINA
+          ? "Angelina Jolie"
+          : "Alexander J Skarsgard",
+        wireAccountSuffix: NT_IS_ANGELINA ? "480550" : "890240",
       };
 
       window.NT_STATUS_TIPS = {
@@ -7150,19 +7170,19 @@
           wireInstrBeneficiary.innerText = NT_PROFILE.wiringBeneficiary;
 
           if (accountType === "checking") {
-            wireInstrAccountNum.innerText = "89024001";
+            wireInstrAccountNum.innerText = NT_PROFILE.wireAccountSuffix + "01";
             wireInstrRouting.innerText = "021000021";
             wireInstrSwift.innerText = "NORUS33XXX";
             activeAccountLabel.style.color = "#3b82f6";
             activeAccountLabel.style.background = "rgba(59, 130, 246, 0.1)";
           } else if (accountType === "savings") {
-            wireInstrAccountNum.innerText = "89024002";
+            wireInstrAccountNum.innerText = NT_PROFILE.wireAccountSuffix + "02";
             wireInstrRouting.innerText = "021000021";
             wireInstrSwift.innerText = "NORUS33XXX";
             activeAccountLabel.style.color = "#16a34a";
             activeAccountLabel.style.background = "rgba(22, 163, 74, 0.1)";
           } else if (accountType === "credit") {
-            wireInstrAccountNum.innerText = "89024003";
+            wireInstrAccountNum.innerText = NT_PROFILE.wireAccountSuffix + "03";
             wireInstrRouting.innerText = "021000021";
             wireInstrSwift.innerText = "NORUS33XXX";
             activeAccountLabel.style.color = "#ef4444";
@@ -10790,7 +10810,7 @@
                 <div>
                   <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
                     <div class="nt-brand-logo-wrap"><img src="public/logo.svg" alt="" class="nt-brand-logo nt-brand-logo--pdf" width="48" height="24" decoding="async" /></div>
-                    <span style="font-weight: 700; font-size: 17px; color: var(--primary); letter-spacing: -0.5px;">Alexander J Skarsgard</span>
+                    <span style="font-weight: 700; font-size: 17px; color: var(--primary); letter-spacing: -0.5px;">${NT_PROFILE.legalName}</span>
                   </div>
                   <div style="font-size: 11px; color: #64748b; line-height: 1.4;">
                     50 South La Salle Street<br>
@@ -10803,7 +10823,7 @@
                   <h4 style="margin: 0 0 6px 0; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px; color: #0f172a;">Official Audit Statement</h4>
                   <div style="font-size: 11px; color: #64748b; line-height: 1.4;">
                     Statement Period: <strong>May 01 - May 19, 2026</strong><br>
-                    Account Identifier: <strong>NT-89024-817</strong><br>
+                    Account Identifier: <strong>${NT_IS_ANGELINA ? "NT-48055-217" : "NT-89024-817"}</strong><br>
                     Generated Date: <strong>May 19, 2026</strong>
                   </div>
                 </div>
