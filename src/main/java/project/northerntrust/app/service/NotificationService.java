@@ -291,15 +291,22 @@ public class NotificationService {
 
     @Transactional
     public void seedDemoNotifications(User user) {
+        String last4 = paymentCardRepository.findByUser(user)
+                .map(card -> card.getLastFour() != null ? card.getLastFour() : "••••")
+                .orElse("••••");
+        String locale = (user.getCity() != null && user.getState() != null)
+                ? user.getCity() + ", " + user.getState() + ", United States"
+                : "Chicago, IL, United States";
+
         Map<String, String> loginMeta = new LinkedHashMap<>();
         loginMeta.put("ipAddress", "73.42.118.204");
-        loginMeta.put("location", "Chicago, IL, United States");
+        loginMeta.put("location", locale);
         loginMeta.put("device", "Chrome on Windows");
         loginMeta.put("userAgent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122");
 
         create(user, NotificationType.LOGIN, NotificationSeverity.INFO,
                 "Successful sign-in",
-                "Your account was accessed from Chicago, IL.",
+                "Your account was accessed from " + locale.split(",")[0] + ".",
                 null, loginMeta);
 
         create(user, NotificationType.SECURITY, NotificationSeverity.WARNING,
@@ -326,8 +333,8 @@ public class NotificationService {
 
         create(user, NotificationType.CARD_LOCK, NotificationSeverity.WARNING,
                 "Debit card temporarily frozen",
-                "Card ending 4920 was frozen from the mobile banking channel.",
-                null, meta("cardLast4", "4920", "action", "freeze"));
+                "Card ending " + last4 + " was frozen from the mobile banking channel.",
+                null, meta("cardLast4", last4, "action", "freeze"));
 
         create(user, NotificationType.SYSTEM, NotificationSeverity.INFO,
                 "Statement available",
