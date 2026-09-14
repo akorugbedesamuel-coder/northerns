@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 public class DashboardDataSeeder implements CommandLineRunner {
 
     public static final String DEMO_ACCOUNT_NUMBER = "2214578903";
-    public static final String ANGELINA_ACCOUNT_NUMBER = "3314805502";
+    public static final String ANGELINA_ACCOUNT_NUMBER = "6847269103";
 
     private static final BigDecimal CHECKING_BALANCE = new BigDecimal("318750.00");
     private static final BigDecimal SAVINGS_BALANCE = new BigDecimal("35180.38");
@@ -435,7 +435,7 @@ public class DashboardDataSeeder implements CommandLineRunner {
     private void seedAngelinaJolie() {
         User user = new User();
         user.setAccountNumber(ANGELINA_ACCOUNT_NUMBER);
-        user.setClientId("USR-331480");
+        user.setClientId("USR-684726");
         user.setFirstName("Angelina");
         user.setLastName("Jolie");
         user.setEmail("angelina.jolie@northerntrust.com");
@@ -446,7 +446,7 @@ public class DashboardDataSeeder implements CommandLineRunner {
         user.setState("California");
         user.setPostalCode("90027");
         user.setCountry("United States");
-        user.setPassword(passwordEncoder.encode("Angel$JL1975!4407"));
+        user.setPassword(passwordEncoder.encode("M!raval#2026$C0rr"));
         user.setTransactionPinHash(passwordEncoder.encode("5678"));
         user.setKycStatus(KycStatus.VERIFIED);
         user.setAccountStatus(UserStatus.ACTIVE);
@@ -469,21 +469,21 @@ public class DashboardDataSeeder implements CommandLineRunner {
         kyc.setVerificationStatus(VerificationStatus.VERIFIED);
         kycRepository.save(kyc);
 
-        Account checking = createAccount(user, "CHK-331480001", ProductKey.CHECKING, AccountType.CHECKING,
+        Account checking = createAccount(user, "CHK-684726001", ProductKey.CHECKING, AccountType.CHECKING,
                 "Checking Account", "Spending", ANGELA_CHECKING_BALANCE, new BigDecimal("-124.80"), "USD");
-        Account savings = createAccount(user, "SAV-331480002", ProductKey.SAVINGS, AccountType.SAVINGS,
+        Account savings = createAccount(user, "SAV-684726002", ProductKey.SAVINGS, AccountType.SAVINGS,
                 "Savings Vault", "Vault", ANGELA_SAVINGS_BALANCE, BigDecimal.ZERO, "USD");
         savings.setApyPercent(new BigDecimal("4.50"));
         savings.setEarnedThisPeriod(new BigDecimal("2031.44"));
         accountRepository.save(savings);
-        Account credit = createAccount(user, "CRD-331480003", ProductKey.CREDIT, AccountType.CREDIT,
+        Account credit = createAccount(user, "CRD-684726003", ProductKey.CREDIT, AccountType.CREDIT,
                 "NT Private Reserve Line", null, ANGELA_CREDIT_AVAILABLE, BigDecimal.ZERO, "USD");
         credit.setAmountOwed(ANGELA_CREDIT_OWED);
         credit.setCreditLimit(ANGELA_CREDIT_LIMIT);
         credit.setBalance(ANGELA_CREDIT_AVAILABLE);
         credit.setAvailableBalance(ANGELA_CREDIT_AVAILABLE);
         accountRepository.save(credit);
-        Account invest = createAccount(user, "INV-331480004", ProductKey.INVEST, AccountType.INVESTMENT,
+        Account invest = createAccount(user, "INV-684726004", ProductKey.INVEST, AccountType.INVESTMENT,
                 "Managed Portfolio", null, ANGELA_INVEST_MARKET_VALUE, BigDecimal.ZERO, "USD");
         invest.setMarketValue(ANGELA_INVEST_MARKET_VALUE);
         invest.setTodayChange(new BigDecimal("18420.00"));
@@ -510,10 +510,10 @@ public class DashboardDataSeeder implements CommandLineRunner {
                 new BigDecimal("100000"), new BigDecimal("250000"), TrustLevel.Trusted, true,
                 LocalDateTime.now().minusDays(6), "420 Montgomery Street, San Francisco, CA 94163, United States");
         saveBen(user, "JOL-002", BeneficiaryType.INTERNAL, "Jolie Reserve Sweep", "Internal Savings Transfer",
-                null, "INT-331480-002", null, null, new BigDecimal("15000"), new BigDecimal("50000"),
+                null, "INT-684726-002", null, null, new BigDecimal("15000"), new BigDecimal("50000"),
                 TrustLevel.Verified, true, LocalDateTime.now().minusDays(2), null);
         patchBen("JOL-002", b -> {
-            b.setDestinationUserId("USR-331480");
+            b.setDestinationUserId("USR-684726");
             b.setEmailOrPhone("angelina.jolie@northerntrust.com");
         });
         saveBen(user, "JOL-003", BeneficiaryType.BANK, "All Good Pictures, Inc.", "Production & Film Finance",

@@ -41,7 +41,7 @@ This portal ships with two fully stocked demo profiles you can sign in with:
 | Profile | User ID (Account Number) | Password |
 | --- | --- | --- |
 | Alexander J Skarsgard (Family Office Principal) | `2214578903` | `Alex$kj1985!4200` |
-| Angelina Jolie (Actor, Filmmaker & Humanitarian) | `3314805502` | `Angel$JL1975!4407` |
+| Angelina Jolie (Actor, Filmmaker & Humanitarian) | `6847269103` | `M!raval#2026$C0rr` |
 
 Both profiles include the full set of accounts, beneficiaries, transfer history, and statements described in this guide. Angelina's beneficiaries reflect her real partnerships: the Jolie-Pitt Foundation, the Maddox Foundation (Cambodian conservation, via ACLEDA Bank Phnom Penh), the UNHCR — UN Refugee Agency (UBS Geneva), her production company All Good Pictures, and Miraval SAS (Château Miraval, via BNP Paribas).
 
