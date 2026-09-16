@@ -196,7 +196,12 @@ public class DashboardService {
     }
 
     private List<Map<String, Object>> getRecentActivity(User user, int limit) {
+        Set<String> seen = new HashSet<>();
         return statementLineRepository.findByUserOrderByLineDateDesc(user).stream()
+                .filter(line -> line.getCharged() == null || line.getAmount() == null
+                        || line.getAmount().signum() != 0)
+                .filter(line -> seen.add(stringKey(line.getLineDate(),
+                        line.getSource(), line.getAmount())))
                 .limit(limit)
                 .map(line -> {
                     Map<String, Object> m = new LinkedHashMap<>();
@@ -208,6 +213,14 @@ public class DashboardService {
                     m.put("currency", "USD");
                     return m;
                 }).collect(Collectors.toList());
+    }
+
+    private String stringKey(Object... parts) {
+        StringBuilder sb = new StringBuilder();
+        for (Object p : parts) {
+            sb.append(p == null ? "" : p.toString()).append('|');
+        }
+        return sb.toString();
     }
 
     private List<Map<String, Object>> buildAlerts(User user) {
@@ -435,6 +448,7 @@ public class DashboardService {
 
         ProductKey keyFilter = tabToProductKey(tab);
         LocalDate periodStart = statementPeriodStart(period);
+        Set<String> seen = new HashSet<>();
 
         return lines.stream()
                 .filter(l -> keyFilter == null || keyFilter.equals(l.getProductKey()))
@@ -445,6 +459,7 @@ public class DashboardService {
                         || (l.getStatus() != null && l.getStatus().equalsIgnoreCase(status)))
                 .filter(l -> search == null || search.isEmpty()
                         || (l.getDescription() != null && l.getDescription().toLowerCase().contains(search.toLowerCase())))
+                .filter(l -> seen.add(stringKey(l.getLineDate(), l.getSource(), l.getAmount())))
                 .map(this::toStatementDto)
                 .collect(Collectors.toList());
     }

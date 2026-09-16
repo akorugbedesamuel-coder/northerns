@@ -8047,20 +8047,22 @@
               });
 
               // Chase-standard greeting + last-login disclosure
-              (function () {
+              window.ntUpdateGreeting = function () {
                 const g = document.getElementById("ntGreeting");
-                if (g) {
-                  const h = new Date().getHours();
-                  const part = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
-                  let name = "";
-                  try {
-                    name = sessionStorage.getItem("nt_user_name")
-                      || localStorage.getItem("nt_user_name")
-                      || (window.NTApi && window.NTApi.state && window.NTApi.state.user && window.NTApi.state.user.firstName)
-                      || "Alexander";
-                  } catch (e) { name = "Alexander"; }
-                  g.textContent = part + ", " + name;
-                }
+                if (!g) return;
+                const h = new Date().getHours();
+                const part = h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+                let name = "";
+                try {
+                  const prof = window.NTApi && window.NTApi.state && window.NTApi.state.profile;
+                  name = sessionStorage.getItem("nt_user_name")
+                    || localStorage.getItem("nt_user_name")
+                    || (prof && (prof.firstName || prof.displayName))
+                    || "";
+                } catch (e) { name = ""; }
+                g.textContent = part + (name ? ", " + name : "");
+              };
+              window.ntUpdateGreeting();
                 const ll = document.getElementById("ntLastLogin");
                 if (ll) {
                   const now = new Date();
@@ -8072,7 +8074,6 @@
                     if (!prev) sessionStorage.setItem("nt_prev_login", stamp);
                   } catch (e) { ll.textContent = stamp; }
                 }
-              })();
 
               // Default: Checking account chart + activity (pie on mobile, bar on desktop)
               switchActiveSubAccount("checking", false, { force: true });

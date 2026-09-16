@@ -27,12 +27,12 @@ public class DashboardDataSeeder implements CommandLineRunner {
     private static final BigDecimal CREDIT_OWED = CREDIT_LIMIT.subtract(CREDIT_AVAILABLE);
     private static final BigDecimal INVEST_MARKET_VALUE = new BigDecimal("169400000.00");
 
-    private static final BigDecimal ANGELA_CHECKING_BALANCE = new BigDecimal("1284650.22");
+    private static final BigDecimal ANGELA_CHECKING_BALANCE = new BigDecimal("743.81");
     private static final BigDecimal ANGELA_SAVINGS_BALANCE = new BigDecimal("540330.18");
     private static final BigDecimal ANGELA_CREDIT_LIMIT = new BigDecimal("500000.00");
     private static final BigDecimal ANGELA_CREDIT_AVAILABLE = new BigDecimal("124802.16");
     private static final BigDecimal ANGELA_CREDIT_OWED = ANGELA_CREDIT_LIMIT.subtract(ANGELA_CREDIT_AVAILABLE);
-    private static final BigDecimal ANGELA_INVEST_MARKET_VALUE = new BigDecimal("241750000.00");
+    private static final BigDecimal ANGELA_INVEST_MARKET_VALUE = new BigDecimal("241458420.00");
 
     @Autowired
     private UserRepository userRepository;
@@ -536,31 +536,85 @@ public class DashboardDataSeeder implements CommandLineRunner {
 
     private void seedAngelinaStatementLines(User user) {
         unified(user, null, "2026-05-20", "Private Cinema & Premium Travel", "NT Private Reserve Line", "Fee", "-4200.00", ANGELA_CREDIT_AVAILABLE.toPlainString(), "Card");
-        unified(user, ProductKey.CHECKING, "2026-05-19", "Miraval Wine Distribution Revenue", "Checking Account", "Deposit", "11850.00", ANGELA_CHECKING_BALANCE.toPlainString(), "Wire");
-        unified(user, ProductKey.INVEST, "2026-05-18", "Vanguard Consolidated Dividend", "Managed Portfolio", "Interest", "8420.00", ANGELA_INVEST_MARKET_VALUE.toPlainString(), "Internal");
-        unified(user, ProductKey.CHECKING, "2026-05-16", "Netflix Streaming Rights Payment", "Checking Account", "Deposit", "125000.00", "559650.22", "ACH");
-        unified(user, ProductKey.SAVINGS, "2026-05-15", "Monthly Yield Accrual", "Savings Vault", "Interest", "2026.00", "540330.18", "Internal");
-        unified(user, ProductKey.CHECKING, "2026-05-13", "Skydance Media Film Earnings", "Checking Account", "Deposit", "84200.00", "434650.22", "ACH");
         unified(user, null, "2026-05-14", "Château Miraval Management Fee", "NT Private Reserve Line", "Fee", "-3125.00", "129802.16", "Card");
-        unified(user, ProductKey.SAVINGS, "2026-05-01", "Reserve Sweep", "Savings Vault", "Deposit", "12000.00", "538304.18", "Internal");
-        unified(user, ProductKey.CHECKING, "2026-05-10", "Tom Ford Beauty Fragrance Royalties", "Checking Account", "Deposit", "1850.00", "350450.22", "ACH");
+        unified(user, null, "2026-04-12", "Boutique Fashion & Travel Purchases", "NT Private Reserve Line", "Fee", "-16850.00", "146570.00", "Card");
+
+        unified(user, ProductKey.CHECKING, "2026-05-20", "Estate Capital Improvements", "Checking Account", "Withdrawal", "-15188.44", "743.81", "Wire");
+        unified(user, ProductKey.CHECKING, "2026-05-18", "Miraval Wine Distribution Revenue", "Checking Account", "Deposit", "3850.00", "15932.25", "Wire");
+        unified(user, ProductKey.CHECKING, "2026-05-16", "Vanguard Dividend Payout", "Checking Account", "Deposit", "2120.00", "12082.25", "Internal");
+        unified(user, ProductKey.CHECKING, "2026-05-14", "Netflix Streaming Rights Payment", "Checking Account", "Deposit", "8750.00", "9962.25", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-05-11", "Boutique Fashion & Travel Purchases", "Checking Account", "Withdrawal", "-895.00", "1212.25", "Card");
+        unified(user, ProductKey.CHECKING, "2026-05-10", "UNHCR Refugee Relief Contribution", "Checking Account", "Withdrawal", "-4000.00", "2107.25", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-05-07", "Tom Ford Fragrance Royalties", "Checking Account", "Deposit", "1850.00", "6107.25", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-05-06", "Music Publishing Royalties (Q1)", "Checking Account", "Deposit", "3400.00", "4257.25", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-05-04", "Estate Payroll & Grounds", "Checking Account", "Withdrawal", "-5200.00", "857.25", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-05-01", "Estate Property Insurance", "Checking Account", "Withdrawal", "-3200.00", "6057.25", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-04-29", "Reserve Sweep from Savings Vault", "Checking Account", "Deposit", "6000.00", "9257.25", "Internal");
+        unified(user, ProductKey.CHECKING, "2026-04-26", "Château Miraval Grounds & Vineyards", "Checking Account", "Withdrawal", "-6500.00", "3257.25", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-04-23", "Private Health & Wellness", "Checking Account", "Withdrawal", "-1050.00", "9757.25", "Card");
+        unified(user, ProductKey.CHECKING, "2026-04-20", "Maddox Foundation Charity Gala", "Checking Account", "Withdrawal", "-5000.00", "10807.25", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-04-17", "Fine Art Purchase", "Checking Account", "Withdrawal", "-2100.00", "15807.25", "Wire");
+        unified(user, ProductKey.CHECKING, "2026-04-14", "Music Publishing Royalties", "Checking Account", "Deposit", "3900.00", "17907.25", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-04-11", "UNHCR Refugee Relief Contribution", "Checking Account", "Withdrawal", "-4000.00", "14007.25", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-04-09", "Restaurant & Dining", "Checking Account", "Withdrawal", "-312.75", "18007.25", "Card");
+        unified(user, ProductKey.CHECKING, "2026-04-06", "Atelier & Wardrobe", "Checking Account", "Withdrawal", "-1480.00", "18320.00", "Card");
+        unified(user, ProductKey.CHECKING, "2026-04-03", "Skydance Media Film Earnings", "Checking Account", "Deposit", "18750.00", "19800.00", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-04-01", "Estate Property Insurance", "Checking Account", "Withdrawal", "-3200.00", "1050.00", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-03-28", "Security Detail (Monthly)", "Checking Account", "Withdrawal", "-2350.00", "4250.00", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-03-25", "Reserve Sweep to Savings Vault", "Checking Account", "Withdrawal", "-8000.00", "6600.00", "Internal");
+        unified(user, ProductKey.CHECKING, "2026-03-22", "Book Royalties (HarperCollins)", "Checking Account", "Deposit", "9400.00", "14600.00", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-03-19", "UNHCR Refugee Relief Contribution", "Checking Account", "Withdrawal", "-4000.00", "5200.00", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-03-16", "Household Staff Payroll", "Checking Account", "Withdrawal", "-7600.00", "9200.00", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-03-13", "Los Feliz Estate Property Tax", "Checking Account", "Withdrawal", "-8600.00", "16800.00", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-03-11", "Netflix Streaming Rights Payment", "Checking Account", "Deposit", "18000.00", "25400.00", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-03-08", "Estate Payroll & Grounds", "Checking Account", "Withdrawal", "-8400.00", "7400.00", "ACH");
+        unified(user, ProductKey.CHECKING, "2026-03-05", "Miraval Wine Distribution Revenue", "Checking Account", "Deposit", "9800.00", "15800.00", "Wire");
+        unified(user, ProductKey.CHECKING, "2026-03-02", "Opening Balance Carry Forward", "Checking Account", "Deposit", "6000.00", "6000.00", "ACH");
+
+        unified(user, ProductKey.INVEST, "2026-05-18", "Vanguard Consolidated Dividend", "Managed Portfolio", "Interest", "8420.00", ANGELA_INVEST_MARKET_VALUE.toPlainString(), "Internal");
         unified(user, ProductKey.INVEST, "2026-05-05", "SPY S&P 500 Rebalance Buy", "Managed Portfolio", "Investments", "-240000.00", "241450000.00", "Internal");
         unified(user, ProductKey.INVEST, "2026-04-24", "Berkshire Hathaway Class B Purchase", "Managed Portfolio", "Investments", "-75000.00", "241690000.00", "Internal");
-        unified(user, ProductKey.SAVINGS, "2026-04-15", "Monthly Yield Accrual", "Savings Vault", "Interest", "2120.00", "526304.18", "Internal");
-        unified(user, ProductKey.CHECKING, "2026-05-04", "Estate Payroll & Grounds", "Checking Account", "Withdrawal", "-21800.00", "348600.22", "ACH");
         unified(user, ProductKey.INVEST, "2026-04-20", "BlackRock Global Bond Yield", "Managed Portfolio", "Interest", "6310.00", "241765000.00", "Internal");
-        unified(user, null, "2026-04-12", "Boutique Fashion & Travel Purchases", "NT Private Reserve Line", "Fee", "-16850.00", "146570.00", "Card");
-        unified(user, ProductKey.SAVINGS, "2026-04-01", "Reserve Sweep", "Savings Vault", "Deposit", "15000.00", "524184.18", "Internal");
         unified(user, ProductKey.INVEST, "2026-04-05", "NASDAQ 100 Index Purchase", "Managed Portfolio", "Investments", "-180000.00", "241758690.00", "Internal");
         unified(user, ProductKey.INVEST, "2026-03-20", "Vanguard Treasury Fund Dividend", "Managed Portfolio", "Interest", "4120.00", "241938690.00", "Internal");
+
+        unified(user, ProductKey.SAVINGS, "2026-05-15", "Monthly Yield Accrual", "Savings Vault", "Interest", "2026.00", "540330.18", "Internal");
+        unified(user, ProductKey.SAVINGS, "2026-05-01", "Reserve Sweep", "Savings Vault", "Deposit", "12000.00", "538304.18", "Internal");
+        unified(user, ProductKey.SAVINGS, "2026-04-15", "Monthly Yield Accrual", "Savings Vault", "Interest", "2120.00", "526304.18", "Internal");
+        unified(user, ProductKey.SAVINGS, "2026-04-01", "Reserve Sweep", "Savings Vault", "Deposit", "15000.00", "524184.18", "Internal");
         unified(user, ProductKey.SAVINGS, "2026-03-15", "Monthly Yield Accrual", "Savings Vault", "Interest", "2015.00", "509184.18", "Internal");
 
-        checking(user, "2026-05-19", "Miraval Wine Distribution Revenue", "11850.00", ANGELA_CHECKING_BALANCE.toPlainString(), "Wire", "Deposit");
-        checking(user, "2026-05-16", "Netflix Streaming Rights Payment", "125000.00", "559650.22", "ACH", "Deposit");
-        checking(user, "2026-05-13", "Skydance Media Film Earnings", "84200.00", "434650.22", "ACH", "Deposit");
-        checking(user, "2026-05-10", "Tom Ford Beauty Fragrance Royalties", "1850.00", "350450.22", "ACH", "Deposit");
-        checking(user, "2026-05-04", "Estate Payroll & Grounds", "-21800.00", "348600.22", "ACH", "Withdrawal");
-        checking(user, "2026-04-28", "Capital Reserve Sweep", "-15000.00", "370400.22", "ACH", "Withdrawal");
+        checking(user, "2026-05-20", "Estate Capital Improvements", "-15188.44", "743.81", "Wire", "Withdrawal");
+        checking(user, "2026-05-18", "Miraval Wine Distribution Revenue", "3850.00", "15932.25", "Wire", "Deposit");
+        checking(user, "2026-05-16", "Vanguard Dividend Payout", "2120.00", "12082.25", "Internal", "Deposit");
+        checking(user, "2026-05-14", "Netflix Streaming Rights Payment", "8750.00", "9962.25", "ACH", "Deposit");
+        checking(user, "2026-05-11", "Boutique Fashion & Travel Purchases", "-895.00", "1212.25", "Card", "Withdrawal");
+        checking(user, "2026-05-10", "UNHCR Refugee Relief Contribution", "-4000.00", "2107.25", "ACH", "Withdrawal");
+        checking(user, "2026-05-07", "Tom Ford Fragrance Royalties", "1850.00", "6107.25", "ACH", "Deposit");
+        checking(user, "2026-05-06", "Music Publishing Royalties (Q1)", "3400.00", "4257.25", "ACH", "Deposit");
+        checking(user, "2026-05-04", "Estate Payroll & Grounds", "-5200.00", "857.25", "ACH", "Withdrawal");
+        checking(user, "2026-05-01", "Estate Property Insurance", "-3200.00", "6057.25", "ACH", "Withdrawal");
+        checking(user, "2026-04-29", "Reserve Sweep from Savings Vault", "6000.00", "9257.25", "Internal", "Deposit");
+        checking(user, "2026-04-26", "Château Miraval Grounds & Vineyards", "-6500.00", "3257.25", "ACH", "Withdrawal");
+        checking(user, "2026-04-23", "Private Health & Wellness", "-1050.00", "9757.25", "Card", "Withdrawal");
+        checking(user, "2026-04-20", "Maddox Foundation Charity Gala", "-5000.00", "10807.25", "ACH", "Withdrawal");
+        checking(user, "2026-04-17", "Fine Art Purchase", "-2100.00", "15807.25", "Wire", "Withdrawal");
+        checking(user, "2026-04-14", "Music Publishing Royalties", "3900.00", "17907.25", "ACH", "Deposit");
+        checking(user, "2026-04-11", "UNHCR Refugee Relief Contribution", "-4000.00", "14007.25", "ACH", "Withdrawal");
+        checking(user, "2026-04-09", "Restaurant & Dining", "-312.75", "18007.25", "Card", "Withdrawal");
+        checking(user, "2026-04-06", "Atelier & Wardrobe", "-1480.00", "18320.00", "Card", "Withdrawal");
+        checking(user, "2026-04-03", "Skydance Media Film Earnings", "18750.00", "19800.00", "ACH", "Deposit");
+        checking(user, "2026-04-01", "Estate Property Insurance", "-3200.00", "1050.00", "ACH", "Withdrawal");
+        checking(user, "2026-03-28", "Security Detail (Monthly)", "-2350.00", "4250.00", "ACH", "Withdrawal");
+        checking(user, "2026-03-25", "Reserve Sweep to Savings Vault", "-8000.00", "6600.00", "Internal", "Withdrawal");
+        checking(user, "2026-03-22", "Book Royalties (HarperCollins)", "9400.00", "14600.00", "ACH", "Deposit");
+        checking(user, "2026-03-19", "UNHCR Refugee Relief Contribution", "-4000.00", "5200.00", "ACH", "Withdrawal");
+        checking(user, "2026-03-16", "Household Staff Payroll", "-7600.00", "9200.00", "ACH", "Withdrawal");
+        checking(user, "2026-03-13", "Los Feliz Estate Property Tax", "-8600.00", "16800.00", "ACH", "Withdrawal");
+        checking(user, "2026-03-11", "Netflix Streaming Rights Payment", "18000.00", "25400.00", "ACH", "Deposit");
+        checking(user, "2026-03-08", "Estate Payroll & Grounds", "-8400.00", "7400.00", "ACH", "Withdrawal");
+        checking(user, "2026-03-05", "Miraval Wine Distribution Revenue", "9800.00", "15800.00", "Wire", "Deposit");
+        checking(user, "2026-03-02", "Opening Balance Carry Forward", "6000.00", "6000.00", "ACH", "Deposit");
 
         savings(user, "2026-05-15", "Interest", "2026.00", "4.50%", "540330.18");
         savings(user, "2026-05-01", "Deposit", "12000.00", "4.50%", "538304.18");
@@ -603,6 +657,26 @@ public class DashboardDataSeeder implements CommandLineRunner {
                 "22000.00", "USD", DisplayTransferStatus.Settled, false, 25, "Low");
         tx(user, checking, "AJ-TXH-0080", TransferType.SWIFT, "UBS Zurich (CHF)", "Checking Account",
                 "9500.00", "USD", DisplayTransferStatus.Failed, false, 51, "Medium");
+        tx(user, checking, "AJ-TXH-0099", TransferType.ACH, "Jolie-Pitt Foundation", "Checking Account",
+                "12000.00", "USD", DisplayTransferStatus.Settled, false, 18, "Low");
+        tx(user, checking, "AJ-TXH-0098", TransferType.WIRE, "Miraval SAS (EUR)", "Checking Account",
+                "4600.00", "EUR", DisplayTransferStatus.Settled, false, 14, "Low");
+        tx(user, checking, "AJ-TXH-0097", TransferType.ACH, "All Good Pictures, Inc.", "Checking Account",
+                "87500.00", "USD", DisplayTransferStatus.Settled, false, 21, "Low");
+        tx(user, checking, "AJ-TXH-0096", TransferType.SWIFT, "UNHCR — UN Refugee Agency", "Checking Account",
+                "15000.00", "USD", DisplayTransferStatus.Settled, false, 16, "Low", "Switzerland (CH)");
+        tx(user, savings, "AJ-TXH-0095", TransferType.INTERNAL, "Checking → Savings Vault", "Savings Vault",
+                "8000.00", "USD", DisplayTransferStatus.Settled, false, 5, "Low");
+        tx(user, checking, "AJ-TXH-0094", TransferType.WIRE, "Chase Private Client (Fedwire)", "Checking Account",
+                "18500.00", "USD", DisplayTransferStatus.Returned, false, 34, "Medium");
+        tx(user, checking, "AJ-TXH-0093", TransferType.ACH, "Netflix Streaming Rights Payment", "Checking Account",
+                "125000.00", "USD", DisplayTransferStatus.Settled, false, 12, "Low");
+        tx(user, checking, "AJ-TXH-0092", TransferType.ACH, "Skydance Media Film Earnings", "Checking Account",
+                "84200.00", "USD", DisplayTransferStatus.Settled, false, 12, "Low");
+        tx(user, invest, "AJ-TXH-0068", TransferType.INTERNAL, "Managed Portfolio → Checking", "Managed Portfolio",
+                "25000.00", "USD", DisplayTransferStatus.Settled, false, 8, "Low");
+        tx(user, checking, "AJ-TXH-0067", TransferType.ACH, "Maddox Foundation", "Checking Account",
+                "5000.00", "USD", DisplayTransferStatus.Settled, false, 20, "Low");
 
         enrichPending("AJ-TXH-0090", "18400.00",
                 "[\"Large amount threshold exceeded\",\"High-risk jurisdiction (United Kingdom)\",\"New Beneficiary\",\"Behavioral velocity anomaly\"]",

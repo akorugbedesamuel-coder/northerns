@@ -245,6 +245,11 @@
     const name = p.displayName || (p.firstName + ' ' + p.lastName);
     const el = document.getElementById('headerClientName');
     if (el) el.textContent = name;
+    try {
+      const first = p.firstName || name;
+      sessionStorage.setItem('nt_user_name', first);
+      if (typeof window.ntUpdateGreeting === 'function') window.ntUpdateGreeting();
+    } catch (e) { /* ignore */ }
     hydrateSession();
   }
 
